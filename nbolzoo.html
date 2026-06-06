@@ -871,6 +871,43 @@ body {
 }
 .proposal-tip strong { color: var(--primary-dark); }
 
+/* IMAGE CARD STYLES */
+.card-bg-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 0;
+  transition: transform 0.4s ease;
+}
+.card:hover .card-bg-img { transform: scale(1.05); }
+.card-img-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.18); z-index: 1;
+}
+.card-emoji-over {
+  position: relative; z-index: 2; font-size: 36px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+.card-img-credit {
+  position: absolute; bottom: 5px; left: 7px;
+  font-size: 9px; color: rgba(255,255,255,0.85);
+  background: rgba(0,0,0,0.4); padding: 1px 5px; border-radius: 3px;
+  z-index: 3; letter-spacing: 0.3px;
+}
+.aimag-card-img-wrap {
+  height: 110px; border-radius: 10px; overflow: hidden;
+  margin-bottom: 10px; position: relative;
+  background: linear-gradient(135deg, var(--primary-soft), var(--primary-extra-soft));
+  display: flex; align-items: center; justify-content: center;
+}
+.aimag-card-img-wrap img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 0;
+  transition: transform 0.4s;
+}
+.aimag-card:hover .aimag-card-img-wrap img { transform: scale(1.06); }
+.aimag-card-emoji-over {
+  position: relative; z-index: 1; font-size: 28px;
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.45));
+}
+
 /* FOOTER */
 .footer {
   background: var(--text); color: rgba(255,255,255,0.85);
@@ -6673,6 +6710,166 @@ let currentAimagId = null;
 const cardColors = ["#CAF0F8","#E8F4F8","#FAECE7","#E0E7FF","#FEF3C7","#D1FAE5","#FCE7F3","#E0F2FE"];
 function getColor(id) { return cardColors[id % cardColors.length]; }
 
+// ===== IMAGE DATABASE =====
+const WK = "https://upload.wikimedia.org/wikipedia/commons/thumb/";
+const US = "https://images.unsplash.com/photo-";
+const IMG = {
+  // Mongolia — Wikipedia Commons
+  ub:       WK+"0/03/Jugder_001.jpg/640px-Jugder_001.jpg",
+  khuvsgul: WK+"a/a9/Khuvsgul.jpg/640px-Khuvsgul.jpg",
+  gobi:     WK+"7/79/Gobi_Desert.jpg/640px-Gobi_Desert.jpg",
+  terelj:   WK+"b/b6/Gorkhi-Terelj_National_Park.jpg/640px-Gorkhi-Terelj_National_Park.jpg",
+  bayanzag: WK+"d/d7/Flaming_cliffs_5.jpg/640px-Flaming_cliffs_5.jpg",
+  orkhon:   WK+"6/63/Orchon-mongolei.JPG/640px-Orchon-mongolei.JPG",
+  erdene:   WK+"4/4c/%C5%9Awi%C4%85tynia_Zachodnia_w_klasztorze_Erdene_Dzuu_01.jpg/640px-%C5%9Awi%C4%85tynia_Zachodnia_w_klasztorze_Erdene_Dzuu_01.jpg",
+  altai:    WK+"2/2b/GoraBeluha.jpg/640px-GoraBeluha.jpg",
+  hustai:   WK+"b/b9/Khustain_Nuruu_National_Park.jpg/640px-Khustain_Nuruu_National_Park.jpg",
+  genghis:  WK+"9/93/Genghis_Khan_Equestrian_Statue%2C_photo_by_Vaiz_Ha.jpg/640px-Genghis_Khan_Equestrian_Statue%2C_photo_by_Vaiz_Ha.jpg",
+  steppe:   WK+"5/5e/Mongolian_steppe.jpg/640px-Mongolian_steppe.jpg",
+  // Activities — Unsplash (free, no attribution required)
+  coffee:   US+"1511632765486-a01980e01a18?w=420&h=200&fit=crop&auto=format",
+  park:     US+"1441974231531-c6227db76b6e?w=420&h=200&fit=crop&auto=format",
+  museum:   US+"1554907984-15263bfd63bd?w=420&h=200&fit=crop&auto=format",
+  cinema:   US+"1489599849927-2ee91cede3ba?w=420&h=200&fit=crop&auto=format",
+  skating:  US+"1461897689869-c3e07dab7d48?w=420&h=200&fit=crop&auto=format",
+  spa:      US+"1544161515-4ab6ce6db874?w=420&h=200&fit=crop&auto=format",
+  hiking:   US+"1551632811-561732d1e306?w=420&h=200&fit=crop&auto=format",
+  dinner:   US+"1414235077428-338989a2e8c0?w=420&h=200&fit=crop&auto=format",
+  bookshop: US+"1507003211169-0a1dd7228f2d?w=420&h=200&fit=crop&auto=format",
+  pottery:  US+"1565193566173-7a0ee3dbe261?w=420&h=200&fit=crop&auto=format",
+  yoga:     US+"1544367567-0f2fcb009e0b?w=420&h=200&fit=crop&auto=format",
+  bowling:  US+"1535131749006-b7f58c99034b?w=420&h=200&fit=crop&auto=format",
+  music:    US+"1514525253161-7a46d19cd819?w=420&h=200&fit=crop&auto=format",
+  fitness:  US+"1534438327276-14e5300c3a48?w=420&h=200&fit=crop&auto=format",
+  cooking:  US+"1556909114-f6e7ad7d3136?w=420&h=200&fit=crop&auto=format",
+  theater:  US+"1507924538820-ede94a04019d?w=420&h=200&fit=crop&auto=format",
+  bar:      US+"1574126154517-d1e0d89ef734?w=420&h=200&fit=crop&auto=format",
+  couple:   US+"1516589178581-6cd7833ae3b2?w=420&h=200&fit=crop&auto=format",
+  boardgame:US+"1611996575749-79a3a250f948?w=420&h=200&fit=crop&auto=format",
+  archery:  US+"1508193638397-1c4234db14d8?w=420&h=200&fit=crop&auto=format",
+  art:      US+"1561214115-f2f134cc4912?w=420&h=200&fit=crop&auto=format",
+};
+
+// Aimag image by name/region
+const aimagImgDB = {
+  "Хөвсгөл":    {u: IMG.khuvsgul,  s: "Wikipedia CC"},
+  "Өмнөговь":   {u: IMG.bayanzag,  s: "Wikipedia CC"},
+  "Өвөрхангай": {u: IMG.orkhon,    s: "Wikipedia CC"},
+  "Төв":         {u: IMG.terelj,    s: "Wikipedia CC"},
+  "Архангай":    {u: IMG.khuvsgul,  s: "Wikipedia CC"},
+  "Баян-Өлгий": {u: IMG.altai,     s: "Wikipedia CC"},
+  "Говь-Алтай": {u: IMG.altai,     s: "Wikipedia CC"},
+  "Баянхонгор":  {u: IMG.gobi,     s: "Wikipedia CC"},
+  "Говьсүмбэр":  {u: IMG.gobi,     s: "Wikipedia CC"},
+  "Дорноговь":   {u: IMG.gobi,     s: "Wikipedia CC"},
+  "Дундговь":    {u: IMG.gobi,     s: "Wikipedia CC"},
+  "Дорнод":      {u: IMG.steppe,   s: "Wikipedia CC"},
+  "Сүхбаатар":   {u: IMG.steppe,   s: "Wikipedia CC"},
+  "Хэнтий":      {u: IMG.hustai,   s: "Wikipedia CC"},
+  "Хангай":      {u: IMG.orkhon,   s: "Wikipedia CC"},
+  "Булган":      {u: IMG.steppe,   s: "Wikipedia CC"},
+  "Орхон":       {u: IMG.ub,       s: "Wikipedia CC"},
+  "Дархан-Уул":  {u: IMG.ub,       s: "Wikipedia CC"},
+  "Завхан":      {u: IMG.altai,    s: "Wikipedia CC"},
+  "Ховд":        {u: IMG.altai,    s: "Wikipedia CC"},
+  "Увс":         {u: IMG.steppe,   s: "Wikipedia CC"},
+  "Сэлэнгэ":     {u: IMG.steppe,   s: "Wikipedia CC"},
+};
+// Fallback by region
+const regionImgDB = {
+  "Хангайн": {u: IMG.orkhon,   s: "Wikipedia CC"},
+  "Баруун":  {u: IMG.altai,    s: "Wikipedia CC"},
+  "Хойд":    {u: IMG.khuvsgul, s: "Wikipedia CC"},
+  "Зүүн":    {u: IMG.steppe,   s: "Wikipedia CC"},
+  "Өмнөд":   {u: IMG.gobi,     s: "Wikipedia CC"},
+  "Төв":     {u: IMG.terelj,   s: "Wikipedia CC"},
+};
+
+function getAimagImg(a) {
+  return aimagImgDB[a.name] || regionImgDB[a.region] || {u: IMG.steppe, s: "Wikipedia CC"};
+}
+
+// Wonder type image mapping
+const wonderTypeImgDB = {
+  lake:      {u: IMG.khuvsgul, s: "Wikipedia CC"},
+  mountain:  {u: IMG.altai,    s: "Wikipedia CC"},
+  desert:    {u: IMG.gobi,     s: "Wikipedia CC"},
+  volcano:   {u: IMG.khuvsgul, s: "Wikipedia CC"},
+  cave:      {u: IMG.bayanzag, s: "Wikipedia CC"},
+  temple:    {u: IMG.erdene,   s: "Wikipedia CC"},
+  waterfall: {u: IMG.orkhon,   s: "Wikipedia CC"},
+  rock:      {u: IMG.bayanzag, s: "Wikipedia CC"},
+  ruins:     {u: IMG.erdene,   s: "Wikipedia CC"},
+  steppe:    {u: IMG.steppe,   s: "Wikipedia CC"},
+  canyon:    {u: IMG.bayanzag, s: "Wikipedia CC"},
+  river:     {u: IMG.orkhon,   s: "Wikipedia CC"},
+  spring:    {u: IMG.khuvsgul, s: "Wikipedia CC"},
+  nomad:     {u: IMG.steppe,   s: "Wikipedia CC"},
+  historic:  {u: IMG.erdene,   s: "Wikipedia CC"},
+  nature:    {u: IMG.terelj,   s: "Wikipedia CC"},
+};
+
+// UB idea title keyword → image
+function getIdeaImg(title) {
+  const t = title.toLowerCase();
+  if(t.includes("зайсан") || t.includes("хотын") || t.includes("skybar") || t.includes("sky"))
+    return {u: IMG.ub,       s: "Wikipedia CC"};
+  if(t.includes("сүхбаатар") || t.includes("талбай"))
+    return {u: IMG.ub,       s: "Wikipedia CC"};
+  if(t.includes("музей") || t.includes("heritage") || t.includes("чойжин") || t.includes("монгол cos"))
+    return {u: IMG.museum,   s: "Unsplash"};
+  if(t.includes("гандан") || t.includes("хийд") || t.includes("залбир"))
+    return {u: IMG.erdene,   s: "Wikipedia CC"};
+  if(t.includes("богд уул") || t.includes("уулд алх") || t.includes("аялал") || t.includes("хайк"))
+    return {u: IMG.hiking,   s: "Unsplash"};
+  if(t.includes("art") || t.includes("үзэсгэлэн") || t.includes("экспо"))
+    return {u: IMG.art,      s: "Unsplash"};
+  if(t.includes("кино") || t.includes("theatre") || t.includes("кинотеатр") || t.includes("шангри"))
+    return {u: IMG.cinema,   s: "Unsplash"};
+  if(t.includes("кофешоп") || t.includes("кафе") || t.includes("tom n") || t.includes("stupa cafe"))
+    return {u: IMG.coffee,   s: "Unsplash"};
+  if(t.includes("internom") || t.includes("ном"))
+    return {u: IMG.bookshop, s: "Unsplash"};
+  if(t.includes("жүжиг") || t.includes("опера") || t.includes("театр"))
+    return {u: IMG.theater,  s: "Unsplash"};
+  if(t.includes("ресторан") || t.includes("хархорум 14") || t.includes("цаатан"))
+    return {u: IMG.dinner,   s: "Unsplash"};
+  if(t.includes("skybar") || t.includes("sky bar") || t.includes("шөнийн"))
+    return {u: IMG.bar,      s: "Unsplash"};
+  if(t.includes("карао") || t.includes("mongolyrics") || t.includes("хөгжим") || t.includes("дуу"))
+    return {u: IMG.music,    s: "Unsplash"};
+  if(t.includes("боулинг"))
+    return {u: IMG.bowling,  s: "Unsplash"};
+  if(t.includes("ice") || t.includes("гулгуур") || t.includes("зимний"))
+    return {u: IMG.skating,  s: "Unsplash"};
+  if(t.includes("spa") || t.includes("массаж") || t.includes("тайвшрал"))
+    return {u: IMG.spa,      s: "Unsplash"};
+  if(t.includes("парк") || t.includes("зугаал") || t.includes("алхалт"))
+    return {u: IMG.park,     s: "Unsplash"};
+  if(t.includes("савлуур") || t.includes("шавар"))
+    return {u: IMG.pottery,  s: "Unsplash"};
+  if(t.includes("ёг") || t.includes("yoga"))
+    return {u: IMG.yoga,     s: "Unsplash"};
+  if(t.includes("мастер класс") || t.includes("хоол хийх"))
+    return {u: IMG.cooking,  s: "Unsplash"};
+  if(t.includes("фитнес") || t.includes("бэлтгэл"))
+    return {u: IMG.fitness,  s: "Unsplash"};
+  if(t.includes("сур харваа") || t.includes("archery"))
+    return {u: IMG.archery,  s: "Unsplash"};
+  if(t.includes("board game") || t.includes("тоглоом") || t.includes("тоглох"))
+    return {u: IMG.boardgame,s: "Unsplash"};
+  if(t.includes("хос") || t.includes("байгаль"))
+    return {u: IMG.couple,   s: "Unsplash"};
+  return null;
+}
+
+function imgTag(url, credit, cls, style) {
+  const cred = credit === "Wikipedia CC"
+    ? `<span class="card-img-credit">© Wikipedia CC</span>`
+    : `<span class="card-img-credit">Unsplash</span>`;
+  return `<img src="${url}" loading="lazy" class="${cls||''}" style="${style||''}" onerror="this.parentNode.removeChild(this)">${cred}`;
+}
+
 function navigate(page, param) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.getElementById("page-" + page).classList.add("active");
@@ -6697,10 +6894,21 @@ function renderFeatured() {
 
 function renderCard(idea) {
   const isLiked = userLikes.has(idea.id);
+  const imgInfo = getIdeaImg(idea.title);
+  const badge = idea.day === 1
+    ? '<div class="card-badge gold" style="z-index:3">⭐ Шинэ жил</div>'
+    : (idea.likes > 1500 ? '<div class="card-badge" style="z-index:3">🔥 Hot</div>' : '');
+  const imageContent = imgInfo
+    ? `<img src="${imgInfo.u}" loading="lazy" class="card-bg-img" onerror="this.remove()">
+       <div class="card-img-overlay"></div>
+       <span class="card-emoji-over">${idea.emoji}</span>
+       <span class="card-img-credit">${imgInfo.s==="Wikipedia CC"?"© Wikipedia CC":"Unsplash"}</span>`
+    : idea.emoji;
   return `
     <div class="card" onclick="openIdeaModal(${idea.id})">
-      <div class="card-image" style="background: ${getColor(idea.id)}">${idea.emoji}
-        ${idea.day === 1 ? '<div class="card-badge gold">⭐ Шинэ жил</div>' : (idea.likes > 1500 ? '<div class="card-badge">🔥 Hot</div>' : '')}
+      <div class="card-image" style="background: ${getColor(idea.id)}; overflow:hidden;">
+        ${imageContent}
+        ${badge}
       </div>
       <div class="card-body">
         <div class="card-day">📅 ${idea.day}-р өдөр</div>
@@ -6718,16 +6926,24 @@ function renderCard(idea) {
     </div>`;
 }
 
-function renderFeaturedAimags() {
-  const featured = aimagsClean.slice(0, 8);
-  document.getElementById("featuredAimags").innerHTML = featured.map(a => `
+function renderAimagCard(a) {
+  const img = getAimagImg(a);
+  return `
     <div class="aimag-card" onclick="navigate('aimag-detail', ${a.id})">
-      <div class="aimag-card-emoji">${a.emoji}</div>
+      <div class="aimag-card-img-wrap">
+        <img src="${img.u}" loading="lazy" alt="${a.name}" onerror="this.remove()">
+        <span class="aimag-card-emoji-over">${a.emoji}</span>
+        <span class="card-img-credit">${img.s==="Wikipedia CC"?"© Wikipedia CC":"Unsplash"}</span>
+      </div>
       <div class="aimag-card-name">${a.name}</div>
       <div class="aimag-card-region">${a.region} бүс · ${a.capital}</div>
       <div class="aimag-card-stats">9 гайхамшиг · 9 болзоо</div>
-    </div>
-  `).join("");
+    </div>`;
+}
+
+function renderFeaturedAimags() {
+  const featured = aimagsClean.slice(0, 8);
+  document.getElementById("featuredAimags").innerHTML = featured.map(renderAimagCard).join("");
 }
 
 function renderUbIdeas() {
@@ -6767,14 +6983,7 @@ function changeUbPage(p) {
 
 function renderAimags() {
   const filtered = currentRegion === "all" ? aimagsClean : aimagsClean.filter(a => a.region === currentRegion);
-  document.getElementById("aimagsGrid").innerHTML = filtered.map(a => `
-    <div class="aimag-card" onclick="navigate('aimag-detail', ${a.id})">
-      <div class="aimag-card-emoji">${a.emoji}</div>
-      <div class="aimag-card-name">${a.name}</div>
-      <div class="aimag-card-region">${a.region} бүс · ${a.capital}</div>
-      <div class="aimag-card-stats">9 гайхамшиг · 9 болзоо</div>
-    </div>
-  `).join("");
+  document.getElementById("aimagsGrid").innerHTML = filtered.map(renderAimagCard).join("");
 }
 
 function renderAimagDetail(id) {
@@ -6782,12 +6991,19 @@ function renderAimagDetail(id) {
   if(!a) return navigate('aimags');
   currentAimagId = id;
   
+  const aiImg = getAimagImg(a);
   document.getElementById("aimagDetail").innerHTML = `
     <div class="aimag-detail">
-      <div class="aimag-header">
-        <div style="font-size: 56px; margin-bottom: 8px;">${a.emoji}</div>
-        <h1>${a.name} аймаг</h1>
-        <div class="meta">${a.region} бүс · Төв нь ${a.capital} · 9 гайхамшиг + 9 болзоо</div>
+      <div class="aimag-header" style="position:relative; overflow:hidden;">
+        <img src="${aiImg.u}" loading="lazy" alt="${a.name}"
+          style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.22;z-index:0;"
+          onerror="this.remove()">
+        <div style="position:relative;z-index:1;">
+          <div style="font-size: 56px; margin-bottom: 8px;">${a.emoji}</div>
+          <h1>${a.name} аймаг</h1>
+          <div class="meta">${a.region} бүс · Төв нь ${a.capital} · 9 гайхамшиг + 9 болзоо</div>
+          <div style="font-size:10px; opacity:0.6; margin-top:6px;">📸 ${aiImg.s}</div>
+        </div>
       </div>
       <div class="aimag-section">
         <h3>📜 Түүхэн мэдээлэл</h3>
@@ -6857,9 +7073,17 @@ function openWonderModal(aimagId, wonderIdx) {
       <button class="modal-close" onclick="closeModal()">×</button>
     </div>
     <div class="modal-body">
-      <div class="wonder-modal-visual ${type}">
-        <span class="emoji">${w.emoji}</span>
-      </div>
+      ${(wonderTypeImgDB[type]) ? (() => {
+        const wi = wonderTypeImgDB[type];
+        return `<div class="wonder-modal-visual ${type}" style="position:relative;overflow:hidden;">
+          <img src="${wi.u}" loading="lazy" alt="${w.name}"
+            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;"
+            onerror="this.remove()">
+          <div style="position:absolute;inset:0;background:rgba(0,0,0,0.2);z-index:1;"></div>
+          <span class="emoji" style="position:relative;z-index:2;">${w.emoji}</span>
+          <span class="card-img-credit" style="z-index:3;">${wi.s==="Wikipedia CC"?"© Wikipedia CC":"Unsplash"}</span>
+        </div>`;
+      })() : `<div class="wonder-modal-visual ${type}"><span class="emoji">${w.emoji}</span></div>`}
       <div class="modal-meta" style="margin-bottom:16px;">
         <div class="modal-meta-item">📍 <strong>${a.name} аймаг</strong></div>
         <div class="modal-meta-item">🏷 <strong>${typeLabel(type)}</strong></div>
@@ -6878,10 +7102,6 @@ function openWonderModal(aimagId, wonderIdx) {
       <div class="wonder-detail-section">
         <div class="label">👁 Хүн очоод юу үзэх вэ</div>
         <div class="text">${wd.see || w.desc}</div>
-      </div>
-
-      <div class="wonder-img-note">
-        📷 <strong>Зургийн тухай:</strong> Энд тухайн газрын бодит гэрэл зураг харагдах ёстой. Сайтыг бодитоор ажиллуулахдаа Unsplash (үнэгүй) эсвэл өөрийн авсан зургийг холбоно. Одоогоор газрын төрлөөр өнгөт дүрсээр төлөөлүүлж байна.
       </div>
     </div>
   `;

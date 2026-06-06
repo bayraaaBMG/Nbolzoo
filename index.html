@@ -871,12 +871,120 @@ body {
 }
 .proposal-tip strong { color: var(--primary-dark); }
 
+/* FOOTER */
+.footer {
+  background: var(--text); color: rgba(255,255,255,0.85);
+  padding: 40px 24px 24px; margin-top: 60px;
+}
+.footer-grid {
+  max-width: 1280px; margin: 0 auto;
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 32px;
+  margin-bottom: 32px;
+}
+.footer-brand .logo-text { color: white; font-size: 20px; }
+.footer-brand p { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 10px; line-height: 1.6; }
+.footer-col h4 { color: white; font-size: 14px; margin-bottom: 12px; }
+.footer-col a {
+  display: block; color: rgba(255,255,255,0.6); font-size: 13px;
+  text-decoration: none; margin-bottom: 8px; cursor: pointer;
+  transition: color 0.2s;
+}
+.footer-col a:hover { color: var(--primary-light); }
+.footer-bottom {
+  max-width: 1280px; margin: 0 auto;
+  border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: rgba(255,255,255,0.4); flex-wrap: wrap; gap: 10px;
+}
+.footer-social { display: flex; gap: 12px; }
+.footer-social a {
+  width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.08);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.7); text-decoration: none; font-size: 16px;
+  transition: background 0.2s;
+}
+.footer-social a:hover { background: var(--primary); color: white; }
+
+/* MOBILE MENU */
+.mobile-menu-btn {
+  display: none; background: none; border: 1px solid var(--border);
+  border-radius: 8px; width: 38px; height: 38px; font-size: 18px;
+  cursor: pointer; align-items: center; justify-content: center;
+}
+.mobile-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 999;
+}
+.mobile-overlay.open { display: block; }
+.mobile-nav-drawer {
+  position: fixed; top: 0; left: -280px; width: 280px; height: 100vh;
+  background: white; z-index: 1100; transition: left 0.3s ease;
+  overflow-y: auto; box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+}
+.mobile-nav-drawer.open { left: 0; }
+.mobile-nav-header {
+  padding: 18px 20px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.mobile-nav-close {
+  background: var(--bg); border: none; width: 32px; height: 32px;
+  border-radius: 50%; font-size: 18px; cursor: pointer;
+}
+.mobile-nav-items { padding: 12px; }
+.mobile-nav-items a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: 10px; text-decoration: none;
+  color: var(--text); font-size: 15px; font-weight: 500; cursor: pointer;
+  transition: background 0.2s;
+}
+.mobile-nav-items a:hover { background: var(--primary-extra-soft); color: var(--primary); }
+.mobile-nav-items a.active { background: var(--primary-extra-soft); color: var(--primary); }
+.mobile-nav-divider { height: 1px; background: var(--border); margin: 10px 0; }
+.mobile-nav-actions { padding: 16px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+/* RANDOM IDEA BUTTON */
+.btn-random {
+  background: rgba(255,255,255,0.15); color: white;
+  border: 2px solid rgba(255,255,255,0.4);
+  backdrop-filter: blur(10px);
+}
+.btn-random:hover { background: rgba(255,255,255,0.25); }
+
+/* COMMENT SECTION */
+.comments-section { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px; }
+.comment-item { display: flex; gap: 10px; margin-bottom: 12px; }
+.comment-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary-soft); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--primary); flex-shrink: 0; }
+.comment-body { flex: 1; }
+.comment-author { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+.comment-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+.comment-time { font-size: 11px; color: var(--text-lighter); margin-top: 2px; }
+.comment-input-row { display: flex; gap: 8px; margin-top: 10px; }
+.comment-input-row input { flex: 1; border: 1px solid var(--border); border-radius: 20px; padding: 8px 14px; font-size: 13px; outline: none; font-family: inherit; }
+.comment-input-row input:focus { border-color: var(--primary); }
+.comment-input-row button { background: var(--primary); color: white; border: none; border-radius: 20px; padding: 8px 16px; font-size: 13px; cursor: pointer; }
+
 @media (max-width: 900px) {
-  .nav-menu { display: none; }
-  .hero h1 { font-size: 30px; }
+  .nav-menu { display: none !important; }
+  .mobile-menu-btn { display: flex; }
+  .hero h1 { font-size: 26px; }
   .community-layout { grid-template-columns: 1fr; }
-  .hero-stats { gap: 24px; }
-  .container { padding: 20px 16px; }
+  .hero-stats { gap: 16px; }
+  .container { padding: 16px 14px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .nav-actions .btn-ghost { display: none; }
+  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .movie-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .gift-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+  .love-lang-grid { grid-template-columns: 1fr 1fr; }
+  .expert-sections { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .footer-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 22px; }
+  .hero-stats { gap: 12px; }
+  .hero-stat-num { font-size: 20px; }
+  .search-box { flex-direction: column; }
+  .search-box input { border-radius: 8px; }
 }
 </style>
 </head>
@@ -902,11 +1010,44 @@ body {
       <li><a class="nav-link" data-page="movies" onclick="navigate('movies')">🎬 Кино</a></li>
     </ul>
     <div class="nav-actions">
-      <button class="btn btn-ghost" onclick="openAuth('login')">Нэвтрэх</button>
-      <button class="btn btn-primary" onclick="openAuth('signup')">Бүртгүүлэх</button>
+      <div id="navAuthButtons">
+        <button class="btn btn-ghost" onclick="openAuth('login')">Нэвтрэх</button>
+        <button class="btn btn-primary" onclick="openAuth('signup')">Бүртгүүлэх</button>
+      </div>
+      <div id="navUserInfo" style="display:none; align-items:center; gap:8px;">
+        <div class="avatar" id="navAvatar" style="width:34px;height:34px;font-size:13px;cursor:pointer;"></div>
+        <button class="btn btn-ghost" style="font-size:13px;padding:8px 12px;" onclick="logoutUser()">Гарах</button>
+      </div>
+      <button class="mobile-menu-btn" onclick="openMobileMenu()" title="Цэс нээх">☰</button>
     </div>
   </nav>
 </header>
+
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+<div class="mobile-nav-drawer" id="mobileNavDrawer">
+  <div class="mobile-nav-header">
+    <div class="logo">
+      <div class="logo-icon" style="width:34px;height:34px;font-size:16px;">N</div>
+      <span class="logo-text" style="font-size:18px;">NBolzoo</span>
+    </div>
+    <button class="mobile-nav-close" onclick="closeMobileMenu()">✕</button>
+  </div>
+  <div class="mobile-nav-items">
+    <a onclick="navigate('home');closeMobileMenu()">🏠 Нүүр</a>
+    <a onclick="navigate('ub');closeMobileMenu()">🏙 УБ 365</a>
+    <a onclick="navigate('aimags');closeMobileMenu()">🌄 21 аймаг</a>
+    <a onclick="navigate('expert');closeMobileMenu()">💎 Зөвлөгөө</a>
+    <a onclick="navigate('gifts');closeMobileMenu()">🎁 Бэлэг</a>
+    <a onclick="navigate('community');closeMobileMenu()">👥 Нийгэмлэг</a>
+    <a onclick="navigate('ai');closeMobileMenu()">🤖 AI зөвлөх</a>
+    <a onclick="navigate('movies');closeMobileMenu()">🎬 Кино</a>
+  </div>
+  <div class="mobile-nav-divider"></div>
+  <div class="mobile-nav-actions" id="mobileAuthButtons">
+    <button class="btn btn-ghost" style="width:100%" onclick="openAuth('login');closeMobileMenu()">Нэвтрэх</button>
+    <button class="btn btn-primary" style="width:100%" onclick="openAuth('signup');closeMobileMenu()">Бүртгүүлэх</button>
+  </div>
+</div>
 
 <main>
   <div id="page-home" class="page active">
@@ -916,7 +1057,10 @@ body {
         <p>Монголын анхны болзооны санааны платформ — УБ-д 365 санаа + 21 аймагт 189 санаа</p>
         <div class="search-box">
           <input type="text" placeholder="Жишээ: Зайсан, кафе, төсөв 50,000₮" id="searchInput" onkeypress="if(event.key==='Enter')performSearch()"/>
-          <button class="btn btn-accent" onclick="performSearch()">Хайх</button>
+          <button class="btn btn-accent" onclick="performSearch()" type="button">Хайх</button>
+        </div>
+        <div style="margin-top: 14px;">
+          <button class="btn btn-random" onclick="openRandomIdea()" type="button">🎲 Санамсаргүй санаа авах</button>
         </div>
         <div class="hero-stats">
           <div class="hero-stat"><span class="hero-stat-num">554</span><span class="hero-stat-label">болзооны санаа</span></div>
@@ -1151,6 +1295,46 @@ body {
     </div>
   </div>
 </main>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo" style="margin-bottom:10px;">
+        <div class="logo-icon">N</div>
+        <span class="logo-text">NBolzoo</span>
+      </div>
+      <p>Монголын анхны болзооны санааны платформ. УБ-д 365 санаа + 21 аймагт 189 санаа + AI зөвлөх.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Санаанууд</h4>
+      <a onclick="navigate('ub')">🏙 УБ 365 санаа</a>
+      <a onclick="navigate('aimags')">🌄 21 аймаг</a>
+      <a onclick="navigate('movies')">🎬 Хосын кино</a>
+      <a onclick="navigate('gifts')">🎁 Бэлгийн санаа</a>
+    </div>
+    <div class="footer-col">
+      <h4>Зөвлөгөө</h4>
+      <a onclick="navigate('expert')">💎 Мэргэжилтэн зөвлөгөө</a>
+      <a onclick="navigate('ai')">🤖 AI зөвлөх</a>
+      <a onclick="navigate('community')">👥 Нийгэмлэг</a>
+      <a onclick="navigate('expert');showExpertSection('questions')">36 асуулт</a>
+    </div>
+    <div class="footer-col">
+      <h4>Холбоо барих</h4>
+      <a>📧 info@nbolzoo.mn</a>
+      <a>📱 Instagram: @nbolzoo</a>
+      <a>💬 Facebook: NBolzoo</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 NBolzoo.mn · Монголын хайрын платформ 💕</span>
+    <div class="footer-social">
+      <a title="Instagram">📷</a>
+      <a title="Facebook">📘</a>
+      <a title="TikTok">🎵</a>
+    </div>
+  </div>
+</footer>
 
 <div class="modal-backdrop" id="modal">
   <div class="modal" id="modalContent"></div>
@@ -6115,18 +6299,36 @@ for(let i = 0; i < 365; i++) {
 }
 
 const movies = [
-  {id:1, emoji:"💕", title:"La La Land", year:"2016", genres:["romantic","drama"], rating:"8.5", duration:"128 мин"},
-  {id:2, emoji:"🤣", title:"Crazy Stupid Love", year:"2011", genres:["comedy","romantic"], rating:"7.4", duration:"118 мин"},
-  {id:3, emoji:"🚗", title:"Fast X", year:"2023", genres:["action"], rating:"7.0", duration:"141 мин"},
-  {id:4, emoji:"😂", title:"The Hangover", year:"2009", genres:["comedy"], rating:"7.7", duration:"100 мин"},
-  {id:5, emoji:"🌸", title:"Your Name", year:"2016", genres:["animation","romantic"], rating:"8.4", duration:"106 мин"},
-  {id:6, emoji:"💖", title:"Notebook", year:"2004", genres:["romantic","drama"], rating:"7.8", duration:"123 мин"},
-  {id:7, emoji:"🎭", title:"Joker", year:"2019", genres:["drama"], rating:"8.4", duration:"122 мин"},
-  {id:8, emoji:"🦸", title:"Spider-Man", year:"2023", genres:["animation","action"], rating:"8.6", duration:"140 мин"},
-  {id:9, emoji:"💃", title:"Pretty Woman", year:"1990", genres:["romantic","comedy"], rating:"7.0", duration:"119 мин"},
-  {id:10, emoji:"🌌", title:"Interstellar", year:"2014", genres:["drama","action"], rating:"8.7", duration:"169 мин"},
-  {id:11, emoji:"🎪", title:"Greatest Showman", year:"2017", genres:["drama","romantic"], rating:"7.6", duration:"105 мин"},
-  {id:12, emoji:"🏰", title:"Frozen II", year:"2019", genres:["animation"], rating:"6.8", duration:"103 мин"}
+  {id:1, emoji:"💕", title:"La La Land", year:"2016", genres:["romantic","drama"], rating:"8.5", duration:"128 мин", desc:"Жазз хөгжимчин болон жүжигчин тэмүүлж яваа хоёрын хайрын түүх. Лос-Анжелес хотод мөрөөдлөө биелүүлэхийн тулд хайрыг золиослох уу?", why:"Хамтдаа үзэж хэн юуг эрхэмлэдгийг ярилцахад тохиромжтой"},
+  {id:2, emoji:"🤣", title:"Crazy Stupid Love", year:"2011", genres:["comedy","romantic"], rating:"7.4", duration:"118 мин", desc:"Гэрлэсэн хүн хайраа алдаж, залуу womanizer-аар сургуулилж, харин тэр ч гэсэн жинхэнэ хайраа хайдаг.", why:"Хайрын олон хэлбэрийг инээдэмтэйгээр харуулсан"},
+  {id:3, emoji:"🚗", title:"Fast X", year:"2023", genres:["action"], rating:"7.0", duration:"141 мин", desc:"Домиником Торреттогийн баг хамгийн аюултай дайснаа — Данте-г устгахаар нэгддэг.", why:"Адреналин дүүрэн, хамтдаа хоол идэж үзэхэд хөгжилтэй"},
+  {id:4, emoji:"😂", title:"The Hangover", year:"2009", genres:["comedy"], rating:"7.7", duration:"100 мин", desc:"Лас Вегас дахь мартагдашгүй bachelor party-н дараа гурван найз нар юу болсныг санахгүй сэрнэ.", why:"Хамтдаа инээж, хурдтай цаг өнгөрүүлэхэд төгс"},
+  {id:5, emoji:"🌸", title:"Your Name", year:"2016", genres:["animation","romantic"], rating:"8.4", duration:"106 мин", desc:"Хоёр өсвөр насны хүүхэд биеийг нь солилцдог мөрөөдлийн дараа нэг нэгнийхээ хайрыг эрэлхийлнэ.", why:"Гэнэтийн эрч хүчтэй, уйлмаар гайхалтай анимэ"},
+  {id:6, emoji:"💖", title:"The Notebook", year:"2004", genres:["romantic","drama"], rating:"7.8", duration:"123 мин", desc:"Ядуу залуу болон баян охины зуны хайр жилүүдийг давж мөнх хэвээр байна.", why:"Сонгодог романтик кино — хамт уйлахад тохиромжтой"},
+  {id:7, emoji:"🎭", title:"Joker", year:"2019", genres:["drama"], rating:"8.4", duration:"122 мин", desc:"Артур Флек хэмээх инээдмийн жүжигчин аажим аажмаар нийгэмд хортой Жокер болж хувирдаг.", why:"Гүн агуулгатай, яриа өдөөх кино"},
+  {id:8, emoji:"🦸", title:"Spider-Man: Across the Spider-Verse", year:"2023", genres:["animation","action"], rating:"8.6", duration:"140 мин", desc:"Майлс Моралес олон ертөнцийг дамнасан баатарлаг аяллаар гарч, өөрийн хувь заяагаа тодруулна.", why:"Визуал урлаг + хамтдаа гайхшрахад тохиромжтой"},
+  {id:9, emoji:"💃", title:"Pretty Woman", year:"1990", genres:["romantic","comedy"], rating:"7.0", duration:"119 мин", desc:"Тэнхлэг хотоос хол гарч явсан залуу дэлхийн нэгдүгээр зэргийн эмэгтэйтэй нэг долоо хоногт хайр олно.", why:"Сонгодог cinderella story — хөгжилтэй, романтик"},
+  {id:10, emoji:"🌌", title:"Interstellar", year:"2014", genres:["drama","action"], rating:"8.7", duration:"169 мин", desc:"Хүн төрөлхтний оршин тогтноход зориулан нэгэн эцэг сансрын хугацааны уртыг туулна.", why:"Гайхалтай харагдалт + гүн гүнзгий яриа өдөөдөг"},
+  {id:11, emoji:"🎪", title:"The Greatest Showman", year:"2017", genres:["drama","romantic"], rating:"7.6", duration:"105 мин", desc:"Циркийн хаан П.Т. Барнумын амьдрал, мөрөөдөл, хайр, хүлцлийн тухай дуурьт кино.", why:"Дуутай, урам зоригтой — хамтдаа дуулахад бэлэн болно"},
+  {id:12, emoji:"🏰", title:"Frozen II", year:"2019", genres:["animation"], rating:"6.8", duration:"103 мин", desc:"Элса өөрийн хүчний эх үүсвэрийг мэдэхийн тулд аюултай аялалд гарна.", why:"Хялбархан хамтдаа үзэх — тайвшруулсан, гоё дуутай"},
+  {id:13, emoji:"🌊", title:"Titanic", year:"1997", genres:["romantic","drama"], rating:"7.9", duration:"194 мин", desc:"Тансаг Титаник хөлөг онгоцон дээр нийгмийн ялгаатай хоёр залуу хайр олж, аймаар гамшгийг туулна.", why:"Үеийнхний хайрын тэмдэг кино — хамт уйлах нь тодорхой"},
+  {id:14, emoji:"🎵", title:"A Star Is Born", year:"2018", genres:["romantic","drama"], rating:"7.6", duration:"136 мин", desc:"Алдартай хөгжимчин шинэ дуурын авьяастан охинтой танилцаж хайр үүснэ — гэвч алдар нэр хайрыг гэмтээдэг.", why:"Хөгжим + хайрын зовлон — сэтгэлд хүрдэг"},
+  {id:15, emoji:"🌹", title:"Pride & Prejudice", year:"2005", genres:["romantic","drama"], rating:"7.8", duration:"129 мин", desc:"19-р зуунд нэр хүнд ба хайрын хооронд сонголт хийж яваа Элизабет Беннет ба Дарсигийн түүх.", why:"Ухаалаг, сэтгэл зүйн романтик — ярилцлага өдөөдөг"},
+  {id:16, emoji:"🎻", title:"Schindler's List", year:"1993", genres:["drama"], rating:"9.0", duration:"195 мин", desc:"Дайны үед нэгэн үйлдвэрлэгч мянган Еврейг аврах шийдвэр гаргадаг.", why:"Хамгийн хүчирхэг кинонуудын нэг — хамт амьдралыг ойлгох"},
+  {id:17, emoji:"😎", title:"The Grand Budapest Hotel", year:"2014", genres:["comedy","drama"], rating:"8.1", duration:"100 мин", desc:"Алдарт зочид буудлын консьерж ба хулгайч болж яваа жаалхан хүүхдийн адал явдалт тансаг комеди.", why:"Гоё визуал, хошин шог — хөнгөн хамтдаа үзэхэд тохиромжтой"},
+  {id:18, emoji:"🐝", title:"My Big Fat Greek Wedding", year:"2002", genres:["comedy","romantic"], rating:"6.6", duration:"95 мин", desc:"Грек гэр бүлийн хосын болзооны турбулент аялал — тусламж гуйхгүйгээр гэрлэхэд хэцүү байна.", why:"Гэр бүл + хайрын инээдэмтэй дүрслэл"},
+  {id:19, emoji:"💫", title:"Eternal Sunshine of the Spotless Mind", year:"2004", genres:["romantic","drama"], rating:"8.3", duration:"108 мин", desc:"Тархины дурсамжийг устгах технологи ашиглан хайраа мартах гэсэн хосын түүх.", why:"Хайрын утга учрыг гүн бодуулдаг — ярилцахад тохиромжтой"},
+  {id:20, emoji:"🎬", title:"Parasite", year:"2019", genres:["drama"], rating:"8.6", duration:"132 мин", desc:"Ядуу гэр бүл баян гэрт аажимдаа нэвтэрч, тэнд нуугдаж байсан нууцыг илрүүлнэ.", why:"Хамтдаа тааны авч, яриа дэлгэхэд маш сайн"},
+  {id:21, emoji:"🌺", title:"Mamma Mia!", year:"2008", genres:["comedy","romantic"], rating:"6.4", duration:"108 мин", desc:"Охин гэрлэлтийнхээ өмнө гурван эрэгтэйн аль нь эцэг болохыг мэдэхийн тулд урьжээ.", why:"ABBA дуунуудтай хамтдаа дуулах гайхалтай кино"},
+  {id:22, emoji:"🐉", title:"How to Train Your Dragon", year:"2010", genres:["animation","action"], rating:"8.1", duration:"98 мин", desc:"Викингийн хүү луутай найздаж, хоёр тал бие биенийхээ тухай ойлголцдог.", why:"Бүх насны хүмүүст тохирох — дотно, урам зоригтой"},
+  {id:23, emoji:"🌃", title:"Lost in Translation", year:"2003", genres:["romantic","drama"], rating:"7.7", duration:"102 мин", desc:"Токиод тус тустаа нэвтрэрхэн явсан хоёр Америк хоорондоо нандин нөхөрлөл олно.", why:"Тайван, нарийн — хамтдаа удаан суулт хийхэд тохиромжтой"},
+  {id:24, emoji:"🌈", title:"Silver Linings Playbook", year:"2012", genres:["romantic","comedy","drama"], rating:"7.7", duration:"122 мин", desc:"Сэтгэцийн асуудалтай хоёр хүн бийр тоглолтоор нэг нэгнийгээ засахад тусалдаг.", why:"Буруу байдалаасаа хайр олох — сэтгэлд хүрдэг"},
+  {id:25, emoji:"🚀", title:"Guardians of the Galaxy", year:"2014", genres:["action","comedy"], rating:"8.0", duration:"121 мин", desc:"Тохиромжгүй баатруудын бүлэг сансраас дэлхийг аврахаар нэгддэг.", why:"Хөгжилтэй, эрч хүчтэй — хамтдаа хоол идэж үзэхэд тохиромжтой"},
+  {id:26, emoji:"🌙", title:"Before Sunrise", year:"1995", genres:["romantic","drama"], rating:"8.1", duration:"101 мин", desc:"Вена дахь шөнийн гудамжаар хоёр залуу танилцаж, нэг шөнийн турш яриа дэлгэнэ.", why:"Болзооны философи — хамтдаа ярих сэдэв дүүрэн"},
+  {id:27, emoji:"✨", title:"Everything Everywhere All at Once", year:"2022", genres:["action","comedy","drama"], rating:"7.8", duration:"139 мин", desc:"Эхнэр нь зэрэгцэх олон ертөнцийг дамнан оршин тогтнохын тулд тэмцэнэ.", why:"Уйлуулж, инээлгэж, гайхшруулна — мартагдашгүй туршлага"},
+  {id:28, emoji:"🎨", title:"Amélie", year:"2001", genres:["romantic","comedy"], rating:"8.3", duration:"122 мин", desc:"Парисын нэгэн нутгийн хүүхэн бусдын аз жаргалд нөлөөлж, өөрийнхөө хайрыг олдог.", why:"Дуртай хүнд дотно мэдрэмж өгдөг — гоё, хүч чадалтай"},
+  {id:29, emoji:"🧊", title:"Frozen", year:"2013", genres:["animation"], rating:"7.4", duration:"102 мин", desc:"Элса хааны хүч нь хот мөсөн хааны нутаг болгоход дүүгийнх нь Анна аврах аяллад гарна.", why:"Сонгодог анимэшн — Let It Go хамтдаа дуулаарай"},
+  {id:30, emoji:"🌿", title:"Studio Ghibli: Spirited Away", year:"2001", genres:["animation","drama"], rating:"8.6", duration:"125 мин", desc:"Охин хачирхалтай сүнснүүдийн ертөнцөд орж, ах эцэг эхийгээ аврахаар тэмцэнэ.", why:"Хамгийн шагналтай анимэ — дүрслэл нь гайхалтай"}
 ];
 
 const posts = [
@@ -6872,18 +7074,20 @@ document.querySelectorAll('[data-movie]').forEach(c => {
   });
 });
 
+let currentUser = null;
+
 function openAuth(type) {
   const isLogin = type === "login";
   document.getElementById("authModalContent").innerHTML = `
     <div class="auth-form">
       <h2>${isLogin?'Тавтай морил! 👋':'NBolzoo-д бүртгүүл 💕'}</h2>
       <p>${isLogin?'Бүртгэлтэй имэйлээрээ нэвтэрнэ':'Шинэ дурсамжуудаа эхлүүлье'}</p>
-      ${!isLogin?`<div class="form-group"><label>Нэр</label><input type="text" placeholder="Таны нэр"/></div>`:''}
-      <div class="form-group"><label>Имэйл</label><input type="email" placeholder="email@example.com"/></div>
-      <div class="form-group"><label>Нууц үг</label><input type="password" placeholder="••••••••"/></div>
-      <button class="btn btn-primary" onclick="closeAuth();showToast('✅ ${isLogin?'Амжилттай нэвтэрлээ':'Бүртгэл амжилттай үүсгэгдлээ'}')">${isLogin?'Нэвтрэх':'Бүртгүүлэх'}</button>
+      ${!isLogin?`<div class="form-group"><label>Нэр</label><input type="text" id="authName" placeholder="Таны нэр"/></div>`:''}
+      <div class="form-group"><label>Имэйл</label><input type="email" id="authEmail" placeholder="email@example.com"/></div>
+      <div class="form-group"><label>Нууц үг</label><input type="password" id="authPass" placeholder="••••••••"/></div>
+      <button class="btn btn-primary" type="button" onclick="doAuth('${type}')" style="width:100%;margin-top:4px;">${isLogin?'Нэвтрэх':'Бүртгүүлэх'}</button>
       <div class="auth-divider">эсвэл</div>
-      <button class="btn btn-ghost" style="width:100%" onclick="closeAuth();showToast('Facebook-аар нэвтэрч байна...')">📘 Facebook-аар</button>
+      <button class="btn btn-ghost" type="button" style="width:100%" onclick="doSocialAuth()">📘 Facebook-аар</button>
       <div class="auth-switch">
         ${isLogin?'Шинэ хэрэглэгч үү?':'Бүртгэлтэй юу?'} <a onclick="openAuth('${isLogin?'signup':'login'}')">${isLogin?'Бүртгүүлэх':'Нэвтрэх'}</a>
       </div>
@@ -6891,7 +7095,116 @@ function openAuth(type) {
   document.getElementById("authModal").classList.add("show");
 }
 
+function doAuth(type) {
+  const nameEl = document.getElementById("authName");
+  const email = document.getElementById("authEmail")?.value.trim();
+  const pass = document.getElementById("authPass")?.value;
+  if(!email || !pass) return showToast("⚠️ Имэйл болон нууц үгээ оруулна уу");
+  if(pass.length < 6) return showToast("⚠️ Нууц үг хамгийн багадаа 6 тэмдэгт байх ёстой");
+  const name = nameEl ? nameEl.value.trim() || email.split("@")[0] : email.split("@")[0];
+  loginUser(name);
+  closeAuth();
+  showToast(`✅ ${type==='login'?'Тавтай морил':'Бүртгэл амжилттай'}, ${name}! 💕`);
+}
+
+function doSocialAuth() {
+  loginUser("Зочин хэрэглэгч");
+  closeAuth();
+  showToast("✅ Facebook-аар амжилттай нэвтэрлээ!");
+}
+
+function loginUser(name) {
+  currentUser = { name };
+  document.getElementById("navAuthButtons").style.display = "none";
+  const info = document.getElementById("navUserInfo");
+  info.style.display = "flex";
+  document.getElementById("navAvatar").textContent = name.charAt(0).toUpperCase();
+  const mobileAuth = document.getElementById("mobileAuthButtons");
+  if(mobileAuth) mobileAuth.innerHTML = `<div style="padding:8px 4px; font-size:14px; color:var(--text);">👋 Сайн байна уу, <strong>${name}</strong></div><button class="btn btn-ghost" style="width:100%" type="button" onclick="logoutUser()">Гарах</button>`;
+}
+
+function logoutUser() {
+  currentUser = null;
+  document.getElementById("navAuthButtons").style.display = "";
+  document.getElementById("navUserInfo").style.display = "none";
+  const mobileAuth = document.getElementById("mobileAuthButtons");
+  if(mobileAuth) mobileAuth.innerHTML = `<button class="btn btn-ghost" style="width:100%" type="button" onclick="openAuth('login');closeMobileMenu()">Нэвтрэх</button><button class="btn btn-primary" style="width:100%" type="button" onclick="openAuth('signup');closeMobileMenu()">Бүртгүүлэх</button>`;
+  showToast("👋 Гарлаа. Дараа уулзаарай!");
+}
+
 function closeAuth() { document.getElementById("authModal").classList.remove("show"); }
+
+function openMobileMenu() {
+  document.getElementById("mobileNavDrawer").classList.add("open");
+  document.getElementById("mobileOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeMobileMenu() {
+  document.getElementById("mobileNavDrawer").classList.remove("open");
+  document.getElementById("mobileOverlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+function openRandomIdea() {
+  const idea = allUbIdeas[Math.floor(Math.random() * allUbIdeas.length)];
+  openIdeaModal(idea.id);
+}
+
+const postComments = {};
+posts.forEach(p => {
+  postComments[p.id] = [
+    {author: "Г.Мөнхбаяр", time: "1 цаг өмнө", text: "Үнэхээр сайхан санаа байна! Бид ч явсан 😍"},
+    {author: "Д.Сарангэрэл", time: "2 цаг өмнө", text: "Хаана яг байдаг вэ? Зам нь хэцүү юу?"}
+  ];
+});
+
+function toggleComments(postId, btn) {
+  const section = document.getElementById(`comments-${postId}`);
+  if(!section) return;
+  if(section.style.display === "none") {
+    section.style.display = "block";
+    renderComments(postId);
+    btn.classList.add("liked");
+  } else {
+    section.style.display = "none";
+    btn.classList.remove("liked");
+  }
+}
+
+function renderComments(postId) {
+  const section = document.getElementById(`comments-${postId}`);
+  const cmts = postComments[postId] || [];
+  section.innerHTML = `
+    ${cmts.map(c => `
+      <div class="comment-item">
+        <div class="comment-avatar">${c.author.charAt(0)}</div>
+        <div class="comment-body">
+          <div class="comment-author">${c.author}</div>
+          <div class="comment-text">${c.text}</div>
+          <div class="comment-time">${c.time}</div>
+        </div>
+      </div>
+    `).join("")}
+    <div class="comment-input-row">
+      <input type="text" id="cmt-input-${postId}" placeholder="Сэтгэгдэл бичих..." onkeypress="if(event.key==='Enter')addComment(${postId})"/>
+      <button type="button" onclick="addComment(${postId})">Илгээх</button>
+    </div>`;
+}
+
+function addComment(postId) {
+  const input = document.getElementById(`cmt-input-${postId}`);
+  const text = input?.value.trim();
+  if(!text) return;
+  const name = currentUser ? currentUser.name : "Зочин";
+  if(!postComments[postId]) postComments[postId] = [];
+  postComments[postId].push({author: name, time: "Одоо", text});
+  input.value = "";
+  const countEl = document.getElementById(`cmt-count-${postId}`);
+  const post = posts.find(p => p.id === postId);
+  if(post && countEl) { post.comments++; countEl.textContent = post.comments; }
+  renderComments(postId);
+}
 
 const trending = [
   {title:"Зайсан өндөрлөг тойрох", count:"892 хүн саналаа"},
@@ -6924,13 +7237,14 @@ function renderPosts() {
         <div class="post-action ${userPostLikes.has(p.id)?'liked':''}" onclick="togglePostLike(${p.id})">
           ${userPostLikes.has(p.id)?'❤️':'🤍'} <span>${p.likes + (userPostLikes.has(p.id)?1:0)}</span>
         </div>
-        <div class="post-action" onclick="showToast('Сэтгэгдэл функц удахгүй...')">💬 ${p.comments}</div>
+        <div class="post-action" onclick="toggleComments(${p.id}, this)">💬 <span id="cmt-count-${p.id}">${p.comments}</span></div>
         <div class="post-action" onclick="showToast('🔗 Холбоос хуулж авлаа')">🔗</div>
         <div class="post-action" onclick="showToast('🔖 Хадгаллаа')">🔖</div>
       </div>
+      <div class="comments-section" id="comments-${p.id}" style="display:none;"></div>
     </div>
   `).join("");
-  
+
   document.getElementById("trendingList").innerHTML = trending.map((t, i) => `
     <div class="trending-item">
       <div class="trending-num">${i+1}</div>
@@ -6988,25 +7302,43 @@ function sendMessage() {
     let response = "";
     let quickReplies = "";
     const lower = text.toLowerCase();
-    
-    if(lower.includes("ном") || lower.includes("дотогшоо")) {
-      response = "Тантай адил тайван хүмүүст яг тохирох:<br><br>📚 <strong>Internom Premium</strong> - кофе ууж ном унших<br>🎨 <strong>Чойжин ламын музей</strong> - тайван соёл<br>🌳 <strong>Богд уулд алхах</strong> - сэтгэл нээх<br><br>Та ямар төсөвтэй вэ?";
-      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="sendQuickReply('50,000₮ хүртэл')">< 50,000₮</div><div class="quick-reply" onclick="sendQuickReply('100,000₮ хүртэл')">< 100,000₮</div><div class="quick-reply" onclick="sendQuickReply('200,000₮ хүртэл')">< 200,000₮</div></div>`;
-    } else if(lower.includes("аял") || lower.includes("гадагшаа")) {
-      response = "Аяллын дуртай хосуудад тохирох:<br><br>🏔 <strong>Хөвсгөл нуур</strong> - 3 хоног, мартагдашгүй<br>🏛 <strong>Хархорин - Эрдэнэ зуу</strong> - 2 хоног, түүхэн<br>🐎 <strong>Тэрэлж адууны аялал</strong> - 1 өдөр<br><br>Аль аймаг сонирхолтой?";
-      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="navigate('aimags')">21 аймаг үзэх →</div></div>`;
-    } else if(lower.includes("урлаг")) {
-      response = "Урлагийн хосуудад зориулж:<br><br>🎨 <strong>Шавар савлуурын дугаа</strong> - бүтээлч<br>🎭 <strong>Mongolian Theatre</strong> - сонгодог жүжиг<br>🏛 <strong>Mongolian Heritage үзэсгэлэн</strong> - уламжлал<br>🎤 <strong>Mongolian Opera</strong> - дуурийн жүжиг";
-    } else if(lower.includes("спорт")) {
-      response = "Идэвхтэй хосуудад:<br><br>⛸ <strong>Зимний паркт гулгуурын аялал</strong> - 25,000₮<br>🚲 <strong>Богд уулд авирах</strong> - 80,000₮<br>🏊 <strong>Усан тоглоом Шарын гол</strong> - 90,000₮<br>🐎 <strong>Тэрэлж адууны аялал</strong> - 180,000₮";
-    } else if(text.includes("₮") || lower.includes("төсөв")) {
-      response = "Сайн! Энэ төсөвт тохирох санаа олдлоо:<br><br>✨ Манай AI 12 санаа гаргалаа. <strong>Шавар савлуур</strong> (~80,000₮) болон <strong>Skybar Mongolia</strong> (~120,000₮) хамгийн их таалагдах магадлалтай.";
-      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="navigate('ub')">365 санаа харах →</div></div>`;
+
+    if(lower.includes("ном") || lower.includes("дотогшоо") || lower.includes("тайван")) {
+      response = "Тайван, оюуны хосуудад яг тохирох 3 санаа:<br><br>📚 <strong>Internom Premium</strong> — кофе ууж, ном сонгож уншсан хэсгээ хуваалцах (~40,000₮)<br>🎨 <strong>Чойжин ламын музей</strong> — соёлын гүнзгий яриатай болзоо (~30,000₮)<br>🌳 <strong>Богд уулын ар тал</strong> — ойн замаар алхаж, амилах (~20,000₮)<br><br>Та хэд хоносон хосоо юу?";
+      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="sendQuickReply('Шинэ танилцсан')">Шинэ танилцсан</div><div class="quick-reply" onclick="sendQuickReply('1 жил болсон')">1+ жил</div><div class="quick-reply" onclick="sendQuickReply('50,000₮ хүртэл төсөв')">Хямд газар хайж байна</div></div>`;
+    } else if(lower.includes("аял") || lower.includes("гадагшаа") || lower.includes("байгаль")) {
+      response = "Аяллын сонирхолтой хосуудад шилдэг санаа:<br><br>🏔 <strong>Хөвсгөл нуур</strong> — 3 хоног, мартагдашгүй (~200,000₮/хүн)<br>🏛 <strong>Хархорин + Эрдэнэ зуу</strong> — 2 хоног, түүхэн (~150,000₮/хүн)<br>🐎 <strong>Тэрэлж адууны аялал</strong> — 1 өдөр, адреналин (~80,000₮)<br>🌋 <strong>Хорго галт уул</strong> — Архангайн гайхамшиг<br><br>Аль аймаг руу явах сонирхолтой вэ?";
+      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="navigate('aimags');closeMobileMenu && closeMobileMenu()">21 аймаг үзэх →</div><div class="quick-reply" onclick="sendQuickReply('Архангай')">🏔 Архангай</div><div class="quick-reply" onclick="sendQuickReply('Хөвсгөл')">🌊 Хөвсгөл</div></div>`;
+    } else if(lower.includes("урлаг") || lower.includes("бүтээлч") || lower.includes("зур")) {
+      response = "Бүтээлч хосуудад онцгой санаа:<br><br>🎨 <strong>Шавар савлуурын дугаа</strong> — хосоор сав хийх (~80,000₮)<br>🖼 <strong>Зурах + дарс үдэш</strong> — Upaint Studio (~120,000₮)<br>🎭 <strong>Mongolian Theatre жүжиг</strong> — сонгодог (~80,000₮)<br>📸 <strong>Хосын гэрэл зургийн сесс</strong> — дурсамж (~150,000₮)<br><br>Хэзээ явах вэ?";
+      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="sendQuickReply('Энэ амралтын өдөр')">Амралтын өдөр</div><div class="quick-reply" onclick="sendQuickReply('Ажлын өдөр оройд')">Ажлын өдөр оройд</div></div>`;
+    } else if(lower.includes("спорт") || lower.includes("идэвхтэй") || lower.includes("дугуй")) {
+      response = "Идэвхтэй хосуудад зориулсан санаа:<br><br>⛸ <strong>Зимний паркт гулгуур</strong> — өвлийн хөгжилтэй (~25,000₮)<br>🚵 <strong>Богд уулын аялал</strong> — 2-3 цаг (~0₮)<br>🏊 <strong>Хосын усан спорт</strong> — (~90,000₮)<br>🐎 <strong>Тэрэлжийн адуу</strong> — мартагдашгүй (~180,000₮)<br>🎯 <strong>Archery болон лазер таг</strong> — (~60,000₮)";
+      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="navigate('ub')">УБ-ын санаа харах →</div></div>`;
+    } else if(lower.includes("хоол") || lower.includes("ресторан") || lower.includes("кафе") || lower.includes("кофе")) {
+      response = "УБ-ын хамгийн дурлагдсан ресторанууд:<br><br>🍷 <strong>Skybar Mongolia</strong> — шөнийн хотын тойм, романтик (~120,000₮)<br>🥩 <strong>Хархорум 14</strong> — жинхэнэ Монгол хоол (~90,000₮)<br>🎵 <strong>Mongolyrics</strong> — амьд хөгжим + хоол (~110,000₮)<br>☕ <strong>Internom + кофе</strong> — тайван, ном (~40,000₮)<br>🌿 <strong>Vegetarian ресторан</strong> — эрүүл (~70,000₮)";
+      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="sendQuickReply('Хямд газар хайж байна')">Хямд хоол</div><div class="quick-reply" onclick="sendQuickReply('Романтик ресторан хайж байна')">Романтик</div></div>`;
+    } else if(lower.includes("шинэ танилцсан") || lower.includes("анхны болзоо") || lower.match(/\d+\s*сар/)) {
+      response = "Анхны болзоонд хамгийн чухал зүйл — тайван орчин, ярих боломж.<br><br>✨ <strong>Кофе + парк</strong> — тайван, ярилцлагатай (~40,000₮)<br>🎨 <strong>Музей эсвэл үзэсгэлэн</strong> — ярих сэдэвтэй (~30,000₮)<br>🌳 <strong>Богд уулд алхах</strong> — байгальд тайван (~0₮)<br><br>⚠️ Анхны болзоонд 💡 зөвлөгөө: Ярих эсвэл сонсох аль ихийг хийх вэ?";
+      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="navigate('expert');showExpertSection('mistakes')">7 алдааг мэдэх</div><div class="quick-reply" onclick="navigate('expert');showExpertSection('checklist')">Болзооны жагсаалт</div></div>`;
+    } else if(lower.includes("1 жил") || lower.includes("удаан") || lower.includes("ойрын")) {
+      response = "Удаан хамт байсан хосуудад дурсамж сэргээх санаа:<br><br>🔄 <strong>Reset болзоо</strong> — шинэ газар, шинэ туршлага<br>❓ <strong>36 асуулт тоглоом</strong> — нэг нэгнийгээ дахин мэдэх<br>🎁 <strong>Бэлэг гайхшруулах</strong> — хүлээгдэхгүй байгаа зүйл<br>🌄 <strong>Аймаг руу аялах</strong> — хот орчноос алслах<br><br>Сүүлд хамт ямар сайхан юм хийсэн бэ?";
+      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="navigate('expert');showExpertSection('reset')">Reset санаа харах</div><div class="quick-reply" onclick="navigate('gifts')">Бэлгийн санаа</div></div>`;
+    } else if(lower.includes("50,000") || lower.includes("хямд") || lower.includes("үнэгүй")) {
+      const freeIdeas = allUbIdeas.filter(i => i.price === 0).slice(0,3);
+      const cheapIdeas = allUbIdeas.filter(i => i.price > 0 && i.price <= 50000).slice(0,3);
+      response = `Хямд төсөвт тохирох шилдэг санаа:<br><br>🆓 <strong>Үнэгүй:</strong><br>${freeIdeas.map(i=>`• ${i.title}`).join("<br>")}<br><br>💸 <strong>50,000₮ хүртэл:</strong><br>${cheapIdeas.map(i=>`• ${i.title} (~${i.priceText})`).join("<br>")}`;
+      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="navigate('ub')">Бүх санаа харах →</div></div>`;
+    } else if(lower.includes("100,000") || lower.includes("200,000")) {
+      response = "Дунд зэрэг төсөвт тохирох шилдэг санаа:<br><br>🎨 <strong>Шавар савлуурын дугаа</strong> — 80,000₮<br>🎤 <strong>Mongolian Opera</strong> — 80,000₮<br>⛸ <strong>Зимний парк + хоол</strong> — 90,000₮<br>🎭 <strong>Theatre + dinner</strong> — 150,000₮<br>🏊 <strong>SPA + массаж</strong> — 200,000₮<br><br>Хэзээ явах вэ?";
+    } else if(lower.includes("романтик") || lower.includes("гэнэтийн") || lower.includes("гайхшруул")) {
+      response = "Хосыгоо гайхшруулах санаа:<br><br>🎈 <strong>Агаарын бөмбөлгөн нисэлт</strong> — мартагдашгүй (~400,000₮)<br>⭐ <strong>Оддын зураг бэлэглэх</strong> — анх уулзсан өдрийн тэнгэр (~80,000₮)<br>🕯 <strong>Гэрт тусгай гэгээтэй гайхшруулах</strong> — хямд<br>🌹 <strong>Дарс + сар харах</strong> — Зайсан (~80,000₮)<br>💌 <strong>100 шалтгааны хайрцаг</strong> — гар хийцийн бэлэг (~30,000₮)";
+      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="navigate('gifts')">Бэлгийн санаа →</div></div>`;
     } else {
-      response = "Сонирхолтой! Та хосоо хэр удаан мэддэг вэ?";
-      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="sendQuickReply('Шинэ танилцсан')">< 3 сар</div><div class="quick-reply" onclick="sendQuickReply('1 жил хүртэл')">3 сар - 1 жил</div><div class="quick-reply" onclick="sendQuickReply('Удаан хамт байгаа')">1+ жил</div></div>`;
+      response = "Сонирхолтой! Та болон хосынхоо тухай илүү мэдье:<br><br>Хосоо юу хийхэд хамгийн их дуртай вэ?";
+      quickReplies = `<div class="quick-replies"><div class="quick-reply" onclick="sendQuickReply('Гэртээ чимэглэлтэй, тайван')">🏠 Гэртээ</div><div class="quick-reply" onclick="sendQuickReply('Гадаа байгаль, идэвхтэй')">🌿 Гадаа</div><div class="quick-reply" onclick="sendQuickReply('Ресторан, хоол хүнс')">🍽 Хоол</div><div class="quick-reply" onclick="sendQuickReply('Аялал, шинэ газар')">✈ Аялал</div></div>`;
     }
-    
+
     messages.insertAdjacentHTML("beforeend", `<div class="message ai">${response}</div>${quickReplies}`);
     messages.scrollTop = messages.scrollHeight;
   }, 600);
@@ -7041,15 +7373,42 @@ function renderGifts() {
   }).join("");
 
   const filtered = gifts.filter(g => g.cat === currentGiftCat);
-  document.getElementById("giftGrid").innerHTML = filtered.map(g => `
-    <div class="gift-card" onclick="showToast('${g.emoji} ${g.title.replace(/'/g,'')}')">
+  document.getElementById("giftGrid").innerHTML = filtered.map((g, idx) => {
+    const gIdx = gifts.indexOf(g);
+    return `
+    <div class="gift-card" onclick="openGiftModal(${gIdx})">
       <span class="gift-emoji">${g.emoji}</span>
       <h4>${g.title}</h4>
       <div class="gift-desc">${g.desc}</div>
       <div class="gift-price">💰 ${g.price}</div>
       <div class="gift-why">💡 ${g.why}</div>
+    </div>`;
+  }).join("");
+}
+
+function openGiftModal(idx) {
+  const g = gifts[idx];
+  if(!g) return;
+  const cat = giftCategories.find(c => c.id === g.cat) || {};
+  document.getElementById("modalContent").innerHTML = `
+    <div class="modal-header">
+      <h3>${g.emoji} ${g.title}</h3>
+      <button class="modal-close" onclick="closeModal()" type="button">✕</button>
     </div>
-  `).join("");
+    <div class="modal-body">
+      <div style="height:120px; background:linear-gradient(135deg,var(--primary-soft),var(--accent-soft)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:56px; margin-bottom:16px;">${g.emoji}</div>
+      <div class="modal-meta">
+        <span class="modal-meta-item">${cat.emoji||''} ${cat.name||''}</span>
+        <span class="modal-meta-item">💰 ${g.price}</span>
+      </div>
+      <p style="font-size:14px; line-height:1.7; color:var(--text); margin-bottom:14px;">${g.desc}</p>
+      <div class="feeling-box">
+        <h4>💡 Яагаад энэ бэлэг хамаарах вэ?</h4>
+        <p>${g.why}</p>
+      </div>
+      <button class="btn btn-accent" style="width:100%; margin-top:14px;" onclick="showToast('💝 ${g.title.replace(/'/g,'')} хадгалагдлаа!'); closeModal();" type="button">💝 Бэлгийн жагсаалтад нэмэх</button>
+    </div>`;
+  document.getElementById("modal").classList.add("show");
 }
 
 function setGiftCat(catId) {
@@ -7395,9 +7754,10 @@ function prevQuestion() {
 }
 
 function renderMovies() {
+  const genreLabels = {romantic:"💕 Романтик", comedy:"😄 Инээдмийн", action:"💥 Адал явдалт", drama:"🎭 Драм", animation:"🎨 Анимэшн"};
   const filtered = currentMovieFilter === "all" ? movies : movies.filter(m => m.genres.includes(currentMovieFilter));
   document.getElementById("movieGrid").innerHTML = filtered.map(m => `
-    <div class="movie-card" onclick="showToast('🎬 ${m.title} - ${m.year}')">
+    <div class="movie-card" onclick="openMovieModal(${m.id})">
       <div class="movie-poster">
         ${m.emoji}
         <div class="movie-rating">⭐ ${m.rating}</div>
@@ -7405,10 +7765,43 @@ function renderMovies() {
       <div class="movie-info">
         <div class="movie-title">${m.title}</div>
         <div class="movie-meta">${m.year} · ${m.duration}</div>
-        <div class="movie-genres">${m.genres.slice(0,2).map(g => `<span class="genre-tag">${g}</span>`).join("")}</div>
+        <div class="movie-genres">${m.genres.slice(0,2).map(g => `<span class="genre-tag">${genreLabels[g]||g}</span>`).join("")}</div>
       </div>
     </div>
   `).join("");
+}
+
+function openMovieModal(id) {
+  const m = movies.find(x => x.id === id);
+  if(!m) return;
+  const genreLabels = {romantic:"💕 Романтик", comedy:"😄 Инээдмийн", action:"💥 Адал явдалт", drama:"🎭 Драм", animation:"🎨 Анимэшн"};
+  const posterColors = {romantic:"linear-gradient(135deg,#FF6B8A,#FF4570)", comedy:"linear-gradient(135deg,#FFB347,#FF8C00)", action:"linear-gradient(135deg,#4A90E2,#003366)", drama:"linear-gradient(135deg,#8B5E83,#4A2040)", animation:"linear-gradient(135deg,#56CCF2,#2F80ED)"};
+  const bgColor = posterColors[m.genres[0]] || "linear-gradient(135deg,var(--primary),var(--primary-dark))";
+  document.getElementById("modalContent").innerHTML = `
+    <div class="modal-header">
+      <h3>🎬 ${m.title}</h3>
+      <button class="modal-close" onclick="closeModal()" type="button">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="height:180px; background:${bgColor}; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:72px; margin-bottom:18px;">
+        ${m.emoji}
+      </div>
+      <div class="modal-meta">
+        <span class="modal-meta-item">📅 ${m.year}</span>
+        <span class="modal-meta-item">⏱ ${m.duration}</span>
+        <span class="modal-meta-item">⭐ ${m.rating}/10</span>
+      </div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;">
+        ${m.genres.map(g=>`<span class="genre-tag" style="font-size:12px; padding:4px 10px;">${genreLabels[g]||g}</span>`).join("")}
+      </div>
+      <p style="font-size:14px; line-height:1.7; color:var(--text); margin-bottom:14px;">${m.desc}</p>
+      <div class="feeling-box">
+        <h4>💑 Яагаад хосуудад тохиромжтой вэ?</h4>
+        <p>${m.why}</p>
+      </div>
+      <button class="btn btn-primary" style="width:100%; margin-top:14px;" onclick="showToast('✅ ${m.title.replace(/'/g,'')} watchlist-д нэмэгдлээ!'); closeModal();" type="button">+ Watchlist-д нэмэх</button>
+    </div>`;
+  document.getElementById("modal").classList.add("show");
 }
 
 function showToast(message) {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="mn">
 <head>
 <meta charset="UTF-8">
@@ -1098,14 +1098,14 @@ body {
     </ul>
     <div class="nav-actions">
       <div id="navAuthButtons">
-        <button class="btn btn-ghost" onclick="openAuth('login')">Нэвтрэх</button>
-        <button class="btn btn-primary" onclick="openAuth('signup')">Бүртгүүлэх</button>
+        <button type="button" class="btn btn-ghost" onclick="openAuth('login')">Нэвтрэх</button>
+        <button type="button" class="btn btn-primary" onclick="openAuth('signup')">Бүртгүүлэх</button>
       </div>
       <div id="navUserInfo" style="display:none; align-items:center; gap:8px;">
         <div class="avatar" id="navAvatar" style="width:34px;height:34px;font-size:13px;cursor:pointer;"></div>
-        <button class="btn btn-ghost" style="font-size:13px;padding:8px 12px;" onclick="logoutUser()">Гарах</button>
+        <button type="button" class="btn btn-ghost" style="font-size:13px;padding:8px 12px;" onclick="logoutUser()">Гарах</button>
       </div>
-      <button class="mobile-menu-btn" onclick="openMobileMenu()" title="Цэс нээх">☰</button>
+      <button type="button" class="mobile-menu-btn" onclick="openMobileMenu()" title="Цэс нээх">☰</button>
     </div>
   </nav>
 </header>
@@ -1117,7 +1117,7 @@ body {
       <div class="logo-icon" style="width:34px;height:34px;font-size:16px;">N</div>
       <span class="logo-text" style="font-size:18px;">NBolzoo</span>
     </div>
-    <button class="mobile-nav-close" onclick="closeMobileMenu()">✕</button>
+    <button type="button" class="mobile-nav-close" onclick="closeMobileMenu()">✕</button>
   </div>
   <div class="mobile-nav-items">
     <a onclick="navigate('home');closeMobileMenu()">🏠 Нүүр</a>
@@ -1132,8 +1132,8 @@ body {
   </div>
   <div class="mobile-nav-divider"></div>
   <div class="mobile-nav-actions" id="mobileAuthButtons">
-    <button class="btn btn-ghost" style="width:100%" onclick="openAuth('login');closeMobileMenu()">Нэвтрэх</button>
-    <button class="btn btn-primary" style="width:100%" onclick="openAuth('signup');closeMobileMenu()">Бүртгүүлэх</button>
+    <button type="button" class="btn btn-ghost" style="width:100%" onclick="openAuth('login');closeMobileMenu()">Нэвтрэх</button>
+    <button type="button" class="btn btn-primary" style="width:100%" onclick="openAuth('signup');closeMobileMenu()">Бүртгүүлэх</button>
   </div>
 </div>
 
@@ -1171,7 +1171,7 @@ body {
         <div class="ai-content">
           <h3>NBolzoo AI зөвлөх танд тусгайлан санал болгож байна</h3>
           <p>Та өөрийнхөө сонирхол, зан чанар, төсвийг хэлээд бид танд тохирох болзооны төрөл, газар, бүр тохирох хүн санал болгоно.</p>
-          <button class="ai-btn" onclick="navigate('ai')">AI зөвлөхтэй ярилцах →</button>
+          <button type="button" class="ai-btn" onclick="navigate('ai')">AI зөвлөхтэй ярилцах →</button>
         </div>
       </div>
 
@@ -1242,7 +1242,7 @@ body {
                 <span style="cursor: pointer;">😊</span>
                 <span style="cursor: pointer;">💸</span>
               </div>
-              <button class="btn btn-primary" onclick="submitPost()">Нийтлэх</button>
+              <button type="button" class="btn btn-primary" onclick="submitPost()">Нийтлэх</button>
             </div>
           </div>
           <div id="postsList"></div>
@@ -1285,7 +1285,7 @@ body {
         </div>
         <div class="chat-input">
           <input type="text" id="chatInput" placeholder="Мессеж бичих..." onkeypress="if(event.key==='Enter')sendMessage()"/>
-          <button class="send-btn" onclick="sendMessage()">→</button>
+          <button type="button" class="send-btn" onclick="sendMessage()">→</button>
         </div>
       </div>
     </div>
@@ -1351,8 +1351,8 @@ body {
       </div>
 
       <div style="display:flex; gap:10px; margin-bottom:20px;">
-        <button class="btn btn-primary" onclick="showGiftTab('gifts')" id="giftTabBtn">🎁 Бэлгийн санаа (247)</button>
-        <button class="btn btn-ghost" onclick="showGiftTab('proposals')" id="proposalTabBtn">💍 Гэрлэх санал + заавар (28)</button>
+        <button type="button" class="btn btn-primary" onclick="showGiftTab('gifts')" id="giftTabBtn">🎁 Бэлгийн санаа (247)</button>
+        <button type="button" class="btn btn-ghost" onclick="showGiftTab('proposals')" id="proposalTabBtn">💍 Гэрлэх санал + заавар (28)</button>
       </div>
 
       <div id="giftsContent">
@@ -1396,7 +1396,7 @@ body {
   </div>
 </main>
 
-<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Дээш буцах">↑</button>
+<button type="button" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Дээш буцах">↑</button>
 
 <footer class="footer">
   <div class="footer-grid">
@@ -7169,7 +7169,7 @@ function imgTag(url, credit, cls, style) {
   const cred = credit === "Wikipedia CC"
     ? `<span class="card-img-credit">© Wikipedia CC</span>`
     : `<span class="card-img-credit">Unsplash</span>`;
-  return `<img src="${url}" loading="lazy" class="${cls||''}" style="${style||''}" onerror="this.parentNode.removeChild(this)">${cred}`;
+  return `<img src="${url}" loading="lazy" alt="" class="${cls||''}" style="${style||''}" onerror="this.parentNode.removeChild(this)">${cred}`;
 }
 
 function navigate(page, param) {
@@ -7227,7 +7227,7 @@ function renderCard(idea) {
     ? '<div class="card-badge gold" style="z-index:3">⭐ Шинэ жил</div>'
     : (idea.likes > 1500 ? '<div class="card-badge" style="z-index:3">🔥 Hot</div>' : '');
   const imageContent = imgInfo
-    ? `<img src="${imgInfo.u}" loading="lazy" class="card-bg-img" onerror="this.remove()">
+    ? `<img src="${imgInfo.u}" loading="lazy" alt="${idea.title}" class="card-bg-img" onerror="this.remove()">
        <div class="card-img-overlay"></div>
        <span class="card-emoji-over">${idea.emoji}</span>
        <span class="card-img-credit">${imgInfo.s==="Wikipedia CC"?"© Wikipedia CC":"Unsplash"}</span>`
@@ -7290,13 +7290,13 @@ function renderUbIdeas() {
   document.getElementById("ubGrid").innerHTML = pageItems.length ? pageItems.map(renderCard).join("") :
     '<div class="empty-state">Энэ ангилалд санаа байхгүй байна</div>';
   
-  let paginationHtml = `<button onclick="changeUbPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹ Өмнөх</button>`;
+  let paginationHtml = `<button type="button" onclick="changeUbPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹ Өмнөх</button>`;
   const startP = Math.max(1, currentPage - 2);
   const endP = Math.min(totalPages, startP + 4);
   for(let i = startP; i <= endP; i++) {
-    paginationHtml += `<button onclick="changeUbPage(${i})" class="${i===currentPage?'active':''}">${i}</button>`;
+    paginationHtml += `<button type="button" onclick="changeUbPage(${i})" class="${i===currentPage?'active':''}">${i}</button>`;
   }
-  paginationHtml += `<button onclick="changeUbPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>Дараах ›</button>`;
+  paginationHtml += `<button type="button" onclick="changeUbPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>Дараах ›</button>`;
   paginationHtml += `<span style="padding: 8px 14px; color: var(--text-light); font-size: 13px;">${filtered.length} санаа</span>`;
   
   document.getElementById("ubPagination").innerHTML = paginationHtml;
@@ -7398,7 +7398,7 @@ function openWonderModal(aimagId, wonderIdx) {
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
       <h2 style="font-size: 22px;">${w.emoji} ${w.name}</h2>
-      <button class="modal-close" onclick="closeModal()">×</button>
+      <button type="button" class="modal-close" onclick="closeModal()">×</button>
     </div>
     <div class="modal-body">
       ${(wonderTypeImgDB[type]) ? (() => {
@@ -7521,7 +7521,7 @@ function openIdeaModal(id) {
   const isLiked = userLikes.has(idea.id);
   const imgHtml = imgInfo
     ? `<div class="modal-image" style="background:${getColor(idea.id)};position:relative;overflow:hidden;padding:0;">
-        <img src="${imgInfo.u}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">
+        <img src="${imgInfo.u}" loading="lazy" alt="${idea.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">
         <div style="position:absolute;inset:0;background:rgba(0,0,0,0.2);"></div>
         <span style="position:relative;z-index:1;font-size:56px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));">${idea.emoji}</span>
         <span class="card-img-credit" style="z-index:2;">${imgInfo.s==="Wikipedia CC"?"© Wikipedia CC":"Unsplash"}</span>
@@ -7567,7 +7567,7 @@ function openAimagDateModal(aimagId, dateIdx) {
     </div>
     <div class="modal-body">
       <div class="modal-image" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));position:relative;overflow:hidden;padding:0;">
-        <img src="${aiImg.u}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">
+        <img src="${aiImg.u}" loading="lazy" alt="${a.name} аймаг" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">
         <div style="position:absolute;inset:0;background:rgba(0,0,0,0.25);"></div>
         <span style="position:relative;z-index:1;font-size:56px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));">${d.emoji}</span>
         <span class="card-img-credit" style="z-index:2;">📍 ${a.name} · ${aiImg.s}</span>
@@ -8615,9 +8615,9 @@ function showExpertSection(section) {
         </div>
         <div class="question-text">${aronQuestions[aronQuestionIndex]}</div>
         <div class="question-controls">
-          <button class="btn btn-ghost" onclick="prevQuestion()" ${aronQuestionIndex===0?'disabled':''}>← Өмнөх</button>
+          <button type="button" class="btn btn-ghost" onclick="prevQuestion()" ${aronQuestionIndex===0?'disabled':''}>← Өмнөх</button>
           <button class="btn btn-ghost" onclick="randomQuestion()" type="button">🎲 Санамсаргүй</button>
-          <button class="btn btn-primary" onclick="nextQuestion()" ${aronQuestionIndex===aronQuestions.length-1?'disabled':''}>Дараах →</button>
+          <button type="button" class="btn btn-primary" onclick="nextQuestion()" ${aronQuestionIndex===aronQuestions.length-1?'disabled':''}>Дараах →</button>
         </div>
       </div>
       <p style="font-size:13px; color:var(--text-light); text-align:center; line-height:1.7;">

@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NBolzoo - Монголын анхны болзооны санааны платформ</title>
+<!-- OG Meta Tags - Social Share -->
+<meta property="og:title" content="NBolzoo — Монголын болзооны санааны платформ">
+<meta property="og:description" content="УБ-д 365 санаа + 21 аймагт 189 санаа + AI зөвлөх. Хосынхоо хамт яах вэ гэдгийг бид хэлнэ 💕">
+<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Gorkhi-Terelj_National_Park.jpg/640px-Gorkhi-Terelj_National_Park.jpg">
+<meta property="og:url" content="https://nbolzoo.vercel.app">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="NBolzoo — Монголын болзооны санааны платформ">
+<meta name="twitter:description" content="УБ-д 365 санаа + 21 аймагт 189 санаа + AI зөвлөх 💕">
+<meta name="description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, AI зөвлөх, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -871,6 +881,41 @@ body {
 }
 .proposal-tip strong { color: var(--primary-dark); }
 
+/* BACK TO TOP */
+.back-to-top {
+  position: fixed; bottom: 24px; right: 24px;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--primary); color: white; border: none;
+  font-size: 20px; cursor: pointer; z-index: 500;
+  box-shadow: 0 4px 16px rgba(0,119,182,0.35);
+  display: none; align-items: center; justify-content: center;
+  transition: all 0.3s;
+}
+.back-to-top.visible { display: flex; }
+.back-to-top:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+/* SAVED PAGE */
+.saved-empty {
+  text-align: center; padding: 60px 20px;
+}
+.saved-empty .icon { font-size: 64px; margin-bottom: 16px; display: block; }
+.saved-empty h3 { font-size: 20px; margin-bottom: 8px; color: var(--text); }
+.saved-empty p { color: var(--text-light); font-size: 14px; }
+
+/* BOOKING MODAL */
+.booking-form { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.booking-form input, .booking-form select, .booking-form textarea {
+  width: 100%; border: 1px solid var(--border); border-radius: 8px;
+  padding: 11px 14px; font-size: 14px; outline: none; font-family: inherit;
+}
+.booking-form input:focus, .booking-form select:focus, .booking-form textarea:focus {
+  border-color: var(--primary);
+}
+.booking-success {
+  text-align: center; padding: 24px;
+}
+.booking-success .tick { font-size: 56px; margin-bottom: 12px; display: block; }
+
 /* IMAGE CARD STYLES */
 .card-bg-img {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -1045,6 +1090,7 @@ body {
       <li><a class="nav-link" data-page="community" onclick="navigate('community')">👥 Нийгэмлэг</a></li>
       <li><a class="nav-link" data-page="ai" onclick="navigate('ai')">🤖 AI зөвлөх</a></li>
       <li><a class="nav-link" data-page="movies" onclick="navigate('movies')">🎬 Кино</a></li>
+      <li><a class="nav-link" data-page="saved" onclick="navigate('saved')">❤️ Хадгалсан</a></li>
     </ul>
     <div class="nav-actions">
       <div id="navAuthButtons">
@@ -1078,6 +1124,7 @@ body {
     <a onclick="navigate('community');closeMobileMenu()">👥 Нийгэмлэг</a>
     <a onclick="navigate('ai');closeMobileMenu()">🤖 AI зөвлөх</a>
     <a onclick="navigate('movies');closeMobileMenu()">🎬 Кино</a>
+    <a onclick="navigate('saved');closeMobileMenu()">❤️ Хадгалсан</a>
   </div>
   <div class="mobile-nav-divider"></div>
   <div class="mobile-nav-actions" id="mobileAuthButtons">
@@ -1319,7 +1366,7 @@ body {
   <div id="page-movies" class="page">
     <div class="container">
       <h1 style="margin-bottom: 6px;">🎬 Хосуудад зориулсан кино</h1>
-      <p style="color: var(--text-light); margin-bottom: 20px;">Хамтдаа үзэх шилдэг кинонууд</p>
+      <p style="color: var(--text-light); margin-bottom: 20px;">Хамтдаа үзэх шилдэг кинонууд — гадаадын болон Монгол кинонууд</p>
       <div class="filters">
         <div class="filter-chip active" data-movie="all">Бүгд</div>
         <div class="filter-chip" data-movie="romantic">💕 Романтик</div>
@@ -1327,11 +1374,22 @@ body {
         <div class="filter-chip" data-movie="action">💥 Адал явдалт</div>
         <div class="filter-chip" data-movie="drama">🎭 Драм</div>
         <div class="filter-chip" data-movie="animation">🎨 Анимэшн</div>
+        <div class="filter-chip" data-movie="mongolian">🇲🇳 Монгол кино</div>
       </div>
       <div class="movie-grid" id="movieGrid"></div>
     </div>
   </div>
+
+  <div id="page-saved" class="page">
+    <div class="container">
+      <h1 style="margin-bottom: 6px;">❤️ Хадгалсан санаанууд</h1>
+      <p style="color: var(--text-light); margin-bottom: 24px;">Таны дуртай гэж тэмдэглэсэн болзооны санаанууд</p>
+      <div id="savedGrid" class="cards-grid"></div>
+    </div>
+  </div>
 </main>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Дээш буцах">↑</button>
 
 <footer class="footer">
   <div class="footer-grid">
@@ -6365,7 +6423,16 @@ const movies = [
   {id:27, emoji:"✨", title:"Everything Everywhere All at Once", year:"2022", genres:["action","comedy","drama"], rating:"7.8", duration:"139 мин", desc:"Эхнэр нь зэрэгцэх олон ертөнцийг дамнан оршин тогтнохын тулд тэмцэнэ.", why:"Уйлуулж, инээлгэж, гайхшруулна — мартагдашгүй туршлага"},
   {id:28, emoji:"🎨", title:"Amélie", year:"2001", genres:["romantic","comedy"], rating:"8.3", duration:"122 мин", desc:"Парисын нэгэн нутгийн хүүхэн бусдын аз жаргалд нөлөөлж, өөрийнхөө хайрыг олдог.", why:"Дуртай хүнд дотно мэдрэмж өгдөг — гоё, хүч чадалтай"},
   {id:29, emoji:"🧊", title:"Frozen", year:"2013", genres:["animation"], rating:"7.4", duration:"102 мин", desc:"Элса хааны хүч нь хот мөсөн хааны нутаг болгоход дүүгийнх нь Анна аврах аяллад гарна.", why:"Сонгодог анимэшн — Let It Go хамтдаа дуулаарай"},
-  {id:30, emoji:"🌿", title:"Studio Ghibli: Spirited Away", year:"2001", genres:["animation","drama"], rating:"8.6", duration:"125 мин", desc:"Охин хачирхалтай сүнснүүдийн ертөнцөд орж, ах эцэг эхийгээ аврахаар тэмцэнэ.", why:"Хамгийн шагналтай анимэ — дүрслэл нь гайхалтай"}
+  {id:30, emoji:"🌿", title:"Studio Ghibli: Spirited Away", year:"2001", genres:["animation","drama"], rating:"8.6", duration:"125 мин", desc:"Охин хачирхалтай сүнснүүдийн ертөнцөд орж, ах эцэг эхийгээ аврахаар тэмцэнэ.", why:"Хамгийн шагналтай анимэ — дүрслэл нь гайхалтай"},
+  // 🇲🇳 МОНГОЛ КИНО
+  {id:31, emoji:"🏹", title:"Монгол (Чингис хааны залуу нас)", year:"2007", genres:["mongolian","action","drama"], rating:"7.7", duration:"126 мин", desc:"Чингис хааны залуу насыг дүрсэлсэн алдарт Монгол-Казак-Герман хамтарсан кино. Тэсэх тэвчих, хайрын хүч хамгийн том хүч.", why:"Монголын түүхийг хамтдаа мэдэхэд, бахархал төрүүлдэг"},
+  {id:32, emoji:"🌸", title:"Харанхуй сарны гэрэл", year:"2018", genres:["mongolian","romantic","drama"], rating:"7.2", duration:"98 мин", desc:"Орчин үеийн Улаанбаатар дахь залуу хоёрын хайрын түүх. Хотын амьдрал, мөрөөдөл, харилцааны бэрхшээл.", why:"Монгол орчин үеийн романтик — бодит мэдрэмжтэй"},
+  {id:33, emoji:"🐎", title:"Тал нутгийн гал", year:"2015", genres:["mongolian","drama","action"], rating:"7.0", duration:"110 мин", desc:"Нүүдэлчин малчны хүү хот руу ирж, хоёр ертөнцийн хооронд сонголт хийдэг.", why:"Монгол уламжлал, хот, хөдөөгийн зөрчлийг ярилцахад"},
+  {id:34, emoji:"🦅", title:"Бүргэдийн нулимс", year:"2020", genres:["mongolian","drama"], rating:"7.4", duration:"105 мин", desc:"Казах бүргэдчин болон залуу охины найрамдал, байгалийн дунд хайр үүсэх тухай.", why:"Монгол байгалийн үзэмж, угсаатны соёл — гайхалтай"},
+  {id:35, emoji:"🎵", title:"Хонхны дуун", year:"2019", genres:["mongolian","romantic"], rating:"6.8", duration:"95 мин", desc:"Монгол уламжлалт хөгжимчин хотын залуу охинтой нэг аяллаар уулздаг романтик кино.", why:"Хөгжим, байгаль, хайр — монгол сэтгэлийн кино"},
+  {id:36, emoji:"🏔", title:"Алтайн домог", year:"2016", genres:["mongolian","action","drama"], rating:"7.1", duration:"118 мин", desc:"Баруун аймгийн уулчид болон байгалийг тайлбарлах адал явдалт домгийн кино.", why:"Монгол Алтайн үзэсгэлэнт байгалийг хамтдаа мэдэх"},
+  {id:37, emoji:"💔", title:"Нарны тал", year:"2022", genres:["mongolian","drama","romantic"], rating:"7.3", duration:"102 мин", desc:"Хот дахь залуу хос хайр дурлал, карьер, гэр бүлийн зөрчлийг шийдвэрлэх тухай.", why:"Орчин үеийн Монгол амьдралыг хамт үзэж ярилцах"},
+  {id:38, emoji:"🌙", title:"Говийн шөнө", year:"2021", genres:["mongolian","romantic"], rating:"7.0", duration:"92 мин", desc:"Говь цөлд алдагдсан хоёр аялагч нэг шөнийн туршид харилцан нээлттэй болдог.", why:"Тайван, дотно — сайн яриа өдөөдөг монгол кино"}
 ];
 
 const posts = [
@@ -6877,7 +6944,7 @@ function navigate(page, param) {
   document.querySelector(`.nav-link[data-page="${page}"]`)?.classList.add("active");
   window.scrollTo({top: 0, behavior: "smooth"});
   
-  if(page === "home") { renderFeatured(); renderFeaturedAimags(); }
+  if(page === "home") { renderFeatured(); renderFeaturedAimags(); updateHeroStats(); }
   if(page === "ub") { currentPage = 1; renderUbIdeas(); }
   if(page === "aimags") renderAimags();
   if(page === "aimag-detail" && param) renderAimagDetail(param);
@@ -6885,6 +6952,32 @@ function navigate(page, param) {
   if(page === "movies") renderMovies();
   if(page === "gifts") { showGiftTab('gifts'); }
   if(page === "expert") { document.getElementById("expertContent").innerHTML = ""; }
+  if(page === "saved") renderSaved();
+}
+
+function updateHeroStats() {
+  const freeCount = allUbIdeas.filter(i => i.price === 0).length;
+  const statNums = document.querySelectorAll(".hero-stat-num");
+  if(statNums[0]) statNums[0].textContent = allUbIdeas.length + (aimagsClean.length * 9);
+  if(statNums[1]) statNums[1].textContent = allUbIdeas.length;
+  if(statNums[2]) statNums[2].textContent = aimagsClean.length;
+  if(statNums[3]) statNums[3].textContent = aimagsClean.length * 9;
+}
+
+function renderSaved() {
+  const saved = allUbIdeas.filter(i => userLikes.has(i.id));
+  const el = document.getElementById("savedGrid");
+  if(!el) return;
+  if(saved.length === 0) {
+    el.innerHTML = `<div class="saved-empty" style="grid-column:1/-1">
+      <span class="icon">❤️</span>
+      <h3>Хадгалсан санаа байхгүй байна</h3>
+      <p>УБ 365 болон аймгийн санаануудаас ❤️ дарж хадгалаарай</p>
+      <button class="btn btn-primary" style="margin-top:16px" onclick="navigate('ub')" type="button">365 санаа харах →</button>
+    </div>`;
+  } else {
+    el.innerHTML = saved.map(idea => renderCard(idea)).join("");
+  }
 }
 
 function renderFeatured() {
@@ -7189,27 +7282,40 @@ function filterSums(query) {
 function openIdeaModal(id) {
   const idea = allUbIdeas.find(i => i.id === id);
   if(!idea) return;
+  const imgInfo = getIdeaImg(idea.title);
+  const isLiked = userLikes.has(idea.id);
+  const imgHtml = imgInfo
+    ? `<div class="modal-image" style="background:${getColor(idea.id)};position:relative;overflow:hidden;padding:0;">
+        <img src="${imgInfo.u}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.2);"></div>
+        <span style="position:relative;z-index:1;font-size:56px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));">${idea.emoji}</span>
+        <span class="card-img-credit" style="z-index:2;">${imgInfo.s==="Wikipedia CC"?"© Wikipedia CC":"Unsplash"}</span>
+      </div>`
+    : `<div class="modal-image" style="background:${getColor(idea.id)}">${idea.emoji}</div>`;
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
       <h2 style="font-size: 20px;">${idea.title}</h2>
-      <button class="modal-close" onclick="closeModal()">×</button>
+      <button class="modal-close" onclick="closeModal()" type="button">×</button>
     </div>
     <div class="modal-body">
-      <div class="modal-image" style="background:${getColor(idea.id)}">${idea.emoji}</div>
+      ${imgHtml}
       <div class="modal-meta">
         <div class="modal-meta-item">📅 <strong>${idea.day}-р өдөр</strong></div>
         <div class="modal-meta-item">📍 <strong>${idea.location}</strong></div>
         <div class="modal-meta-item">💸 <strong>${idea.priceText}</strong></div>
-        <div class="modal-meta-item">❤️ <strong>${idea.likes}</strong></div>
+        <div class="modal-meta-item">❤️ <strong>${idea.likes + (isLiked?1:0)}</strong></div>
       </div>
       <p style="margin-bottom: 16px; line-height: 1.7;">${idea.desc}</p>
       <div class="feeling-box">
         <h4>💝 Энэ болзоонд танд төрөх мэдрэмж:</h4>
         <p>${idea.feeling}</p>
       </div>
-      <div style="display: flex; gap: 8px;">
-        <button class="btn btn-primary" style="flex:1" onclick="closeModal();showToast('🎉 Захиалга илгээгдлээ. Мэдээлэл и-мэйлээр ирнэ.')">📅 Захиалах</button>
-        <button class="btn btn-ghost" onclick="toggleLike(${idea.id});closeModal()">❤️ Хадгалах</button>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-primary" style="flex:1;min-width:120px" type="button" onclick="openBookingModal(${idea.id})">📅 Захиалах</button>
+        <button class="btn ${isLiked?'btn-accent':'btn-ghost'}" type="button" onclick="toggleLike(${idea.id});this.className='btn ${isLiked?'btn-ghost':'btn-accent'}';this.textContent='${isLiked?'🤍 Хадгалах':'❤️ Хадгалсан'}'">
+          ${isLiked?'❤️ Хадгалсан':'🤍 Хадгалах'}
+        </button>
+        <button class="btn btn-ghost" type="button" onclick="shareIdea('${idea.title.replace(/'/g,'').replace(/"/g,'')}', ${idea.id})">🔗 Хуваалцах</button>
       </div>
     </div>`;
   document.getElementById("modal").classList.add("show");
@@ -7218,13 +7324,19 @@ function openIdeaModal(id) {
 function openAimagDateModal(aimagId, dateIdx) {
   const a = aimagsClean.find(x => x.id == aimagId);
   const d = a.dates[dateIdx];
+  const aiImg = getAimagImg(a);
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
-      <h2 style="font-size: 20px;">${d.title}</h2>
-      <button class="modal-close" onclick="closeModal()">×</button>
+      <h2 style="font-size: 20px;">${d.emoji} ${d.title}</h2>
+      <button class="modal-close" onclick="closeModal()" type="button">×</button>
     </div>
     <div class="modal-body">
-      <div class="modal-image" style="background:${getColor(dateIdx)}">${d.emoji}</div>
+      <div class="modal-image" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));position:relative;overflow:hidden;padding:0;">
+        <img src="${aiImg.u}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.25);"></div>
+        <span style="position:relative;z-index:1;font-size:56px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));">${d.emoji}</span>
+        <span class="card-img-credit" style="z-index:2;">📍 ${a.name} · ${aiImg.s}</span>
+      </div>
       <div class="modal-meta">
         <div class="modal-meta-item">📍 <strong>${a.name} аймаг</strong></div>
         <div class="modal-meta-item">💸 <strong>${d.price}</strong></div>
@@ -7234,9 +7346,9 @@ function openAimagDateModal(aimagId, dateIdx) {
         <h4>💝 Энэ болзоонд танд төрөх мэдрэмж:</h4>
         <p>${d.feeling}</p>
       </div>
-      <div style="display: flex; gap: 8px;">
-        <button class="btn btn-primary" style="flex:1" onclick="closeModal();showToast('🎉 Захиалга илгээгдлээ')">📅 Захиалах</button>
-        <button class="btn btn-ghost" onclick="closeModal();showToast('❤️ Хадгаллаа')">❤️ Хадгалах</button>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-primary" style="flex:1" type="button" onclick="openBookingModal(null,'${d.title.replace(/'/g,'')}')">📅 Захиалах</button>
+        <button class="btn btn-ghost" type="button" onclick="shareIdea('${d.title.replace(/'/g,'').replace(/"/g,'')}')">🔗 Хуваалцах</button>
       </div>
     </div>`;
   document.getElementById("modal").classList.add("show");
@@ -7244,11 +7356,86 @@ function openAimagDateModal(aimagId, dateIdx) {
 
 function closeModal() { document.getElementById("modal").classList.remove("show"); }
 
+function openBookingModal(ideaId, customTitle) {
+  const idea = ideaId ? allUbIdeas.find(i => i.id === ideaId) : null;
+  const title = customTitle || (idea ? idea.title : "Болзооны захиалга");
+  const price = idea ? idea.priceText : "Тохиролцоогоор";
+  document.getElementById("modalContent").innerHTML = `
+    <div class="modal-header">
+      <h3>📅 Захиалга — ${title}</h3>
+      <button class="modal-close" onclick="closeModal()" type="button">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-light);font-size:13px;margin-bottom:16px;">Доорх мэдээллийг бөглөснөөр манай баг 24 цагийн дотор холбоо барина.</p>
+      <div class="booking-form">
+        <input type="text" id="bkName" placeholder="Таны нэр *" required>
+        <input type="tel" id="bkPhone" placeholder="Утасны дугаар * (+976)" required>
+        <input type="email" id="bkEmail" placeholder="И-мэйл хаяг">
+        <input type="date" id="bkDate" min="${new Date().toISOString().split('T')[0]}">
+        <select id="bkPeople">
+          <option value="2">2 хүн (хос)</option>
+          <option value="3">3 хүн</option>
+          <option value="4">4 хүн (хосуудын бүлэг)</option>
+        </select>
+        <textarea id="bkNote" placeholder="Нэмэлт тайлбар (тусгай хүсэлт гэх мэт)..." rows="2"></textarea>
+        <div style="background:var(--primary-extra-soft);padding:10px 14px;border-radius:8px;font-size:13px;">
+          💰 Ойролцоо зардал: <strong>${price}</strong>
+        </div>
+        <button class="btn btn-primary" type="button" onclick="submitBooking('${title.replace(/'/g,'')}')">✅ Захиалга илгээх</button>
+      </div>
+    </div>`;
+  document.getElementById("modal").classList.add("show");
+}
+
+function submitBooking(title) {
+  const name = document.getElementById("bkName")?.value.trim();
+  const phone = document.getElementById("bkPhone")?.value.trim();
+  if(!name || !phone) return showToast("⚠️ Нэр болон утасны дугаараа оруулна уу");
+  document.getElementById("modalContent").innerHTML = `
+    <div class="modal-header">
+      <h3>✅ Захиалга амжилттай</h3>
+      <button class="modal-close" onclick="closeModal()" type="button">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="booking-success">
+        <span class="tick">🎉</span>
+        <h3 style="font-size:20px;margin-bottom:8px;">Баярлалаа, ${name}!</h3>
+        <p style="color:var(--text-light);margin-bottom:16px;font-size:14px;">
+          <strong>${title}</strong> болзооны захиалга бүртгэгдлээ.<br>
+          Бид 24 цагийн дотор <strong>${phone}</strong> дугаарт залгана.
+        </p>
+        <div style="background:var(--primary-extra-soft);padding:14px;border-radius:10px;font-size:13px;text-align:left;">
+          📱 WhatsApp/Viber-ээр мессеж илгээж болно<br>
+          📧 info@nbolzoo.mn-д имэйл илгээж болно
+        </div>
+        <button class="btn btn-primary" style="margin-top:16px;width:100%" type="button" onclick="closeModal()">Хаах</button>
+      </div>
+    </div>`;
+  showToast("🎉 Захиалга амжилттай илгээгдлээ!");
+}
+
+function shareIdea(title, id) {
+  const url = `${window.location.origin}${window.location.pathname}${id ? '#idea-'+id : ''}`;
+  const text = `NBolzoo — ${title} 💕\n${url}`;
+  if(navigator.share) {
+    navigator.share({title: 'NBolzoo', text: title, url}).catch(()=>{});
+  } else if(navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => showToast("🔗 Холбоос хуулагдлаа!")).catch(()=>{});
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+    showToast("🔗 Холбоос хуулагдлаа!");
+  }
+}
+
 function toggleLike(id) {
-  if(userLikes.has(id)) userLikes.delete(id);
+  const wasLiked = userLikes.has(id);
+  if(wasLiked) { userLikes.delete(id); showToast("🤍 Хадгалсан санаанаас хасагдлаа"); }
   else { userLikes.add(id); showToast("❤️ Хадгалсан санаанд нэмэгдлээ"); }
   if(document.getElementById("page-ub").classList.contains("active")) renderUbIdeas();
   if(document.getElementById("page-home").classList.contains("active")) renderFeatured();
+  if(document.getElementById("page-saved").classList.contains("active")) renderSaved();
 }
 
 function performSearch() {
@@ -7974,7 +8161,7 @@ function prevQuestion() {
 }
 
 function renderMovies() {
-  const genreLabels = {romantic:"💕 Романтик", comedy:"😄 Инээдмийн", action:"💥 Адал явдалт", drama:"🎭 Драм", animation:"🎨 Анимэшн"};
+  const genreLabels = {romantic:"💕 Романтик", comedy:"😄 Инээдмийн", action:"💥 Адал явдалт", drama:"🎭 Драм", animation:"🎨 Анимэшн", mongolian:"🇲🇳 Монгол"};
   const filtered = currentMovieFilter === "all" ? movies : movies.filter(m => m.genres.includes(currentMovieFilter));
   document.getElementById("movieGrid").innerHTML = filtered.map(m => `
     <div class="movie-card" onclick="openMovieModal(${m.id})">
@@ -7994,8 +8181,8 @@ function renderMovies() {
 function openMovieModal(id) {
   const m = movies.find(x => x.id === id);
   if(!m) return;
-  const genreLabels = {romantic:"💕 Романтик", comedy:"😄 Инээдмийн", action:"💥 Адал явдалт", drama:"🎭 Драм", animation:"🎨 Анимэшн"};
-  const posterColors = {romantic:"linear-gradient(135deg,#FF6B8A,#FF4570)", comedy:"linear-gradient(135deg,#FFB347,#FF8C00)", action:"linear-gradient(135deg,#4A90E2,#003366)", drama:"linear-gradient(135deg,#8B5E83,#4A2040)", animation:"linear-gradient(135deg,#56CCF2,#2F80ED)"};
+  const genreLabels = {romantic:"💕 Романтик", comedy:"😄 Инээдмийн", action:"💥 Адал явдалт", drama:"🎭 Драм", animation:"🎨 Анимэшн", mongolian:"🇲🇳 Монгол кино"};
+  const posterColors = {romantic:"linear-gradient(135deg,#FF6B8A,#FF4570)", comedy:"linear-gradient(135deg,#FFB347,#FF8C00)", action:"linear-gradient(135deg,#4A90E2,#003366)", drama:"linear-gradient(135deg,#8B5E83,#4A2040)", animation:"linear-gradient(135deg,#56CCF2,#2F80ED)", mongolian:"linear-gradient(135deg,#1B6CA8,#023E8A)"};
   const bgColor = posterColors[m.genres[0]] || "linear-gradient(135deg,var(--primary),var(--primary-dark))";
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
@@ -8044,6 +8231,13 @@ document.getElementById("authModal").addEventListener("click", e => {
 
 renderFeatured();
 renderFeaturedAimags();
+updateHeroStats();
+
+// Back-to-top
+window.addEventListener("scroll", () => {
+  const btn = document.getElementById("backToTop");
+  if(btn) btn.classList.toggle("visible", window.scrollY > 400);
+});
 </script>
 
 </body>

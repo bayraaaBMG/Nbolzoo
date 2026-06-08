@@ -710,6 +710,14 @@ body {
 .cinema-yt-btn:hover { background: #cc0000; transform: translateY(-1px); }
 .cinema-watchlist-btn { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); color: #fff; padding: 13px 22px; border-radius: 25px; font-weight: 600; font-size: 15px; border: 1.5px solid rgba(255,255,255,0.15); cursor: pointer; transition: all 0.2s; }
 .cinema-watchlist-btn:hover { background: rgba(255,255,255,0.14); }
+.tmdb-results { max-height: 220px; overflow-y: auto; border: 1px solid rgba(226,183,20,0.2); border-radius: 8px; background: #13131f; }
+.tmdb-result-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); transition: background 0.15s; }
+.tmdb-result-item:last-child { border-bottom: none; }
+.tmdb-result-item:hover { background: rgba(226,183,20,0.12); }
+.tmdb-result-item img { width: 36px; height: 54px; object-fit: cover; border-radius: 4px; flex-shrink: 0; background: #1a1a2e; }
+.tmdb-result-info { flex: 1; min-width: 0; }
+.tmdb-result-title { font-weight: 700; font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tmdb-result-meta { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; }
 .cinema-similar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
 /* Add form */
 .cinema-add-form { max-width: 700px; margin: 0 auto; }
@@ -1238,6 +1246,9 @@ body {
   .search-box input { border-radius: 8px; }
 }
 </style>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -1610,18 +1621,29 @@ body {
           <div></div>
         </div>
         <div style="padding:24px; max-width:600px; margin:0 auto;">
+          <!-- TMDB Auto-search -->
+          <div style="background:rgba(226,183,20,0.08);border:1px solid rgba(226,183,20,0.25);border-radius:12px;padding:16px;margin-bottom:20px;">
+            <label class="cinema-label" style="color:#e2b714;font-size:13px;font-weight:700;">🔍 TMDB-аас автоматаар мэдээлэл татах</label>
+            <p style="color:rgba(255,255,255,0.45);font-size:12px;margin:4px 0 10px;">Кино нэрийг англиар бичээд "Хайх" дарна уу — poster, rating, тайлбар автоматаар орно</p>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="tmdbSearchInput" class="cinema-input" placeholder="жишээ: Interstellar, Parasite..." style="flex:1" onkeypress="if(event.key==='Enter')doTMDBSearch()">
+              <button type="button" id="tmdbSearchBtn" onclick="doTMDBSearch()" style="background:#e2b714;color:#000;border:none;padding:0 18px;border-radius:8px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Хайх</button>
+            </div>
+            <div id="tmdbResults" class="tmdb-results" style="display:none;margin-top:8px;"></div>
+          </div>
+
           <div class="add-movie-grid">
             <div class="form-group">
               <label class="cinema-label">Киноны нэр *</label>
               <input type="text" id="amTitle" class="cinema-input" placeholder="жишээ: Interstellar">
             </div>
             <div class="form-group">
-              <label class="cinema-label">Гарсан он *</label>
+              <label class="cinema-label">Гарсан он</label>
               <input type="text" id="amYear" class="cinema-input" placeholder="жишээ: 2014">
             </div>
-            <div class="form-group">
-              <label class="cinema-label">Poster зургийн URL</label>
-              <input type="text" id="amPoster" class="cinema-input" placeholder="https://... эсвэл TMDB URL">
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="cinema-label">Poster зургийн URL <span style="color:rgba(255,255,255,0.3)">(TMDB хайлтаар автоматаар орно)</span></label>
+              <input type="text" id="amPoster" class="cinema-input" placeholder="https://image.tmdb.org/t/p/w500/...">
             </div>
             <div class="form-group">
               <label class="cinema-label">Рейтинг (0-10)</label>
@@ -1639,29 +1661,26 @@ body {
                 <option value="original">🌐 Эх хэлээр</option>
               </select>
             </div>
-            <div class="form-group" style="grid-column:1/-1">
-              <label class="cinema-label">Trailer YouTube embed URL</label>
-              <input type="text" id="amTrailer" class="cinema-input" placeholder="https://www.youtube.com/embed/...">
+            <div class="form-group">
+              <label class="cinema-label">Төрөл <span style="color:rgba(255,255,255,0.3)">(автоматаар орно)</span></label>
+              <input type="text" id="amGenres" class="cinema-input" placeholder="romantic, drama, action...">
             </div>
             <div class="form-group" style="grid-column:1/-1">
-              <label class="cinema-label">Үзэх холбоос (эрхтэй эх сурвалж)</label>
-              <input type="text" id="amWatchUrl" class="cinema-input" placeholder="https://...">
+              <label class="cinema-label">🔗 Lolokino / үзэх холбоос</label>
+              <input type="text" id="amWatchUrl" class="cinema-input" placeholder="https://lolokino.buzz/... (хоосон бол автоматаар хайна)">
             </div>
             <div class="form-group" style="grid-column:1/-1">
-              <label class="cinema-label">Төрөл (таслалаар тусгаарла)</label>
-              <input type="text" id="amGenres" class="cinema-input" placeholder="romantic, drama, action, comedy, animation, mongolian">
-            </div>
-            <div class="form-group" style="grid-column:1/-1">
-              <label class="cinema-label">Тайлбар *</label>
+              <label class="cinema-label">Тайлбар <span style="color:rgba(255,255,255,0.3)">(TMDB-аас автоматаар орно)</span></label>
               <textarea id="amDesc" class="cinema-input" rows="3" placeholder="Киноны товч тайлбар..."></textarea>
             </div>
             <div class="form-group" style="grid-column:1/-1">
-              <label class="cinema-label">Яагаад хосуудад тохиромжтой вэ?</label>
+              <label class="cinema-label">💑 Яагаад хосуудад тохиромжтой вэ?</label>
               <input type="text" id="amWhy" class="cinema-input" placeholder="жишээ: Хамтдаа уйлахад тохиромжтой">
             </div>
           </div>
-          <div style="display:flex; gap:12px; margin-top:20px;">
-            <button type="button" class="btn btn-primary" onclick="submitAddMovie()" style="flex:1; padding:14px;">✓ Нэмэх</button>
+          <div id="addMovieStatus" style="min-height:20px;margin-top:10px;font-size:13px;text-align:center;"></div>
+          <div style="display:flex; gap:12px; margin-top:16px;">
+            <button type="button" class="btn btn-primary" id="submitMovieBtn" onclick="submitAddMovie()" style="flex:1; padding:14px;">✓ Нэмэх</button>
             <button type="button" class="btn btn-outline" onclick="closeAddMovieModal()" style="padding:14px 20px;">Болих</button>
           </div>
         </div>
@@ -8980,12 +8999,135 @@ function jumpToCategory(startIdx) {
   showExpertSection("questions");
 }
 
+// ===== FIREBASE + TMDB CONFIG =====
+// TODO: Replace with your actual Firebase project config
+const FIREBASE_CONFIG = {
+  apiKey: "YOUR_FIREBASE_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+// TODO: Replace with your TMDB API key (free at https://www.themoviedb.org/settings/api)
+const TMDB_KEY = "YOUR_TMDB_API_KEY";
+
+var db = null;
+var firebaseMovies = [];
+var tmdbSearchResults = [];
+
+function initFirebase() {
+  try {
+    if (typeof firebase === "undefined") return;
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    loadMoviesFromFirebase();
+  } catch(e) {
+    console.warn("Firebase init failed:", e.message);
+  }
+}
+
+function loadMoviesFromFirebase() {
+  if (!db) return;
+  try {
+    db.collection("movies").orderBy("dateAdded", "desc").onSnapshot(snap => {
+      firebaseMovies = snap.docs.map(doc => ({ ...doc.data(), _dbId: doc.id, _user: true }));
+      renderMovies();
+    }, err => console.warn("Firestore load error:", err));
+  } catch(e) {
+    console.warn("loadMoviesFromFirebase error:", e);
+  }
+}
+
+async function saveMovieToFirebase(movie) {
+  if (!db) return null;
+  try {
+    const docRef = await db.collection("movies").add(movie);
+    return docRef.id;
+  } catch(e) {
+    console.warn("saveMovieToFirebase error:", e);
+    return null;
+  }
+}
+
+async function deleteMovieFromFirebase(dbId) {
+  if (!db || !dbId) return;
+  try {
+    await db.collection("movies").doc(dbId).delete();
+  } catch(e) {
+    console.warn("deleteMovieFromFirebase error:", e);
+  }
+}
+
+async function doTMDBSearch() {
+  const q = (document.getElementById("tmdbSearchInput").value || "").trim();
+  if (!q) return;
+  const btn = document.getElementById("tmdbSearchBtn");
+  const resultsEl = document.getElementById("tmdbResults");
+  btn.textContent = "...";
+  btn.disabled = true;
+  try {
+    const url = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=en-US&page=1`;
+    const res = await fetch(url);
+    const data = await res.json();
+    tmdbSearchResults = (data.results || []).slice(0, 8);
+    if (!tmdbSearchResults.length) {
+      resultsEl.innerHTML = '<div style="padding:12px;color:rgba(255,255,255,0.4);font-size:13px;text-align:center">Олдсонгүй</div>';
+    } else {
+      resultsEl.innerHTML = tmdbSearchResults.map((m, i) => {
+        const poster = m.poster_path ? `https://image.tmdb.org/t/p/w92${m.poster_path}` : "";
+        const year = (m.release_date || "").slice(0, 4);
+        const imgHtml = poster
+          ? `<img src="${poster}" alt="" loading="lazy">`
+          : `<div style="width:36px;height:54px;background:#1a1a2e;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px">🎬</div>`;
+        return `<div class="tmdb-result-item" onclick="selectTMDBResult(${i})">
+          ${imgHtml}
+          <div class="tmdb-result-info">
+            <div class="tmdb-result-title">${m.title || m.original_title}</div>
+            <div class="tmdb-result-meta">${year} · ⭐ ${m.vote_average ? m.vote_average.toFixed(1) : "?"}</div>
+          </div>
+        </div>`;
+      }).join("");
+    }
+    resultsEl.style.display = "block";
+  } catch(e) {
+    resultsEl.innerHTML = '<div style="padding:12px;color:#e55;font-size:13px;text-align:center">API алдаа — TMDB_KEY шалгана уу</div>';
+    resultsEl.style.display = "block";
+  }
+  btn.textContent = "Хайх";
+  btn.disabled = false;
+}
+
+const TMDB_GENRE_MAP = {
+  28:"action", 12:"action", 16:"animation", 35:"comedy", 80:"drama",
+  18:"drama", 10749:"romantic", 27:"drama", 878:"action", 10751:"animation",
+  14:"drama", 36:"drama", 10402:"drama", 9648:"drama", 37:"action"
+};
+
+function selectTMDBResult(idx) {
+  const m = tmdbSearchResults[idx];
+  if (!m) return;
+  const year = (m.release_date || "").slice(0, 4);
+  const rating = m.vote_average ? m.vote_average.toFixed(1) : "";
+  const poster = m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : "";
+  const genres = [...new Set((m.genre_ids || []).map(id => TMDB_GENRE_MAP[id]).filter(Boolean))];
+  document.getElementById("amTitle").value = m.title || m.original_title || "";
+  document.getElementById("amYear").value = year;
+  document.getElementById("amRating").value = rating;
+  document.getElementById("amPoster").value = poster;
+  document.getElementById("amGenres").value = genres.join(", ") || "drama";
+  const overviewEl = document.getElementById("amDesc");
+  if (overviewEl && m.overview) overviewEl.value = m.overview;
+  document.getElementById("tmdbResults").style.display = "none";
+  document.getElementById("tmdbSearchInput").value = "";
+}
+
 // ===== CINEMA / MOVIES =====
 const GL = {romantic:"💕 Романтик", comedy:"😄 Инээдмийн", action:"💥 Адал явдалт", drama:"🎭 Драм", animation:"🎨 Анимэшн", mongolian:"🇲🇳 Монгол"};
 const POSTER_BG = {romantic:"linear-gradient(135deg,#3d1a3a,#6b2060)", comedy:"linear-gradient(135deg,#3d2a00,#7a5200)", action:"linear-gradient(135deg,#0a1a3a,#1a3a6a)", drama:"linear-gradient(135deg,#1a0a2a,#3a1a4a)", animation:"linear-gradient(135deg,#0a2a3a,#1a4a6a)", mongolian:"linear-gradient(135deg,#0a2a0a,#1a4a1a)"};
 const LANG_LABEL = {dubbed:"🎙 Монгол хадмал", mongolian:"🇲🇳 Монгол хэлээр", original:"🌐 Эх хэлээр"};
 
-function allMovies() { return [...movies, ...userMovies]; }
+function allMovies() { return [...movies, ...firebaseMovies, ...userMovies]; }
 
 function getFilteredMovies() {
   let list = allMovies();
@@ -9218,10 +9360,10 @@ function closeAddMovieModal() {
   if(ov) { ov.style.display = "none"; document.body.style.overflow = ""; }
 }
 
-function submitAddMovie() {
+async function submitAddMovie() {
   const title = document.getElementById("amTitle").value.trim();
   const desc = document.getElementById("amDesc").value.trim();
-  if(!title || !desc) { showToast("⚠️ Нэр болон тайлбар заавал бөглөнө үү"); return; }
+  if (!title) { showToast("⚠️ Киноны нэр заавал бөглөнө үү"); return; }
   const genreRaw = document.getElementById("amGenres").value;
   const genres = genreRaw ? genreRaw.split(",").map(g=>g.trim()).filter(Boolean) : ["drama"];
   const newMovie = {
@@ -9231,27 +9373,50 @@ function submitAddMovie() {
     duration: document.getElementById("amDuration").value||"",
     lang: document.getElementById("amLang").value||"dubbed",
     poster: document.getElementById("amPoster").value.trim()||"",
-    trailer: document.getElementById("amTrailer").value.trim()||"",
     watchUrl: document.getElementById("amWatchUrl").value.trim()||"",
-    genres, desc,
+    genres, desc: desc||"",
     why: document.getElementById("amWhy").value.trim()||"Хамтдаа үзэхэд тохиромжтой",
     trending: false, dateAdded: new Date().toISOString().slice(0,10)
   };
-  userMovies.push(newMovie);
-  localStorage.setItem("nbolzoo_movies", JSON.stringify(userMovies));
-  closeAddMovieModal();
-  renderMovies();
-  showToast(`✅ "${title}" нэмэгдлээ!`);
-  ["amTitle","amYear","amPoster","amRating","amDuration","amTrailer","amWatchUrl","amGenres","amDesc","amWhy"].forEach(id=>{
+  const statusEl = document.getElementById("addMovieStatus");
+  const submitBtn = document.getElementById("submitMovieBtn");
+  if (statusEl) statusEl.textContent = "";
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Хадгалж байна..."; }
+  if (db) {
+    const dbId = await saveMovieToFirebase(newMovie);
+    if (dbId) {
+      if (statusEl) statusEl.innerHTML = '<span style="color:#4caf50">✅ Firebase-д хадгалагдлаа</span>';
+    } else {
+      userMovies.push(newMovie);
+      localStorage.setItem("nbolzoo_movies", JSON.stringify(userMovies));
+      if (statusEl) statusEl.innerHTML = '<span style="color:#e2b714">⚠️ Firebase байхгүй — локал хадгалагдлаа</span>';
+    }
+  } else {
+    userMovies.push(newMovie);
+    localStorage.setItem("nbolzoo_movies", JSON.stringify(userMovies));
+    if (statusEl) statusEl.innerHTML = '<span style="color:#e2b714">💾 Локал хадгалагдлаа (Firebase тохируулаагүй)</span>';
+  }
+  setTimeout(() => {
+    closeAddMovieModal();
+    renderMovies();
+    showToast(`✅ "${title}" нэмэгдлээ!`);
+  }, 800);
+  ["amTitle","amYear","amPoster","amRating","amDuration","amWatchUrl","amGenres","amDesc","amWhy"].forEach(id=>{
     const el = document.getElementById(id); if(el) el.value="";
   });
+  if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "✓ Нэмэх"; }
 }
 
-function deleteUserMovie(id) {
-  userMovies = userMovies.filter(m => m.id !== id);
-  localStorage.setItem("nbolzoo_movies", JSON.stringify(userMovies));
+async function deleteUserMovie(id) {
+  const inFirebase = firebaseMovies.find(m => m.id === id);
+  if (inFirebase && inFirebase._dbId) {
+    await deleteMovieFromFirebase(inFirebase._dbId);
+  } else {
+    userMovies = userMovies.filter(m => m.id !== id);
+    localStorage.setItem("nbolzoo_movies", JSON.stringify(userMovies));
+    renderMovies();
+  }
   closeMovieDetail();
-  renderMovies();
   showToast("🗑 Кино устгагдлаа");
 }
 
@@ -9275,6 +9440,7 @@ document.getElementById("authModal").addEventListener("click", e => {
   if(e.target.id === "authModal") closeAuth();
 });
 
+initFirebase();
 renderFeatured();
 renderFeaturedAimags();
 updateHeroStats();

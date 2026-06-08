@@ -617,6 +617,7 @@ body {
   width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
   font-size: 54px;
 }
+.cine-poster-text { font-size: inherit !important; align-items: center; justify-content: center; }
 .cine-play-btn {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
   width: 46px; height: 46px; border-radius: 50%;
@@ -705,6 +706,8 @@ body {
 .cinema-trailer-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 .cinema-watch-btn { display: inline-flex; align-items: center; gap: 8px; background: #e2b714; color: #000; padding: 13px 28px; border-radius: 25px; font-weight: 700; font-size: 15px; border: none; cursor: pointer; text-decoration: none; transition: all 0.2s; }
 .cinema-watch-btn:hover { background: #f0c830; transform: translateY(-1px); }
+.cinema-yt-btn { display: inline-flex; align-items: center; gap: 10px; background: #ff0000; color: #fff; padding: 13px 24px; border-radius: 25px; font-weight: 600; font-size: 15px; border: none; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+.cinema-yt-btn:hover { background: #cc0000; transform: translateY(-1px); }
 .cinema-watchlist-btn { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); color: #fff; padding: 13px 22px; border-radius: 25px; font-weight: 600; font-size: 15px; border: 1.5px solid rgba(255,255,255,0.15); cursor: pointer; transition: all 0.2s; }
 .cinema-watchlist-btn:hover { background: rgba(255,255,255,0.14); }
 .cinema-similar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
@@ -9003,12 +9006,21 @@ function getFilteredMovies() {
 
 function cinePosterHtml(m, cls) {
   const bg = POSTER_BG[m.genres[0]] || "linear-gradient(135deg,#1a1a2e,#2a2a4e)";
+  const textFallback = `<div class="cine-poster-fallback cine-poster-text" style="display:none;background:${bg};flex-direction:column;gap:6px;padding:14px;text-align:center">
+    <div style="font-size:32px">${m.emoji}</div>
+    <div style="font-size:11px;font-weight:700;color:#fff;line-height:1.3;word-break:break-word">${m.title}</div>
+    <div style="font-size:10px;color:rgba(255,255,255,0.45)">${m.year}</div>
+  </div>`;
+  const noImgFallback = `<div class="cine-poster-fallback cine-poster-text" style="background:${bg};flex-direction:column;gap:6px;padding:14px;text-align:center">
+    <div style="font-size:32px">${m.emoji}</div>
+    <div style="font-size:11px;font-weight:700;color:#fff;line-height:1.3;word-break:break-word">${m.title}</div>
+    <div style="font-size:10px;color:rgba(255,255,255,0.45)">${m.year}</div>
+  </div>`;
   if(m.poster) {
     return `<img class="cine-poster-img ${cls||''}" src="${m.poster}" alt="${m.title}" loading="lazy"
-      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="cine-poster-fallback" style="display:none; background:${bg}">${m.emoji}</div>`;
+      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">${textFallback}`;
   }
-  return `<div class="cine-poster-fallback" style="background:${bg}">${m.emoji}</div>`;
+  return noImgFallback;
 }
 
 function renderMovies() {
@@ -9095,21 +9107,13 @@ function openMovieDetail(id, isUser) {
         <h4>💑 Яагаад хосуудад тохиромжтой вэ?</h4>
         <p class="cinema-detail-desc" style="color:#e2b714">${m.why||'Хамтдаа үзэхэд тохиромжтой кино'}</p>
       </div>
-      ${m.trailer ? `
       <div class="cinema-detail-section">
         <h4>🎬 Trailer</h4>
-        <div class="cinema-trailer-wrap">
-          <iframe src="${m.trailer}?autoplay=0&rel=0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" title="${m.title} trailer"></iframe>
-        </div>
-        <p style="color:rgba(255,255,255,0.35);font-size:12px;margin-top:8px;text-align:center">Trailer үзсэний дараа ▶ Lolokino-д үзэх товч дарна уу</p>
-      </div>` : `
-      <div class="cinema-detail-section">
-        <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:24px;text-align:center;color:rgba(255,255,255,0.4)">
-          <div style="font-size:36px;margin-bottom:8px">🎬</div>
-          <p style="margin:0;font-size:14px">Trailer байхгүй байна</p>
-          <p style="margin:4px 0 0;font-size:12px">▶ Lolokino-д үзэх товч дарж кинооо үзнэ үү</p>
-        </div>
-      </div>`}
+        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(m.title + ' official trailer')}" target="_blank" rel="noopener" class="cinema-yt-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1C4.5 20.5 12 20.5 12 20.5s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+          YouTube-д trailer харах
+        </a>
+      </div>
       ${similarList.length ? `
       <div class="cinema-detail-section">
         <h4>Төстэй кинонууд</h4>

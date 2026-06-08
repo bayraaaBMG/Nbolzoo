@@ -541,35 +541,197 @@ body {
   background: var(--primary); color: white; border: none; cursor: pointer; font-size: 16px;
 }
 
-.movie-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 18px;
+/* ===== CINEMA REDESIGN ===== */
+.cinema-page { padding: 0 !important; background: #0d0d1a; min-height: 100vh; }
+.cinema-page .container { padding-bottom: 0; }
+.cinema-header {
+  background: linear-gradient(180deg, #050510 0%, #0d0d1a 100%);
+  padding: 40px 0 32px;
 }
-
-.movie-card {
-  background: white; border-radius: 12px; overflow: hidden;
-  border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;
+.cinema-title { color: #fff; font-size: 26px; font-weight: 700; margin: 0 0 6px; }
+.cinema-subtitle { color: rgba(255,255,255,0.5); margin: 0 0 22px; font-size: 14px; }
+.cinema-search-bar {
+  position: relative; max-width: 480px;
+  margin: 0 auto;
 }
-
-.movie-card:hover { transform: translateY(-4px); box-shadow: 0 8px 18px rgba(0,0,0,0.08); }
-
-.movie-poster {
-  height: 260px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+.cinema-search-input {
+  width: 100%; padding: 12px 44px; border-radius: 50px;
+  border: 2px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.07); color: #fff;
+  font-size: 15px; outline: none; transition: border 0.2s; box-sizing: border-box;
+}
+.cinema-search-input::placeholder { color: rgba(255,255,255,0.35); }
+.cinema-search-input:focus { border-color: #e2b714; }
+.cinema-search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 16px; }
+.cinema-search-clear {
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 16px;
+}
+.cinema-tabs {
+  display: flex; gap: 8px; padding: 24px 0 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.08); overflow-x: auto;
+}
+.cinema-tab {
+  padding: 8px 18px; border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: transparent; color: rgba(255,255,255,0.55);
+  cursor: pointer; font-size: 14px; font-weight: 500;
+  white-space: nowrap; transition: all 0.2s;
+}
+.cinema-tab:hover { border-color: #e2b714; color: #e2b714; }
+.cinema-tab.active { background: #e2b714; border-color: #e2b714; color: #000; font-weight: 700; }
+.cinema-filters { padding: 16px 0 12px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 22px; }
+.cinema-filter-row { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; justify-content: space-between; }
+.cinema-filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; }
+.filter-label { color: rgba(255,255,255,0.4); font-size: 12px; white-space: nowrap; }
+.cinema-genre-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.cchip {
+  padding: 5px 12px; border-radius: 14px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: transparent; color: rgba(255,255,255,0.6);
+  cursor: pointer; font-size: 12px; transition: all 0.18s;
+}
+.cchip:hover { border-color: #e2b714; color: #e2b714; }
+.cchip.active { background: rgba(226,183,20,0.15); border-color: #e2b714; color: #e2b714; }
+.cinema-sort-row { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.cinema-sort-select {
+  padding: 6px 12px; border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.75);
+  font-size: 13px; cursor: pointer; outline: none;
+}
+.cinema-count { margin-top: 10px; color: rgba(255,255,255,0.35); font-size: 12px; }
+.cinema-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px; padding-bottom: 8px;
+}
+.cine-card {
+  border-radius: 10px; overflow: hidden; cursor: pointer;
+  background: #151525; transition: transform 0.22s, box-shadow 0.22s; position: relative;
+}
+.cine-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 16px 36px rgba(0,0,0,0.6); }
+.cine-card:hover .cine-play-btn { opacity: 1; }
+.cine-poster-wrap { position: relative; aspect-ratio: 2/3; overflow: hidden; }
+.cine-poster-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cine-poster-fallback {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 54px;
+}
+.cine-play-btn {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 46px; height: 46px; border-radius: 50%;
+  background: rgba(226,183,20,0.92); border: none; cursor: pointer;
+  opacity: 0; transition: opacity 0.22s;
   display: flex; align-items: center; justify-content: center;
-  font-size: 64px; color: white; position: relative;
+  font-size: 18px; color: #000;
 }
-
-.movie-rating {
-  position: absolute; top: 10px; right: 10px;
-  background: rgba(0,0,0,0.7); color: white;
-  padding: 4px 8px; border-radius: 10px; font-size: 12px; font-weight: 600;
+.cine-rating-badge {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(0,0,0,0.82); color: #e2b714;
+  padding: 3px 8px; border-radius: 8px; font-size: 11px; font-weight: 700;
+  backdrop-filter: blur(4px);
 }
-
-.movie-info { padding: 12px; }
-.movie-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-.movie-meta { font-size: 12px; color: var(--text-light); margin-bottom: 8px; }
-.movie-genres { display: flex; gap: 4px; flex-wrap: wrap; }
-
+.cine-lang-badge {
+  position: absolute; top: 8px; left: 8px;
+  padding: 3px 7px; border-radius: 6px; font-size: 9px; font-weight: 700;
+  backdrop-filter: blur(4px);
+}
+.lang-dubbed { background: rgba(59,130,246,0.88); color: #fff; }
+.lang-mongolian { background: rgba(34,197,94,0.88); color: #fff; }
+.lang-original { background: rgba(120,120,120,0.8); color: #fff; }
+.cine-info { padding: 10px 11px 12px; }
+.cine-movie-title {
+  font-size: 13px; font-weight: 600; color: #fff; line-height: 1.35;
+  margin-bottom: 4px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.cine-meta { font-size: 11px; color: rgba(255,255,255,0.38); display: flex; gap: 6px; }
+.cine-genre-pill {
+  display: inline-block; padding: 2px 7px; border-radius: 5px;
+  background: rgba(226,183,20,0.1); color: #e2b714; font-size: 10px; margin-top: 5px;
+}
+.cinema-no-results { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.35); }
+.cinema-add-btn {
+  background: transparent; border: 1.5px dashed rgba(226,183,20,0.5);
+  color: #e2b714; padding: 12px 28px; border-radius: 24px;
+  cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s;
+}
+.cinema-add-btn:hover { background: rgba(226,183,20,0.08); border-color: #e2b714; }
+/* Detail overlay */
+.cinema-detail-overlay {
+  position: fixed; inset: 0; background: #0d0d1a; z-index: 600; overflow-y: auto;
+}
+.cinema-detail-inner { max-width: 860px; margin: 0 auto; padding-bottom: 60px; }
+.cinema-detail-topbar {
+  position: sticky; top: 0; z-index: 10; background: rgba(13,13,26,0.95);
+  backdrop-filter: blur(10px); padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.cinema-back-btn {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.8); padding: 8px 16px; border-radius: 20px;
+  cursor: pointer; font-size: 14px; transition: all 0.18s;
+}
+.cinema-back-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+.cinema-detail-banner {
+  position: relative; height: 320px; overflow: hidden; background: #050510;
+}
+.cinema-detail-banner-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.45; display: block; }
+.cinema-detail-banner-gradient {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, #0d0d1a 0%, transparent 60%);
+}
+.cinema-detail-banner-emoji {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 80px;
+}
+.cinema-detail-body { padding: 0 20px 0; }
+.cinema-detail-header { display: flex; gap: 20px; align-items: flex-end; margin-top: -60px; position: relative; z-index: 2; margin-bottom: 20px; }
+.cinema-detail-poster-thumb {
+  width: 120px; flex-shrink: 0; border-radius: 10px; overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5); aspect-ratio: 2/3;
+}
+.cinema-detail-poster-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cinema-detail-poster-thumb .cine-poster-fallback { font-size: 40px; background: #1a1a2e; }
+.cinema-detail-title-block { flex: 1; padding-bottom: 4px; }
+.cinema-detail-title { color: #fff; font-size: 22px; font-weight: 700; margin: 0 0 6px; line-height: 1.3; }
+.cinema-detail-badges { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+.cinema-detail-rating { color: #e2b714; font-weight: 700; font-size: 16px; }
+.cinema-detail-meta { color: rgba(255,255,255,0.45); font-size: 13px; }
+.cinema-detail-section { margin-top: 22px; }
+.cinema-detail-section h4 { color: rgba(255,255,255,0.55); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 10px; }
+.cinema-detail-desc { color: rgba(255,255,255,0.8); font-size: 15px; line-height: 1.7; }
+.cinema-trailer-wrap { position: relative; padding-top: 56.25%; border-radius: 12px; overflow: hidden; background: #000; }
+.cinema-trailer-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+.cinema-watch-btn { display: inline-flex; align-items: center; gap: 8px; background: #e2b714; color: #000; padding: 13px 28px; border-radius: 25px; font-weight: 700; font-size: 15px; border: none; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+.cinema-watch-btn:hover { background: #f0c830; transform: translateY(-1px); }
+.cinema-watchlist-btn { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); color: #fff; padding: 13px 22px; border-radius: 25px; font-weight: 600; font-size: 15px; border: 1.5px solid rgba(255,255,255,0.15); cursor: pointer; transition: all 0.2s; }
+.cinema-watchlist-btn:hover { background: rgba(255,255,255,0.14); }
+.cinema-similar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+/* Add form */
+.cinema-add-form { max-width: 700px; margin: 0 auto; }
+.cinema-label { display: block; color: rgba(255,255,255,0.6); font-size: 13px; margin-bottom: 6px; }
+.cinema-input {
+  width: 100%; padding: 11px 14px; border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06); color: #fff; font-size: 14px;
+  outline: none; transition: border 0.2s; box-sizing: border-box;
+  font-family: inherit; resize: vertical;
+}
+.cinema-input:focus { border-color: #e2b714; }
+.cinema-input option { background: #1a1a2e; }
+.add-movie-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+/* Responsive */
+@media (max-width: 600px) {
+  .cinema-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .cinema-detail-header { flex-direction: column; align-items: flex-start; margin-top: -40px; }
+  .cinema-detail-poster-thumb { width: 90px; }
+  .cinema-detail-title { font-size: 18px; }
+  .cinema-detail-banner { height: 220px; }
+  .add-movie-grid { grid-template-columns: 1fr; }
+  .cinema-similar-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+}
+/* Keep genre-tag for other pages */
 .genre-tag {
   font-size: 10px; background: var(--primary-soft); color: var(--primary);
   padding: 2px 8px; border-radius: 8px;
@@ -1370,20 +1532,137 @@ body {
     </div>
   </div>
 
-  <div id="page-movies" class="page">
-    <div class="container">
-      <h1 style="margin-bottom: 6px;">🎬 Хосуудад зориулсан кино</h1>
-      <p style="color: var(--text-light); margin-bottom: 20px;">Хамтдаа үзэх шилдэг кинонууд — гадаадын болон Монгол кинонууд</p>
-      <div class="filters">
-        <div class="filter-chip active" data-movie="all">Бүгд</div>
-        <div class="filter-chip" data-movie="romantic">💕 Романтик</div>
-        <div class="filter-chip" data-movie="comedy">😄 Инээдмийн</div>
-        <div class="filter-chip" data-movie="action">💥 Адал явдалт</div>
-        <div class="filter-chip" data-movie="drama">🎭 Драм</div>
-        <div class="filter-chip" data-movie="animation">🎨 Анимэшн</div>
-        <div class="filter-chip" data-movie="mongolian">🇲🇳 Монгол кино</div>
+  <div id="page-movies" class="page cinema-page">
+    <!-- Cinema Header -->
+    <div class="cinema-header">
+      <div class="container">
+        <h1 class="cinema-title">🎬 Кино каталог</h1>
+        <p class="cinema-subtitle">Хосуудад зориулсан монгол хадмал болон монгол кинонуудын цуглуулга</p>
+        <div class="cinema-search-bar">
+          <span class="cinema-search-icon">🔍</span>
+          <input type="text" id="movieSearchInput" class="cinema-search-input" placeholder="Кино нэрээр хайх..." oninput="filterAndRenderMovies()">
+          <button type="button" class="cinema-search-clear" id="movieSearchClear" onclick="clearMovieSearch()" style="display:none">✕</button>
+        </div>
       </div>
-      <div class="movie-grid" id="movieGrid"></div>
+    </div>
+
+    <div class="container">
+      <!-- Cinema Tabs -->
+      <div class="cinema-tabs">
+        <button type="button" class="cinema-tab active" onclick="setCinemaTab('all',this)">Бүгд</button>
+        <button type="button" class="cinema-tab" onclick="setCinemaTab('trending',this)">🔥 Тренд</button>
+        <button type="button" class="cinema-tab" onclick="setCinemaTab('mongolian',this)">🇲🇳 Монгол</button>
+        <button type="button" class="cinema-tab" onclick="setCinemaTab('dubbed',this)">🎙 Хадмал</button>
+      </div>
+
+      <!-- Filters Row -->
+      <div class="cinema-filters">
+        <div class="cinema-filter-row">
+          <div class="cinema-filter-group">
+            <span class="filter-label">Төрөл:</span>
+            <div class="cinema-genre-chips">
+              <button type="button" class="cchip active" data-cgenre="all" onclick="setMovieGenre('all',this)">Бүгд</button>
+              <button type="button" class="cchip" data-cgenre="romantic" onclick="setMovieGenre('romantic',this)">💕 Романтик</button>
+              <button type="button" class="cchip" data-cgenre="comedy" onclick="setMovieGenre('comedy',this)">😄 Инээдмийн</button>
+              <button type="button" class="cchip" data-cgenre="action" onclick="setMovieGenre('action',this)">💥 Адал явдалт</button>
+              <button type="button" class="cchip" data-cgenre="drama" onclick="setMovieGenre('drama',this)">🎭 Драм</button>
+              <button type="button" class="cchip" data-cgenre="animation" onclick="setMovieGenre('animation',this)">🎨 Анимэшн</button>
+              <button type="button" class="cchip" data-cgenre="mongolian" onclick="setMovieGenre('mongolian',this)">🇲🇳 Монгол</button>
+            </div>
+          </div>
+          <div class="cinema-sort-row">
+            <span class="filter-label">Эрэмбэ:</span>
+            <select class="cinema-sort-select" id="movieSortSelect" onchange="setMovieSort(this.value)">
+              <option value="rating">⭐ Рейтинг</option>
+              <option value="year-desc">📅 Шинэ эхэнд</option>
+              <option value="year-asc">📅 Хуучин эхэнд</option>
+              <option value="added">🆕 Нэмэгдсэн</option>
+            </select>
+          </div>
+        </div>
+        <div class="cinema-count" id="movieCount"></div>
+      </div>
+
+      <!-- Movie Grid -->
+      <div class="cinema-grid" id="movieGrid"></div>
+
+      <!-- Add Movie Button -->
+      <div style="text-align:center; padding: 24px 0 40px;">
+        <button type="button" class="cinema-add-btn" onclick="openAddMovieModal()">＋ Кино нэмэх</button>
+        <p style="color:rgba(255,255,255,0.3); font-size:12px; margin-top:8px;">TMDB poster, trailer холбоостойгоор нэмнэ</p>
+      </div>
+    </div>
+
+    <!-- Movie Detail Overlay -->
+    <div id="movieDetailOverlay" class="cinema-detail-overlay" style="display:none">
+      <div id="movieDetailContent" class="cinema-detail-inner"></div>
+    </div>
+
+    <!-- Add Movie Modal -->
+    <div id="addMovieOverlay" class="cinema-detail-overlay" style="display:none">
+      <div class="cinema-add-form">
+        <div class="cinema-detail-topbar">
+          <button type="button" class="cinema-back-btn" onclick="closeAddMovieModal()">← Буцах</button>
+          <h3 style="color:#fff; margin:0; font-size:18px;">＋ Шинэ кино нэмэх</h3>
+          <div></div>
+        </div>
+        <div style="padding:24px; max-width:600px; margin:0 auto;">
+          <div class="add-movie-grid">
+            <div class="form-group">
+              <label class="cinema-label">Киноны нэр *</label>
+              <input type="text" id="amTitle" class="cinema-input" placeholder="жишээ: Interstellar">
+            </div>
+            <div class="form-group">
+              <label class="cinema-label">Гарсан он *</label>
+              <input type="text" id="amYear" class="cinema-input" placeholder="жишээ: 2014">
+            </div>
+            <div class="form-group">
+              <label class="cinema-label">Poster зургийн URL</label>
+              <input type="text" id="amPoster" class="cinema-input" placeholder="https://... эсвэл TMDB URL">
+            </div>
+            <div class="form-group">
+              <label class="cinema-label">Рейтинг (0-10)</label>
+              <input type="text" id="amRating" class="cinema-input" placeholder="жишээ: 8.5">
+            </div>
+            <div class="form-group">
+              <label class="cinema-label">Хугацаа</label>
+              <input type="text" id="amDuration" class="cinema-input" placeholder="жишээ: 120 мин">
+            </div>
+            <div class="form-group">
+              <label class="cinema-label">Хэл</label>
+              <select id="amLang" class="cinema-input">
+                <option value="dubbed">🎙 Монгол хадмал</option>
+                <option value="mongolian">🇲🇳 Монгол хэлээр</option>
+                <option value="original">🌐 Эх хэлээр</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="cinema-label">Trailer YouTube embed URL</label>
+              <input type="text" id="amTrailer" class="cinema-input" placeholder="https://www.youtube.com/embed/...">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="cinema-label">Үзэх холбоос (эрхтэй эх сурвалж)</label>
+              <input type="text" id="amWatchUrl" class="cinema-input" placeholder="https://...">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="cinema-label">Төрөл (таслалаар тусгаарла)</label>
+              <input type="text" id="amGenres" class="cinema-input" placeholder="romantic, drama, action, comedy, animation, mongolian">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="cinema-label">Тайлбар *</label>
+              <textarea id="amDesc" class="cinema-input" rows="3" placeholder="Киноны товч тайлбар..."></textarea>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="cinema-label">Яагаад хосуудад тохиромжтой вэ?</label>
+              <input type="text" id="amWhy" class="cinema-input" placeholder="жишээ: Хамтдаа уйлахад тохиромжтой">
+            </div>
+          </div>
+          <div style="display:flex; gap:12px; margin-top:20px;">
+            <button type="button" class="btn btn-primary" onclick="submitAddMovie()" style="flex:1; padding:14px;">✓ Нэмэх</button>
+            <button type="button" class="btn btn-outline" onclick="closeAddMovieModal()" style="padding:14px 20px;">Болих</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -6400,47 +6679,49 @@ for(let i = 0; i < 365; i++) {
   });
 }
 
+const TMDB = "https://image.tmdb.org/t/p/w342";
 const movies = [
-  {id:1, emoji:"💕", title:"La La Land", year:"2016", genres:["romantic","drama"], rating:"8.5", duration:"128 мин", desc:"Жазз хөгжимчин болон жүжигчин тэмүүлж яваа хоёрын хайрын түүх. Лос-Анжелес хотод мөрөөдлөө биелүүлэхийн тулд хайрыг золиослох уу?", why:"Хамтдаа үзэж хэн юуг эрхэмлэдгийг ярилцахад тохиромжтой"},
-  {id:2, emoji:"🤣", title:"Crazy Stupid Love", year:"2011", genres:["comedy","romantic"], rating:"7.4", duration:"118 мин", desc:"Гэрлэсэн хүн хайраа алдаж, залуу womanizer-аар сургуулилж, харин тэр ч гэсэн жинхэнэ хайраа хайдаг.", why:"Хайрын олон хэлбэрийг инээдэмтэйгээр харуулсан"},
-  {id:3, emoji:"🚗", title:"Fast X", year:"2023", genres:["action"], rating:"7.0", duration:"141 мин", desc:"Домиником Торреттогийн баг хамгийн аюултай дайснаа — Данте-г устгахаар нэгддэг.", why:"Адреналин дүүрэн, хамтдаа хоол идэж үзэхэд хөгжилтэй"},
-  {id:4, emoji:"😂", title:"The Hangover", year:"2009", genres:["comedy"], rating:"7.7", duration:"100 мин", desc:"Лас Вегас дахь мартагдашгүй bachelor party-н дараа гурван найз нар юу болсныг санахгүй сэрнэ.", why:"Хамтдаа инээж, хурдтай цаг өнгөрүүлэхэд төгс"},
-  {id:5, emoji:"🌸", title:"Your Name", year:"2016", genres:["animation","romantic"], rating:"8.4", duration:"106 мин", desc:"Хоёр өсвөр насны хүүхэд биеийг нь солилцдог мөрөөдлийн дараа нэг нэгнийхээ хайрыг эрэлхийлнэ.", why:"Гэнэтийн эрч хүчтэй, уйлмаар гайхалтай анимэ"},
-  {id:6, emoji:"💖", title:"The Notebook", year:"2004", genres:["romantic","drama"], rating:"7.8", duration:"123 мин", desc:"Ядуу залуу болон баян охины зуны хайр жилүүдийг давж мөнх хэвээр байна.", why:"Сонгодог романтик кино — хамт уйлахад тохиромжтой"},
-  {id:7, emoji:"🎭", title:"Joker", year:"2019", genres:["drama"], rating:"8.4", duration:"122 мин", desc:"Артур Флек хэмээх инээдмийн жүжигчин аажим аажмаар нийгэмд хортой Жокер болж хувирдаг.", why:"Гүн агуулгатай, яриа өдөөх кино"},
-  {id:8, emoji:"🦸", title:"Spider-Man: Across the Spider-Verse", year:"2023", genres:["animation","action"], rating:"8.6", duration:"140 мин", desc:"Майлс Моралес олон ертөнцийг дамнасан баатарлаг аяллаар гарч, өөрийн хувь заяагаа тодруулна.", why:"Визуал урлаг + хамтдаа гайхшрахад тохиромжтой"},
-  {id:9, emoji:"💃", title:"Pretty Woman", year:"1990", genres:["romantic","comedy"], rating:"7.0", duration:"119 мин", desc:"Тэнхлэг хотоос хол гарч явсан залуу дэлхийн нэгдүгээр зэргийн эмэгтэйтэй нэг долоо хоногт хайр олно.", why:"Сонгодог cinderella story — хөгжилтэй, романтик"},
-  {id:10, emoji:"🌌", title:"Interstellar", year:"2014", genres:["drama","action"], rating:"8.7", duration:"169 мин", desc:"Хүн төрөлхтний оршин тогтноход зориулан нэгэн эцэг сансрын хугацааны уртыг туулна.", why:"Гайхалтай харагдалт + гүн гүнзгий яриа өдөөдөг"},
-  {id:11, emoji:"🎪", title:"The Greatest Showman", year:"2017", genres:["drama","romantic"], rating:"7.6", duration:"105 мин", desc:"Циркийн хаан П.Т. Барнумын амьдрал, мөрөөдөл, хайр, хүлцлийн тухай дуурьт кино.", why:"Дуутай, урам зоригтой — хамтдаа дуулахад бэлэн болно"},
-  {id:12, emoji:"🏰", title:"Frozen II", year:"2019", genres:["animation"], rating:"6.8", duration:"103 мин", desc:"Элса өөрийн хүчний эх үүсвэрийг мэдэхийн тулд аюултай аялалд гарна.", why:"Хялбархан хамтдаа үзэх — тайвшруулсан, гоё дуутай"},
-  {id:13, emoji:"🌊", title:"Titanic", year:"1997", genres:["romantic","drama"], rating:"7.9", duration:"194 мин", desc:"Тансаг Титаник хөлөг онгоцон дээр нийгмийн ялгаатай хоёр залуу хайр олж, аймаар гамшгийг туулна.", why:"Үеийнхний хайрын тэмдэг кино — хамт уйлах нь тодорхой"},
-  {id:14, emoji:"🎵", title:"A Star Is Born", year:"2018", genres:["romantic","drama"], rating:"7.6", duration:"136 мин", desc:"Алдартай хөгжимчин шинэ дуурын авьяастан охинтой танилцаж хайр үүснэ — гэвч алдар нэр хайрыг гэмтээдэг.", why:"Хөгжим + хайрын зовлон — сэтгэлд хүрдэг"},
-  {id:15, emoji:"🌹", title:"Pride & Prejudice", year:"2005", genres:["romantic","drama"], rating:"7.8", duration:"129 мин", desc:"19-р зуунд нэр хүнд ба хайрын хооронд сонголт хийж яваа Элизабет Беннет ба Дарсигийн түүх.", why:"Ухаалаг, сэтгэл зүйн романтик — ярилцлага өдөөдөг"},
-  {id:16, emoji:"🎻", title:"Schindler's List", year:"1993", genres:["drama"], rating:"9.0", duration:"195 мин", desc:"Дайны үед нэгэн үйлдвэрлэгч мянган Еврейг аврах шийдвэр гаргадаг.", why:"Хамгийн хүчирхэг кинонуудын нэг — хамт амьдралыг ойлгох"},
-  {id:17, emoji:"😎", title:"The Grand Budapest Hotel", year:"2014", genres:["comedy","drama"], rating:"8.1", duration:"100 мин", desc:"Алдарт зочид буудлын консьерж ба хулгайч болж яваа жаалхан хүүхдийн адал явдалт тансаг комеди.", why:"Гоё визуал, хошин шог — хөнгөн хамтдаа үзэхэд тохиромжтой"},
-  {id:18, emoji:"🐝", title:"My Big Fat Greek Wedding", year:"2002", genres:["comedy","romantic"], rating:"6.6", duration:"95 мин", desc:"Грек гэр бүлийн хосын болзооны турбулент аялал — тусламж гуйхгүйгээр гэрлэхэд хэцүү байна.", why:"Гэр бүл + хайрын инээдэмтэй дүрслэл"},
-  {id:19, emoji:"💫", title:"Eternal Sunshine of the Spotless Mind", year:"2004", genres:["romantic","drama"], rating:"8.3", duration:"108 мин", desc:"Тархины дурсамжийг устгах технологи ашиглан хайраа мартах гэсэн хосын түүх.", why:"Хайрын утга учрыг гүн бодуулдаг — ярилцахад тохиромжтой"},
-  {id:20, emoji:"🎬", title:"Parasite", year:"2019", genres:["drama"], rating:"8.6", duration:"132 мин", desc:"Ядуу гэр бүл баян гэрт аажимдаа нэвтэрч, тэнд нуугдаж байсан нууцыг илрүүлнэ.", why:"Хамтдаа тааны авч, яриа дэлгэхэд маш сайн"},
-  {id:21, emoji:"🌺", title:"Mamma Mia!", year:"2008", genres:["comedy","romantic"], rating:"6.4", duration:"108 мин", desc:"Охин гэрлэлтийнхээ өмнө гурван эрэгтэйн аль нь эцэг болохыг мэдэхийн тулд урьжээ.", why:"ABBA дуунуудтай хамтдаа дуулах гайхалтай кино"},
-  {id:22, emoji:"🐉", title:"How to Train Your Dragon", year:"2010", genres:["animation","action"], rating:"8.1", duration:"98 мин", desc:"Викингийн хүү луутай найздаж, хоёр тал бие биенийхээ тухай ойлголцдог.", why:"Бүх насны хүмүүст тохирох — дотно, урам зоригтой"},
-  {id:23, emoji:"🌃", title:"Lost in Translation", year:"2003", genres:["romantic","drama"], rating:"7.7", duration:"102 мин", desc:"Токиод тус тустаа нэвтрэрхэн явсан хоёр Америк хоорондоо нандин нөхөрлөл олно.", why:"Тайван, нарийн — хамтдаа удаан суулт хийхэд тохиромжтой"},
-  {id:24, emoji:"🌈", title:"Silver Linings Playbook", year:"2012", genres:["romantic","comedy","drama"], rating:"7.7", duration:"122 мин", desc:"Сэтгэцийн асуудалтай хоёр хүн бийр тоглолтоор нэг нэгнийгээ засахад тусалдаг.", why:"Буруу байдалаасаа хайр олох — сэтгэлд хүрдэг"},
-  {id:25, emoji:"🚀", title:"Guardians of the Galaxy", year:"2014", genres:["action","comedy"], rating:"8.0", duration:"121 мин", desc:"Тохиромжгүй баатруудын бүлэг сансраас дэлхийг аврахаар нэгддэг.", why:"Хөгжилтэй, эрч хүчтэй — хамтдаа хоол идэж үзэхэд тохиромжтой"},
-  {id:26, emoji:"🌙", title:"Before Sunrise", year:"1995", genres:["romantic","drama"], rating:"8.1", duration:"101 мин", desc:"Вена дахь шөнийн гудамжаар хоёр залуу танилцаж, нэг шөнийн турш яриа дэлгэнэ.", why:"Болзооны философи — хамтдаа ярих сэдэв дүүрэн"},
-  {id:27, emoji:"✨", title:"Everything Everywhere All at Once", year:"2022", genres:["action","comedy","drama"], rating:"7.8", duration:"139 мин", desc:"Эхнэр нь зэрэгцэх олон ертөнцийг дамнан оршин тогтнохын тулд тэмцэнэ.", why:"Уйлуулж, инээлгэж, гайхшруулна — мартагдашгүй туршлага"},
-  {id:28, emoji:"🎨", title:"Amélie", year:"2001", genres:["romantic","comedy"], rating:"8.3", duration:"122 мин", desc:"Парисын нэгэн нутгийн хүүхэн бусдын аз жаргалд нөлөөлж, өөрийнхөө хайрыг олдог.", why:"Дуртай хүнд дотно мэдрэмж өгдөг — гоё, хүч чадалтай"},
-  {id:29, emoji:"🧊", title:"Frozen", year:"2013", genres:["animation"], rating:"7.4", duration:"102 мин", desc:"Элса хааны хүч нь хот мөсөн хааны нутаг болгоход дүүгийнх нь Анна аврах аяллад гарна.", why:"Сонгодог анимэшн — Let It Go хамтдаа дуулаарай"},
-  {id:30, emoji:"🌿", title:"Studio Ghibli: Spirited Away", year:"2001", genres:["animation","drama"], rating:"8.6", duration:"125 мин", desc:"Охин хачирхалтай сүнснүүдийн ертөнцөд орж, ах эцэг эхийгээ аврахаар тэмцэнэ.", why:"Хамгийн шагналтай анимэ — дүрслэл нь гайхалтай"},
+  {id:1, emoji:"💕", title:"La La Land", year:"2016", genres:["romantic","drama"], rating:"8.5", duration:"128 мин", lang:"dubbed", trending:true, dateAdded:"2024-01-01", poster:TMDB+"/k68nPLbIST6NP96JmTxmZijQTHh.jpg", trailer:"https://www.youtube.com/embed/0pdqf4P9MB8", watchUrl:"", director:"Damien Chazelle", desc:"Жазз хөгжимчин болон жүжигчин тэмүүлж яваа хоёрын хайрын түүх. Лос-Анжелес хотод мөрөөдлөө биелүүлэхийн тулд хайрыг золиослох уу?", why:"Хамтдаа үзэж хэн юуг эрхэмлэдгийг ярилцахад тохиромжтой"},
+  {id:2, emoji:"🤣", title:"Crazy Stupid Love", year:"2011", genres:["comedy","romantic"], rating:"7.4", duration:"118 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-02", poster:TMDB+"/hU0E130sBGnMJTOcfgnEoKFvzVB.jpg", trailer:"https://www.youtube.com/embed/2fFJOKdQZ24", watchUrl:"", director:"Glenn Ficarra", desc:"Гэрлэсэн хүн хайраа алдаж, залуу womanizer-аар сургуулилж, харин тэр ч гэсэн жинхэнэ хайраа хайдаг.", why:"Хайрын олон хэлбэрийг инээдэмтэйгээр харуулсан"},
+  {id:3, emoji:"🚗", title:"Fast X", year:"2023", genres:["action"], rating:"7.0", duration:"141 мин", lang:"dubbed", trending:true, dateAdded:"2024-01-03", poster:TMDB+"/fiVW06jE7z9YnO4trhaMEdclSiC.jpg", trailer:"https://www.youtube.com/embed/32RAq6JoN-w", watchUrl:"", director:"Louis Leterrier", desc:"Домиником Торреттогийн баг хамгийн аюултай дайснаа — Данте-г устгахаар нэгддэг.", why:"Адреналин дүүрэн, хамтдаа хоол идэж үзэхэд хөгжилтэй"},
+  {id:4, emoji:"😂", title:"The Hangover", year:"2009", genres:["comedy"], rating:"7.7", duration:"100 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-04", poster:TMDB+"/uluhlXubGu1VxU63boQeRx5v7p9.jpg", trailer:"https://www.youtube.com/embed/t6bNmMNMXAg", watchUrl:"", director:"Todd Phillips", desc:"Лас Вегас дахь мартагдашгүй bachelor party-н дараа гурван найз нар юу болсныг санахгүй сэрнэ.", why:"Хамтдаа инээж, хурдтай цаг өнгөрүүлэхэд төгс"},
+  {id:5, emoji:"🌸", title:"Your Name (Kimi no Na wa)", year:"2016", genres:["animation","romantic"], rating:"8.4", duration:"106 мин", lang:"dubbed", trending:true, dateAdded:"2024-01-05", poster:TMDB+"/q719jXXEzOoYaps6babgKnONONX.jpg", trailer:"https://www.youtube.com/embed/xU47nhruN-Q", watchUrl:"", director:"Makoto Shinkai", desc:"Хоёр өсвөр насны хүүхэд биеийг нь солилцдог мөрөөдлийн дараа нэг нэгнийхээ хайрыг эрэлхийлнэ.", why:"Гэнэтийн эрч хүчтэй, уйлмаар гайхалтай анимэ"},
+  {id:6, emoji:"💖", title:"The Notebook", year:"2004", genres:["romantic","drama"], rating:"7.8", duration:"123 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-06", poster:TMDB+"/qom1SZSENdmHFNZBXbtTFsvke5.jpg", trailer:"https://www.youtube.com/embed/FC6biTjEyZw", watchUrl:"", director:"Nick Cassavetes", desc:"Ядуу залуу болон баян охины зуны хайр жилүүдийг давж мөнх хэвээр байна.", why:"Сонгодог романтик кино — хамт уйлахад тохиромжтой"},
+  {id:7, emoji:"🎭", title:"Joker", year:"2019", genres:["drama"], rating:"8.4", duration:"122 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-07", poster:TMDB+"/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg", trailer:"https://www.youtube.com/embed/zAGVQLHvwOY", watchUrl:"", director:"Todd Phillips", desc:"Артур Флек хэмээх инээдмийн жүжигчин аажим аажмаар нийгэмд хортой Жокер болж хувирдаг.", why:"Гүн агуулгатай, яриа өдөөх кино"},
+  {id:8, emoji:"🦸", title:"Spider-Man: Across the Spider-Verse", year:"2023", genres:["animation","action"], rating:"8.6", duration:"140 мин", lang:"dubbed", trending:true, dateAdded:"2024-01-08", poster:TMDB+"/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg", trailer:"https://www.youtube.com/embed/cqGjhVmlZTY", watchUrl:"", director:"Joaquim Dos Santos", desc:"Майлс Моралес олон ертөнцийг дамнасан баатарлаг аяллаар гарч, өөрийн хувь заяагаа тодруулна.", why:"Визуал урлаг + хамтдаа гайхшрахад тохиромжтой"},
+  {id:9, emoji:"💃", title:"Pretty Woman", year:"1990", genres:["romantic","comedy"], rating:"7.0", duration:"119 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-09", poster:TMDB+"/2pnJJpHJHVFVNpL8R8JhJKlB9Kb.jpg", trailer:"https://www.youtube.com/embed/4TJQGFBkMEo", watchUrl:"", director:"Garry Marshall", desc:"Тэнхлэг хотоос хол гарч явсан залуу дэлхийн нэгдүгээр зэргийн эмэгтэйтэй нэг долоо хоногт хайр олно.", why:"Сонгодог cinderella story — хөгжилтэй, романтик"},
+  {id:10, emoji:"🌌", title:"Interstellar", year:"2014", genres:["drama","action"], rating:"8.7", duration:"169 мин", lang:"dubbed", trending:true, dateAdded:"2024-01-10", poster:TMDB+"/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg", trailer:"https://www.youtube.com/embed/zSWdZVtXT7E", watchUrl:"", director:"Christopher Nolan", desc:"Хүн төрөлхтний оршин тогтноход зориулан нэгэн эцэг сансрын хугацааны уртыг туулна.", why:"Гайхалтай харагдалт + гүн гүнзгий яриа өдөөдөг"},
+  {id:11, emoji:"🎪", title:"The Greatest Showman", year:"2017", genres:["drama","romantic"], rating:"7.6", duration:"105 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-11", poster:TMDB+"/b6REaZ0IxgJPnzxXWIJf9bIHKKG.jpg", trailer:"https://www.youtube.com/embed/AHKoSgJPSc4", watchUrl:"", director:"Michael Gracey", desc:"Циркийн хаан П.Т. Барнумын амьдрал, мөрөөдөл, хайр, хүлцлийн тухай дуурьт кино.", why:"Дуутай, урам зоригтой — хамтдаа дуулахад бэлэн болно"},
+  {id:12, emoji:"🏰", title:"Frozen II", year:"2019", genres:["animation"], rating:"6.8", duration:"103 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-12", poster:TMDB+"/xJWPZIYOEFIjZpBL7SVBGnzn58b.jpg", trailer:"https://www.youtube.com/embed/Zi4LMpSDccc", watchUrl:"", director:"Chris Buck", desc:"Элса өөрийн хүчний эх үүсвэрийг мэдэхийн тулд аюултай аялалд гарна.", why:"Хялбархан хамтдаа үзэх — тайвшруулсан, гоё дуутай"},
+  {id:13, emoji:"🌊", title:"Titanic", year:"1997", genres:["romantic","drama"], rating:"7.9", duration:"194 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-13", poster:TMDB+"/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg", trailer:"https://www.youtube.com/embed/CHekzSiZjrY", watchUrl:"", director:"James Cameron", desc:"Тансаг Титаник хөлөг онгоцон дээр нийгмийн ялгаатай хоёр залуу хайр олж, аймаар гамшгийг туулна.", why:"Үеийнхний хайрын тэмдэг кино — хамт уйлах нь тодорхой"},
+  {id:14, emoji:"🎵", title:"A Star Is Born", year:"2018", genres:["romantic","drama"], rating:"7.6", duration:"136 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-14", poster:TMDB+"/wrFpXMNBRj2PBiN4Z5kix51XaIZ.jpg", trailer:"https://www.youtube.com/embed/nSbzyEJ8X9E", watchUrl:"", director:"Bradley Cooper", desc:"Алдартай хөгжимчин шинэ дуурын авьяастан охинтой танилцаж хайр үүснэ — гэвч алдар нэр хайрыг гэмтээдэг.", why:"Хөгжим + хайрын зовлон — сэтгэлд хүрдэг"},
+  {id:15, emoji:"🌹", title:"Pride & Prejudice", year:"2005", genres:["romantic","drama"], rating:"7.8", duration:"129 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-15", poster:TMDB+"/7wOFJr8hq2tPqB4R5J4ZFiJRCXq.jpg", trailer:"https://www.youtube.com/embed/1dqPcN8z6lo", watchUrl:"", director:"Joe Wright", desc:"19-р зуунд нэр хүнд ба хайрын хооронд сонголт хийж яваа Элизабет Беннет ба Дарсигийн түүх.", why:"Ухаалаг, сэтгэл зүйн романтик — ярилцлага өдөөдөг"},
+  {id:16, emoji:"🎻", title:"Schindler's List", year:"1993", genres:["drama"], rating:"9.0", duration:"195 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-16", poster:TMDB+"/sF1U4EUQS8YHUYjNl3pMGNIQyr0.jpg", trailer:"https://www.youtube.com/embed/gG22XNhtnoY", watchUrl:"", director:"Steven Spielberg", desc:"Дайны үед нэгэн үйлдвэрлэгч мянган Еврейг аврах шийдвэр гаргадаг.", why:"Хамгийн хүчирхэг кинонуудын нэг — хамт амьдралыг ойлгох"},
+  {id:17, emoji:"😎", title:"The Grand Budapest Hotel", year:"2014", genres:["comedy","drama"], rating:"8.1", duration:"100 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-17", poster:TMDB+"/eWdyYQreja6JKAzB8LRTF4KZLUT.jpg", trailer:"https://www.youtube.com/embed/1Fg5iWmQjwk", watchUrl:"", director:"Wes Anderson", desc:"Алдарт зочид буудлын консьерж ба хулгайч болж яваа жаалхан хүүхдийн адал явдалт тансаг комеди.", why:"Гоё визуал, хошин шог — хөнгөн хамтдаа үзэхэд тохиромжтой"},
+  {id:18, emoji:"🐝", title:"My Big Fat Greek Wedding", year:"2002", genres:["comedy","romantic"], rating:"6.6", duration:"95 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-18", poster:TMDB+"/9rRUtnJWI1QgO9DEzPFQmXlKBHJ.jpg", trailer:"https://www.youtube.com/embed/fYmVFWcqJRM", watchUrl:"", director:"Joel Zwick", desc:"Грек гэр бүлийн хосын болзооны турбулент аялал — тусламж гуйхгүйгээр гэрлэхэд хэцүү байна.", why:"Гэр бүл + хайрын инээдэмтэй дүрслэл"},
+  {id:19, emoji:"💫", title:"Eternal Sunshine of the Spotless Mind", year:"2004", genres:["romantic","drama"], rating:"8.3", duration:"108 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-19", poster:TMDB+"/5MwkWH9tYHv3oSd1zqMO8fBELxN.jpg", trailer:"https://www.youtube.com/embed/07-QBnEkgXU", watchUrl:"", director:"Michel Gondry", desc:"Тархины дурсамжийг устгах технологи ашиглан хайраа мартах гэсэн хосын түүх.", why:"Хайрын утга учрыг гүн бодуулдаг — ярилцахад тохиромжтой"},
+  {id:20, emoji:"🎬", title:"Parasite", year:"2019", genres:["drama"], rating:"8.6", duration:"132 мин", lang:"dubbed", trending:true, dateAdded:"2024-01-20", poster:TMDB+"/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg", trailer:"https://www.youtube.com/embed/5xH0HfJHsaY", watchUrl:"", director:"Bong Joon-ho", desc:"Ядуу гэр бүл баян гэрт аажимдаа нэвтэрч, тэнд нуугдаж байсан нууцыг илрүүлнэ.", why:"Хамтдаа тааны авч, яриа дэлгэхэд маш сайн"},
+  {id:21, emoji:"🌺", title:"Mamma Mia!", year:"2008", genres:["comedy","romantic"], rating:"6.4", duration:"108 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-21", poster:TMDB+"/aLVkiINlIeCkcZIzb7XHzPYgO6L.jpg", trailer:"https://www.youtube.com/embed/sxRrSCi5Nk0", watchUrl:"", director:"Phyllida Lloyd", desc:"Охин гэрлэлтийнхээ өмнө гурван эрэгтэйн аль нь эцэг болохыг мэдэхийн тулд урьжээ.", why:"ABBA дуунуудтай хамтдаа дуулах гайхалтай кино"},
+  {id:22, emoji:"🐉", title:"How to Train Your Dragon", year:"2010", genres:["animation","action"], rating:"8.1", duration:"98 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-22", poster:TMDB+"/ygGmAO60t8GyqUKE0xQpOPMrSzM.jpg", trailer:"https://www.youtube.com/embed/oKiYuIsPxYk", watchUrl:"", director:"Dean DeBlois", desc:"Викингийн хүү луутай найздаж, хоёр тал бие биенийхээ тухай ойлголцдог.", why:"Бүх насны хүмүүст тохирох — дотно, урам зоригтой"},
+  {id:23, emoji:"🌃", title:"Lost in Translation", year:"2003", genres:["romantic","drama"], rating:"7.7", duration:"102 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-23", poster:TMDB+"/sn3MDKABzJ1kCGXkBZzY9bXI4zr.jpg", trailer:"https://www.youtube.com/embed/NZRIAYqFW2U", watchUrl:"", director:"Sofia Coppola", desc:"Токиод тус тустаа нэвтрэрхэн явсан хоёр Америк хоорондоо нандин нөхөрлөл олно.", why:"Тайван, нарийн — хамтдаа удаан суулт хийхэд тохиромжтой"},
+  {id:24, emoji:"🌈", title:"Silver Linings Playbook", year:"2012", genres:["romantic","comedy","drama"], rating:"7.7", duration:"122 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-24", poster:TMDB+"/zNGPOFM6B5cRQFME9fHGxpHpIoQ.jpg", trailer:"https://www.youtube.com/embed/QGgCNWvGogI", watchUrl:"", director:"David O. Russell", desc:"Сэтгэцийн асуудалтай хоёр хүн бийр тоглолтоор нэг нэгнийгээ засахад тусалдаг.", why:"Буруу байдалаасаа хайр олох — сэтгэлд хүрдэг"},
+  {id:25, emoji:"🚀", title:"Guardians of the Galaxy", year:"2014", genres:["action","comedy"], rating:"8.0", duration:"121 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-25", poster:TMDB+"/r7vmZjiyZw9rpJMQJdXpjd9geoY.jpg", trailer:"https://www.youtube.com/embed/d96cjJhvlMA", watchUrl:"", director:"James Gunn", desc:"Тохиромжгүй баатруудын бүлэг сансраас дэлхийг аврахаар нэгддэг.", why:"Хөгжилтэй, эрч хүчтэй — хамтдаа хоол идэж үзэхэд тохиромжтой"},
+  {id:26, emoji:"🌙", title:"Before Sunrise", year:"1995", genres:["romantic","drama"], rating:"8.1", duration:"101 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-26", poster:TMDB+"/ifMXoiGaJbv7yXbJkKpFcB7M0oG.jpg", trailer:"https://www.youtube.com/embed/LPSfcaxTAFY", watchUrl:"", director:"Richard Linklater", desc:"Вена дахь шөнийн гудамжаар хоёр залуу танилцаж, нэг шөнийн турш яриа дэлгэнэ.", why:"Болзооны философи — хамтдаа ярих сэдэв дүүрэн"},
+  {id:27, emoji:"✨", title:"Everything Everywhere All at Once", year:"2022", genres:["action","comedy","drama"], rating:"7.8", duration:"139 мин", lang:"dubbed", trending:true, dateAdded:"2024-01-27", poster:TMDB+"/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg", trailer:"https://www.youtube.com/embed/wxN1T1uxQ2g", watchUrl:"", director:"Daniels", desc:"Эхнэр нь зэрэгцэх олон ертөнцийг дамнан оршин тогтнохын тулд тэмцэнэ.", why:"Уйлуулж, инээлгэж, гайхшруулна — мартагдашгүй туршлага"},
+  {id:28, emoji:"🎨", title:"Amélie", year:"2001", genres:["romantic","comedy"], rating:"8.3", duration:"122 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-28", poster:TMDB+"/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg", trailer:"https://www.youtube.com/embed/Bclz4HyVhI0", watchUrl:"", director:"Jean-Pierre Jeunet", desc:"Парисын нэгэн нутгийн хүүхэн бусдын аз жаргалд нөлөөлж, өөрийнхөө хайрыг олдог.", why:"Дуртай хүнд дотно мэдрэмж өгдөг — гоё, хүч чадалтай"},
+  {id:29, emoji:"🧊", title:"Frozen", year:"2013", genres:["animation"], rating:"7.4", duration:"102 мин", lang:"dubbed", trending:false, dateAdded:"2024-01-29", poster:TMDB+"/kgwjIb2JDHRhNk13lmSxiClFjVk.jpg", trailer:"https://www.youtube.com/embed/TbQm5doF_Uc", watchUrl:"", director:"Chris Buck", desc:"Элса хааны хүч нь хот мөсөн хааны нутаг болгоход дүүгийнх нь Анна аврах аяллад гарна.", why:"Сонгодог анимэшн — Let It Go хамтдаа дуулаарай"},
+  {id:30, emoji:"🌿", title:"Spirited Away", year:"2001", genres:["animation","drama"], rating:"8.6", duration:"125 мин", lang:"dubbed", trending:true, dateAdded:"2024-01-30", poster:TMDB+"/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg", trailer:"https://www.youtube.com/embed/ByXuk9QqQkk", watchUrl:"", director:"Hayao Miyazaki", desc:"Охин хачирхалтай сүнснүүдийн ертөнцөд орж, ах эцэг эхийгээ аврахаар тэмцэнэ.", why:"Хамгийн шагналтай анимэ — дүрслэл нь гайхалтай"},
   // 🇲🇳 МОНГОЛ КИНО
-  {id:31, emoji:"🏹", title:"Монгол (Чингис хааны залуу нас)", year:"2007", genres:["mongolian","action","drama"], rating:"7.7", duration:"126 мин", desc:"Чингис хааны залуу насыг дүрсэлсэн алдарт Монгол-Казак-Герман хамтарсан кино. Тэсэх тэвчих, хайрын хүч хамгийн том хүч.", why:"Монголын түүхийг хамтдаа мэдэхэд, бахархал төрүүлдэг"},
-  {id:32, emoji:"🌸", title:"Харанхуй сарны гэрэл", year:"2018", genres:["mongolian","romantic","drama"], rating:"7.2", duration:"98 мин", desc:"Орчин үеийн Улаанбаатар дахь залуу хоёрын хайрын түүх. Хотын амьдрал, мөрөөдөл, харилцааны бэрхшээл.", why:"Монгол орчин үеийн романтик — бодит мэдрэмжтэй"},
-  {id:33, emoji:"🐎", title:"Тал нутгийн гал", year:"2015", genres:["mongolian","drama","action"], rating:"7.0", duration:"110 мин", desc:"Нүүдэлчин малчны хүү хот руу ирж, хоёр ертөнцийн хооронд сонголт хийдэг.", why:"Монгол уламжлал, хот, хөдөөгийн зөрчлийг ярилцахад"},
-  {id:34, emoji:"🦅", title:"Бүргэдийн нулимс", year:"2020", genres:["mongolian","drama"], rating:"7.4", duration:"105 мин", desc:"Казах бүргэдчин болон залуу охины найрамдал, байгалийн дунд хайр үүсэх тухай.", why:"Монгол байгалийн үзэмж, угсаатны соёл — гайхалтай"},
-  {id:35, emoji:"🎵", title:"Хонхны дуун", year:"2019", genres:["mongolian","romantic"], rating:"6.8", duration:"95 мин", desc:"Монгол уламжлалт хөгжимчин хотын залуу охинтой нэг аяллаар уулздаг романтик кино.", why:"Хөгжим, байгаль, хайр — монгол сэтгэлийн кино"},
-  {id:36, emoji:"🏔", title:"Алтайн домог", year:"2016", genres:["mongolian","action","drama"], rating:"7.1", duration:"118 мин", desc:"Баруун аймгийн уулчид болон байгалийг тайлбарлах адал явдалт домгийн кино.", why:"Монгол Алтайн үзэсгэлэнт байгалийг хамтдаа мэдэх"},
-  {id:37, emoji:"💔", title:"Нарны тал", year:"2022", genres:["mongolian","drama","romantic"], rating:"7.3", duration:"102 мин", desc:"Хот дахь залуу хос хайр дурлал, карьер, гэр бүлийн зөрчлийг шийдвэрлэх тухай.", why:"Орчин үеийн Монгол амьдралыг хамт үзэж ярилцах"},
-  {id:38, emoji:"🌙", title:"Говийн шөнө", year:"2021", genres:["mongolian","romantic"], rating:"7.0", duration:"92 мин", desc:"Говь цөлд алдагдсан хоёр аялагч нэг шөнийн туршид харилцан нээлттэй болдог.", why:"Тайван, дотно — сайн яриа өдөөдөг монгол кино"}
+  {id:31, emoji:"🏹", title:"Монгол (Чингис хааны залуу нас)", year:"2007", genres:["mongolian","action","drama"], rating:"7.7", duration:"126 мин", lang:"mongolian", trending:true, dateAdded:"2024-02-01", poster:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Mongol_film.jpg/300px-Mongol_film.jpg", trailer:"https://www.youtube.com/embed/1j-3wfHHAZs", watchUrl:"", director:"Sergei Bodrov", desc:"Чингис хааны залуу насыг дүрсэлсэн алдарт Монгол-Казак-Герман хамтарсан кино. Тэсэх тэвчих, хайрын хүч хамгийн том хүч.", why:"Монголын түүхийг хамтдаа мэдэхэд, бахархал төрүүлдэг"},
+  {id:32, emoji:"🌸", title:"Харанхуй сарны гэрэл", year:"2018", genres:["mongolian","romantic","drama"], rating:"7.2", duration:"98 мин", lang:"mongolian", trending:false, dateAdded:"2024-02-02", poster:"https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=342&h=513&fit=crop", trailer:"", watchUrl:"", director:"Монгол найруулагч", desc:"Орчин үеийн Улаанбаатар дахь залуу хоёрын хайрын түүх. Хотын амьдрал, мөрөөдөл, харилцааны бэрхшээл.", why:"Монгол орчин үеийн романтик — бодит мэдрэмжтэй"},
+  {id:33, emoji:"🐎", title:"Тал нутгийн гал", year:"2015", genres:["mongolian","drama","action"], rating:"7.0", duration:"110 мин", lang:"mongolian", trending:false, dateAdded:"2024-02-03", poster:"https://images.unsplash.com/photo-1541795795328-f073b763494e?w=342&h=513&fit=crop", trailer:"", watchUrl:"", director:"Монгол найруулагч", desc:"Нүүдэлчин малчны хүү хот руу ирж, хоёр ертөнцийн хооронд сонголт хийдэг.", why:"Монгол уламжлал, хот, хөдөөгийн зөрчлийг ярилцахад"},
+  {id:34, emoji:"🦅", title:"Бүргэдийн нулимс", year:"2020", genres:["mongolian","drama"], rating:"7.4", duration:"105 мин", lang:"mongolian", trending:true, dateAdded:"2024-02-04", poster:"https://images.unsplash.com/photo-1472457897821-70d3819a0e24?w=342&h=513&fit=crop", trailer:"", watchUrl:"", director:"Монгол найруулагч", desc:"Казах бүргэдчин болон залуу охины найрамдал, байгалийн дунд хайр үүсэх тухай.", why:"Монгол байгалийн үзэмж, угсаатны соёл — гайхалтай"},
+  {id:35, emoji:"🎵", title:"Хонхны дуун", year:"2019", genres:["mongolian","romantic"], rating:"6.8", duration:"95 мин", lang:"mongolian", trending:false, dateAdded:"2024-02-05", poster:"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=342&h=513&fit=crop", trailer:"", watchUrl:"", director:"Монгол найруулагч", desc:"Монгол уламжлалт хөгжимчин хотын залуу охинтой нэг аяллаар уулздаг романтик кино.", why:"Хөгжим, байгаль, хайр — монгол сэтгэлийн кино"},
+  {id:36, emoji:"🏔", title:"Алтайн домог", year:"2016", genres:["mongolian","action","drama"], rating:"7.1", duration:"118 мин", lang:"mongolian", trending:false, dateAdded:"2024-02-06", poster:"https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=342&h=513&fit=crop", trailer:"", watchUrl:"", director:"Монгол найруулагч", desc:"Баруун аймгийн уулчид болон байгалийг тайлбарлах адал явдалт домгийн кино.", why:"Монгол Алтайн үзэсгэлэнт байгалийг хамтдаа мэдэх"},
+  {id:37, emoji:"💔", title:"Нарны тал", year:"2022", genres:["mongolian","drama","romantic"], rating:"7.3", duration:"102 мин", lang:"mongolian", trending:true, dateAdded:"2024-02-07", poster:"https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=342&h=513&fit=crop", trailer:"", watchUrl:"", director:"Монгол найруулагч", desc:"Хот дахь залуу хос хайр дурлал, карьер, гэр бүлийн зөрчлийг шийдвэрлэх тухай.", why:"Орчин үеийн Монгол амьдралыг хамт үзэж ярилцах"},
+  {id:38, emoji:"🌙", title:"Говийн шөнө", year:"2021", genres:["mongolian","romantic"], rating:"7.0", duration:"92 мин", lang:"mongolian", trending:false, dateAdded:"2024-02-08", poster:"https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=342&h=513&fit=crop", trailer:"", watchUrl:"", director:"Монгол найруулагч", desc:"Говь цөлд алдагдсан хоёр аялагч нэг шөнийн туршид харилцан нээлттэй болдог.", why:"Тайван, дотно — сайн яриа өдөөдөг монгол кино"}
 ];
+let userMovies = JSON.parse(localStorage.getItem("nbolzoo_movies") || "[]");
 
 const posts = [
   {id:1, author:"Болор М.", time:"3 цаг өмнө", content:"Өчигдөр Богд уулын ар талд тэгш цэгээс хот харагдах төгс газар олоод эрхэмсэгтэй болзоонд явсан 🥹 Хамгийн гоё хэсэг нь нар жаргах үед бүтэн хот алтан өнгөтэй болж...", emoji:"🌅", likes:234, comments:18},
@@ -7003,6 +7284,10 @@ const proposals = [
 let currentUbFilter = "all";
 let currentRegion = "all";
 let currentMovieFilter = "all";
+let currentMovieCinemaTab = "all";
+let currentMovieGenre = "all";
+let currentMovieSort = "rating";
+let currentMovieSearch = "";
 let userLikes = new Set();
 let userPostLikes = new Set();
 let currentPage = 1;
@@ -7707,14 +7992,7 @@ document.querySelectorAll('[data-region]').forEach(c => {
   });
 });
 
-document.querySelectorAll('[data-movie]').forEach(c => {
-  c.addEventListener("click", e => {
-    document.querySelectorAll('[data-movie]').forEach(x => x.classList.remove("active"));
-    e.target.classList.add("active");
-    currentMovieFilter = e.target.dataset.movie;
-    renderMovies();
-  });
-});
+// Cinema genre chips handled via onclick in HTML
 
 let currentUser = null;
 
@@ -8693,56 +8971,263 @@ function jumpToCategory(startIdx) {
   showExpertSection("questions");
 }
 
-function renderMovies() {
-  const genreLabels = {romantic:"💕 Романтик", comedy:"😄 Инээдмийн", action:"💥 Адал явдалт", drama:"🎭 Драм", animation:"🎨 Анимэшн", mongolian:"🇲🇳 Монгол"};
-  const filtered = currentMovieFilter === "all" ? movies : movies.filter(m => m.genres.includes(currentMovieFilter));
-  document.getElementById("movieGrid").innerHTML = filtered.map(m => `
-    <div class="movie-card" onclick="openMovieModal(${m.id})">
-      <div class="movie-poster">
-        ${m.emoji}
-        <div class="movie-rating">⭐ ${m.rating}</div>
-      </div>
-      <div class="movie-info">
-        <div class="movie-title">${m.title}</div>
-        <div class="movie-meta">${m.year} · ${m.duration}</div>
-        <div class="movie-genres">${m.genres.slice(0,2).map(g => `<span class="genre-tag">${genreLabels[g]||g}</span>`).join("")}</div>
-      </div>
-    </div>
-  `).join("");
+// ===== CINEMA / MOVIES =====
+const GL = {romantic:"💕 Романтик", comedy:"😄 Инээдмийн", action:"💥 Адал явдалт", drama:"🎭 Драм", animation:"🎨 Анимэшн", mongolian:"🇲🇳 Монгол"};
+const POSTER_BG = {romantic:"linear-gradient(135deg,#3d1a3a,#6b2060)", comedy:"linear-gradient(135deg,#3d2a00,#7a5200)", action:"linear-gradient(135deg,#0a1a3a,#1a3a6a)", drama:"linear-gradient(135deg,#1a0a2a,#3a1a4a)", animation:"linear-gradient(135deg,#0a2a3a,#1a4a6a)", mongolian:"linear-gradient(135deg,#0a2a0a,#1a4a1a)"};
+const LANG_LABEL = {dubbed:"🎙 Монгол хадмал", mongolian:"🇲🇳 Монгол хэлээр", original:"🌐 Эх хэлээр"};
+
+function allMovies() { return [...movies, ...userMovies]; }
+
+function getFilteredMovies() {
+  let list = allMovies();
+  const tab = currentMovieCinemaTab;
+  if(tab === "trending") list = list.filter(m => m.trending);
+  else if(tab === "mongolian") list = list.filter(m => m.lang === "mongolian");
+  else if(tab === "dubbed") list = list.filter(m => m.lang === "dubbed");
+  if(currentMovieGenre !== "all") list = list.filter(m => m.genres.includes(currentMovieGenre));
+  const q = currentMovieSearch.trim().toLowerCase();
+  if(q) list = list.filter(m => m.title.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q));
+  const sort = currentMovieSort;
+  if(sort === "rating") list.sort((a,b) => parseFloat(b.rating) - parseFloat(a.rating));
+  else if(sort === "year-desc") list.sort((a,b) => parseInt(b.year) - parseInt(a.year));
+  else if(sort === "year-asc") list.sort((a,b) => parseInt(a.year) - parseInt(b.year));
+  else if(sort === "added") list.sort((a,b) => (b.dateAdded||"").localeCompare(a.dateAdded||""));
+  return list;
 }
 
-function openMovieModal(id) {
-  const m = movies.find(x => x.id === id);
-  if(!m) return;
-  const genreLabels = {romantic:"💕 Романтик", comedy:"😄 Инээдмийн", action:"💥 Адал явдалт", drama:"🎭 Драм", animation:"🎨 Анимэшн", mongolian:"🇲🇳 Монгол кино"};
-  const posterColors = {romantic:"linear-gradient(135deg,#FF6B8A,#FF4570)", comedy:"linear-gradient(135deg,#FFB347,#FF8C00)", action:"linear-gradient(135deg,#4A90E2,#003366)", drama:"linear-gradient(135deg,#8B5E83,#4A2040)", animation:"linear-gradient(135deg,#56CCF2,#2F80ED)", mongolian:"linear-gradient(135deg,#1B6CA8,#023E8A)"};
-  const bgColor = posterColors[m.genres[0]] || "linear-gradient(135deg,var(--primary),var(--primary-dark))";
-  document.getElementById("modalContent").innerHTML = `
-    <div class="modal-header">
-      <h3>🎬 ${m.title}</h3>
-      <button class="modal-close" onclick="closeModal()" type="button">✕</button>
-    </div>
-    <div class="modal-body">
-      <div style="height:180px; background:${bgColor}; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:72px; margin-bottom:18px;">
-        ${m.emoji}
-      </div>
-      <div class="modal-meta">
-        <span class="modal-meta-item">📅 ${m.year}</span>
-        <span class="modal-meta-item">⏱ ${m.duration}</span>
-        <span class="modal-meta-item">⭐ ${m.rating}/10</span>
-      </div>
-      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;">
-        ${m.genres.map(g=>`<span class="genre-tag" style="font-size:12px; padding:4px 10px;">${genreLabels[g]||g}</span>`).join("")}
-      </div>
-      <p style="font-size:14px; line-height:1.7; color:var(--text); margin-bottom:14px;">${m.desc}</p>
-      <div class="feeling-box">
-        <h4>💑 Яагаад хосуудад тохиромжтой вэ?</h4>
-        <p>${m.why}</p>
-      </div>
-      <button class="btn btn-primary" style="width:100%; margin-top:14px;" onclick="showToast('✅ ${m.title.replace(/'/g,'')} watchlist-д нэмэгдлээ!'); closeModal();" type="button">+ Watchlist-д нэмэх</button>
-    </div>`;
-  document.getElementById("modal").classList.add("show");
+function cinePosterHtml(m, cls) {
+  const bg = POSTER_BG[m.genres[0]] || "linear-gradient(135deg,#1a1a2e,#2a2a4e)";
+  if(m.poster) {
+    return `<img class="cine-poster-img ${cls||''}" src="${m.poster}" alt="${m.title}" loading="lazy"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="cine-poster-fallback" style="display:none; background:${bg}">${m.emoji}</div>`;
+  }
+  return `<div class="cine-poster-fallback" style="background:${bg}">${m.emoji}</div>`;
 }
+
+function renderMovies() {
+  const list = getFilteredMovies();
+  const count = document.getElementById("movieCount");
+  if(count) count.textContent = `${list.length} кино олдлоо`;
+  const grid = document.getElementById("movieGrid");
+  if(!grid) return;
+  if(!list.length) {
+    grid.innerHTML = `<div class="cinema-no-results" style="grid-column:1/-1">
+      <div style="font-size:48px;margin-bottom:12px">🎬</div>
+      <p>Тохирох кино олдсонгүй</p>
+      <button type="button" class="cinema-add-btn" style="margin-top:16px" onclick="clearMovieSearch()">Шүүлтүүр арилгах</button>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = list.map(m => {
+    const langCls = `lang-${m.lang||"dubbed"}`;
+    const langLabel = (m.lang === "mongolian") ? "MN" : (m.lang === "original") ? "ORG" : "HАД";
+    const genreFirst = GL[m.genres[0]] || m.genres[0];
+    return `<div class="cine-card" onclick="openMovieDetail(${m.id}, ${m._user||false})">
+      <div class="cine-poster-wrap">
+        ${cinePosterHtml(m)}
+        <div class="cine-rating-badge">⭐ ${m.rating}</div>
+        <div class="cine-lang-badge ${langCls}">${langLabel}</div>
+        <div class="cine-play-btn">▶</div>
+      </div>
+      <div class="cine-info">
+        <div class="cine-movie-title">${m.title}</div>
+        <div class="cine-meta"><span>${m.year}</span><span>·</span><span>${m.duration||''}</span></div>
+        <span class="cine-genre-pill">${genreFirst}</span>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function openMovieDetail(id, isUser) {
+  const m = isUser ? userMovies.find(x => x.id === id) : allMovies().find(x => x.id === id);
+  if(!m) return;
+  const overlay = document.getElementById("movieDetailOverlay");
+  const content = document.getElementById("movieDetailContent");
+  const bg = POSTER_BG[m.genres[0]] || "linear-gradient(135deg,#1a1a2e,#2a2a4e)";
+  const langLabel = LANG_LABEL[m.lang] || "🎙 Монгол хадмал";
+  const similarList = allMovies().filter(x => x.id !== m.id && x.genres.some(g => m.genres.includes(g))).slice(0,6);
+  content.innerHTML = `
+    <div class="cinema-detail-topbar">
+      <button type="button" class="cinema-back-btn" onclick="closeMovieDetail()">← Буцах</button>
+      <span style="color:rgba(255,255,255,0.5); font-size:13px">Кино дэлгэрэнгүй</span>
+      <div></div>
+    </div>
+    <div class="cinema-detail-banner" style="background:${bg}">
+      ${m.poster ? `<img class="cinema-detail-banner-img" src="${m.poster}" alt="${m.title}" onerror="this.style.display='none'">` : ''}
+      <div class="cinema-detail-banner-gradient"></div>
+      ${!m.poster ? `<div class="cinema-detail-banner-emoji">${m.emoji}</div>` : ''}
+    </div>
+    <div class="cinema-detail-body">
+      <div class="cinema-detail-header">
+        <div class="cinema-detail-poster-thumb">
+          ${cinePosterHtml(m)}
+        </div>
+        <div class="cinema-detail-title-block">
+          <h1 class="cinema-detail-title">${m.title}</h1>
+          <div class="cinema-detail-badges">
+            <span class="cinema-detail-rating">⭐ ${m.rating}/10</span>
+            <span class="cine-lang-badge lang-${m.lang||'dubbed'}" style="position:static">${langLabel}</span>
+          </div>
+          <div class="cinema-detail-meta">${m.year} · ${m.duration||''} ${m.director ? '· ' + m.director : ''}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+            ${m.genres.map(g=>`<span class="cine-genre-pill">${GL[g]||g}</span>`).join("")}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+        ${m.watchUrl ? `<a href="${m.watchUrl}" target="_blank" rel="noopener" class="cinema-watch-btn">▶ Үзэх</a>` : `<button type="button" class="cinema-watch-btn" onclick="showToast('⚠️ Үзэх холбоос нэмэгдээгүй байна')">▶ Үзэх холбоос</button>`}
+        <button type="button" class="cinema-watchlist-btn" onclick="toggleMovieWatchlist(${m.id})">
+          <span id="wlIcon${m.id}">${movieWatchlist.has(m.id)?'✓':'+'}</span> Watchlist
+        </button>
+      </div>
+      <div class="cinema-detail-section">
+        <h4>Тайлбар</h4>
+        <p class="cinema-detail-desc">${m.desc}</p>
+      </div>
+      <div class="cinema-detail-section">
+        <h4>💑 Яагаад хосуудад тохиромжтой вэ?</h4>
+        <p class="cinema-detail-desc" style="color:#e2b714">${m.why||'Хамтдаа үзэхэд тохиромжтой кино'}</p>
+      </div>
+      ${m.trailer ? `
+      <div class="cinema-detail-section">
+        <h4>Trailer</h4>
+        <div class="cinema-trailer-wrap">
+          <iframe src="${m.trailer}" allowfullscreen loading="lazy" title="${m.title} trailer"></iframe>
+        </div>
+      </div>` : ''}
+      ${similarList.length ? `
+      <div class="cinema-detail-section">
+        <h4>Төстэй кинонууд</h4>
+        <div class="cinema-similar-grid">
+          ${similarList.map(s => `
+            <div class="cine-card" onclick="openMovieDetail(${s.id}, false)" style="cursor:pointer">
+              <div class="cine-poster-wrap" style="aspect-ratio:2/3">
+                ${cinePosterHtml(s)}
+                <div class="cine-rating-badge">⭐ ${s.rating}</div>
+              </div>
+              <div class="cine-info">
+                <div class="cine-movie-title">${s.title}</div>
+                <div class="cine-meta">${s.year}</div>
+              </div>
+            </div>`).join("")}
+        </div>
+      </div>` : ''}
+      ${isUser ? `<div style="margin-top:24px;text-align:center">
+        <button type="button" class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" onclick="deleteUserMovie(${id})">🗑 Устгах</button>
+      </div>` : ''}
+    </div>`;
+  overlay.style.display = "block";
+  overlay.scrollTop = 0;
+  document.body.style.overflow = "hidden";
+}
+
+function closeMovieDetail() {
+  document.getElementById("movieDetailOverlay").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+function setCinemaTab(tab, el) {
+  currentMovieCinemaTab = tab;
+  document.querySelectorAll(".cinema-tab").forEach(t => t.classList.remove("active"));
+  if(el) el.classList.add("active");
+  renderMovies();
+}
+
+function setMovieGenre(genre, el) {
+  currentMovieGenre = genre;
+  document.querySelectorAll(".cchip").forEach(c => c.classList.remove("active"));
+  if(el) el.classList.add("active");
+  renderMovies();
+}
+
+function setMovieSort(val) {
+  currentMovieSort = val;
+  renderMovies();
+}
+
+function filterAndRenderMovies() {
+  const inp = document.getElementById("movieSearchInput");
+  currentMovieSearch = inp ? inp.value : "";
+  const clr = document.getElementById("movieSearchClear");
+  if(clr) clr.style.display = currentMovieSearch ? "block" : "none";
+  renderMovies();
+}
+
+function clearMovieSearch() {
+  currentMovieSearch = "";
+  currentMovieCinemaTab = "all";
+  currentMovieGenre = "all";
+  currentMovieSort = "rating";
+  const inp = document.getElementById("movieSearchInput");
+  if(inp) inp.value = "";
+  const clr = document.getElementById("movieSearchClear");
+  if(clr) clr.style.display = "none";
+  document.querySelectorAll(".cinema-tab").forEach((t,i)=>t.classList.toggle("active",i===0));
+  document.querySelectorAll(".cchip").forEach((c,i)=>c.classList.toggle("active",i===0));
+  const sel = document.getElementById("movieSortSelect");
+  if(sel) sel.value = "rating";
+  renderMovies();
+}
+
+let movieWatchlist = new Set(JSON.parse(localStorage.getItem("nbolzoo_watchlist")||"[]"));
+function toggleMovieWatchlist(id) {
+  if(movieWatchlist.has(id)) movieWatchlist.delete(id);
+  else movieWatchlist.add(id);
+  localStorage.setItem("nbolzoo_watchlist", JSON.stringify([...movieWatchlist]));
+  const ic = document.getElementById("wlIcon"+id);
+  if(ic) ic.textContent = movieWatchlist.has(id) ? "✓" : "+";
+  showToast(movieWatchlist.has(id) ? "✅ Watchlist-д нэмэгдлээ!" : "🗑 Watchlist-аас хасагдлаа");
+}
+
+function openAddMovieModal() {
+  const ov = document.getElementById("addMovieOverlay");
+  if(ov) { ov.style.display = "block"; document.body.style.overflow = "hidden"; }
+}
+
+function closeAddMovieModal() {
+  const ov = document.getElementById("addMovieOverlay");
+  if(ov) { ov.style.display = "none"; document.body.style.overflow = ""; }
+}
+
+function submitAddMovie() {
+  const title = document.getElementById("amTitle").value.trim();
+  const desc = document.getElementById("amDesc").value.trim();
+  if(!title || !desc) { showToast("⚠️ Нэр болон тайлбар заавал бөглөнө үү"); return; }
+  const genreRaw = document.getElementById("amGenres").value;
+  const genres = genreRaw ? genreRaw.split(",").map(g=>g.trim()).filter(Boolean) : ["drama"];
+  const newMovie = {
+    id: Date.now(), _user: true, emoji:"🎬",
+    title, year: document.getElementById("amYear").value||"2024",
+    rating: document.getElementById("amRating").value||"7.0",
+    duration: document.getElementById("amDuration").value||"",
+    lang: document.getElementById("amLang").value||"dubbed",
+    poster: document.getElementById("amPoster").value.trim()||"",
+    trailer: document.getElementById("amTrailer").value.trim()||"",
+    watchUrl: document.getElementById("amWatchUrl").value.trim()||"",
+    genres, desc,
+    why: document.getElementById("amWhy").value.trim()||"Хамтдаа үзэхэд тохиромжтой",
+    trending: false, dateAdded: new Date().toISOString().slice(0,10)
+  };
+  userMovies.push(newMovie);
+  localStorage.setItem("nbolzoo_movies", JSON.stringify(userMovies));
+  closeAddMovieModal();
+  renderMovies();
+  showToast(`✅ "${title}" нэмэгдлээ!`);
+  ["amTitle","amYear","amPoster","amRating","amDuration","amTrailer","amWatchUrl","amGenres","amDesc","amWhy"].forEach(id=>{
+    const el = document.getElementById(id); if(el) el.value="";
+  });
+}
+
+function deleteUserMovie(id) {
+  userMovies = userMovies.filter(m => m.id !== id);
+  localStorage.setItem("nbolzoo_movies", JSON.stringify(userMovies));
+  closeMovieDetail();
+  renderMovies();
+  showToast("🗑 Кино устгагдлаа");
+}
+
+function openMovieModal(id) { openMovieDetail(id, false); }
 
 function showToast(message) {
   const existing = document.querySelector(".toast");

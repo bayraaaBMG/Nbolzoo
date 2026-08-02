@@ -174,6 +174,17 @@ function imgTag(url, credit, cls, style) {
   return `<img src="${url}" loading="lazy" alt="" class="${cls||''}" style="${style||''}" onerror="this.parentNode.removeChild(this)">${cred}`;
 }
 
+// Google Maps — API key шаардахгүй энгийн embed + шинэ tab-д нээх холбоос.
+// query нь газрын нэр (жишээ: "Тэрхийн цагаан нуур, Архангай").
+function mapEmbedHtml(query) {
+  const q = encodeURIComponent(query + " Монгол");
+  return `
+    <div class="map-embed-wrap">
+      <iframe src="https://www.google.com/maps?q=${q}&output=embed" loading="lazy" style="width:100%;height:220px;border:0;border-radius:10px;display:block;" allowfullscreen title="${query} — газрын зураг"></iframe>
+      <a href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener" class="map-open-link">🗺 Google Maps дээр нээх →</a>
+    </div>`;
+}
+
 // Кино/аймаг/хуудас бүр өөрийн HTML файл, өөрийн URL-тай тул
 // navigate() зүгээр л тухайн файл руу шилждэг (жинхэнэ browser navigation).
 const NAV_FILE_MAP = { home: "index.html", "aimag-detail": "aimags.html" };
@@ -244,6 +255,7 @@ function openIdeaModal(id) {
         <div class="modal-meta-item">💸 <strong>${idea.priceText}</strong></div>
         <div class="modal-meta-item">❤️ <strong>${idea.likes + (isLiked?1:0)}</strong></div>
       </div>
+      ${mapEmbedHtml(`${idea.location}, Улаанбаатар`)}
       <p style="margin-bottom: 16px; line-height: 1.7;">${idea.desc}</p>
       <div class="feeling-box">
         <h4>💝 Энэ болзоонд танд төрөх мэдрэмж:</h4>

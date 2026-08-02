@@ -4925,16 +4925,23 @@ function renderAimagDetail(id) {
         <h3>✨ ${a.name}-н 9 гайхамшиг</h3>
         <p style="color:var(--text-light); font-size:13px; margin-bottom:12px;">💡 Гайхамшиг бүр дээр дарж нэрийн гарал, түүх, юу үзэхийг харна уу</p>
         <div class="wonders-grid">
-          ${a.wonders.map((w, wi) => `
+          ${a.wonders.map((w, wi) => {
+            const wt = getWonderType(a.id, wi);
+            const wImg = wonderTypeImgDB[wt];
+            const imgHtml = wImg
+              ? `<img src="${wImg.u}" loading="lazy" alt="${w.name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;" onerror="this.remove()"><div style="position:absolute;inset:0;background:rgba(0,0,0,0.25);z-index:1;"></div>`
+              : "";
+            return `
             <div class="wonder-item" onclick="openWonderModal(${a.id}, ${wi})">
-              <div class="wonder-visual ${getWonderType(a.id, wi)}">
-                <span class="wonder-visual-emoji">${w.emoji}</span>
+              <div class="wonder-visual ${wt}" style="position:relative;overflow:hidden;">
+                ${imgHtml}
+                <span class="wonder-visual-emoji" style="position:relative;z-index:2;">${w.emoji}</span>
               </div>
               <div class="wonder-name">${w.name}</div>
               <div class="wonder-desc">${w.desc}</div>
               <div class="wonder-more">Дэлгэрэнгүй →</div>
-            </div>
-          `).join("")}
+            </div>`;
+          }).join("")}
         </div>
       </div>
       <div class="aimag-section">
@@ -5000,6 +5007,8 @@ function openWonderModal(aimagId, wonderIdx) {
         <div class="modal-meta-item">📍 <strong>${a.name} аймаг</strong></div>
         <div class="modal-meta-item">🏷 <strong>${typeLabel(type)}</strong></div>
       </div>
+
+      ${mapEmbedHtml(`${w.name}, ${a.name} аймаг`)}
 
       <div class="wonder-detail-section">
         <div class="label">🔤 Нэрийн гарал (яагаад ингэж нэрлэсэн)</div>
@@ -5118,6 +5127,7 @@ function openAimagDateModal(aimagId, dateIdx) {
         <div class="modal-meta-item">📍 <strong>${a.name} аймаг</strong></div>
         <div class="modal-meta-item">💸 <strong>${d.price}</strong></div>
       </div>
+      ${mapEmbedHtml(`${d.title}, ${a.name} аймаг`)}
       <p style="margin-bottom: 16px; line-height: 1.7;">${d.desc}</p>
       <div class="feeling-box">
         <h4>💝 Энэ болзоонд танд төрөх мэдрэмж:</h4>

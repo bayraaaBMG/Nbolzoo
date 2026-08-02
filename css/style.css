@@ -1268,3 +1268,11 @@ body {
 .admin-stat { background: #fff; border: 1px solid var(--primary-extra-soft); border-radius: 10px; padding: 20px; text-align: center; }
 .admin-stat-num { font-size: 28px; font-weight: 700; color: var(--primary); }
 .admin-stat-label { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+
+/* ===== Google Maps embed ===== */
+.map-embed-wrap { margin: 14px 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--primary-extra-soft); }
+.map-open-link {
+  display: block; text-align: center; padding: 10px; background: var(--primary-extra-soft);
+  color: var(--primary); font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer;
+}
+.map-open-link:hover { background: var(--primary-soft); }

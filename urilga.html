@@ -3,21 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Хадгалсан санаанууд - NBolzoo</title>
+<title>Урилга - NBolzoo</title>
 <!-- OG Meta Tags - Social Share -->
-<meta property="og:title" content="Хадгалсан санаанууд - NBolzoo">
-<meta property="og:description" content="Таны дуртай гэж тэмдэглэсэн болзооны санаанууд.">
+<meta property="og:title" content="Урилга - NBolzoo">
+<meta property="og:description" content="Үйл ажиллагаа, хурим, болзоо, гэрлэх санал — урилгаа үүсгээд шууд QR кодоор хуваалц.">
 <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Gorkhi-Terelj_National_Park.jpg/640px-Gorkhi-Terelj_National_Park.jpg">
-<meta property="og:url" content="https://nbolzoo.vercel.app/saved.html">
+<meta property="og:url" content="https://nbolzoo.vercel.app/urilga.html">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Хадгалсан санаанууд - NBolzoo">
-<meta name="twitter:description" content="Таны дуртай гэж тэмдэглэсэн болзооны санаанууд.">
-<meta name="description" content="Таны дуртай гэж тэмдэглэсэн болзооны санаанууд.">
-<link rel="canonical" href="https://nbolzoo.vercel.app/saved.html">
+<meta name="twitter:title" content="Урилга - NBolzoo">
+<meta name="twitter:description" content="Үйл ажиллагаа, хурим, болзоо, гэрлэх санал — урилгаа үүсгээд шууд QR кодоор хуваалц.">
+<meta name="description" content="Үйл ажиллагаа, хурим, болзоо, гэрлэх санал — урилгаа үүсгээд шууд QR кодоор хуваалц.">
+<link rel="canonical" href="https://nbolzoo.vercel.app/urilga.html">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="apple-touch-icon" href="logo.svg">
 <link rel="stylesheet" href="css/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -45,9 +47,9 @@
       <li><a class="nav-link" data-page="community" onclick="navigate('community')">👥 Нийгэмлэг</a></li>
       <li><a class="nav-link" data-page="ai" onclick="navigate('ai')">🤖 AI зөвлөх</a></li>
       <li><a class="nav-link" data-page="movies" onclick="navigate('movies')">🎬 Кино</a></li>
-      <li><a class="nav-link active" data-page="saved" onclick="navigate('saved')">❤️ Хадгалсан</a></li>
-      <li><a class="nav-link" data-page="urilga" onclick="navigate('urilga')">💌 Урилга</a></li>
-<li><a class="nav-link" id="navAdminLink" data-page="admin" onclick="navigate('admin')" style="display:none;">⚙️ Админ</a></li>
+      <li><a class="nav-link" data-page="saved" onclick="navigate('saved')">❤️ Хадгалсан</a></li>
+      <li><a class="nav-link active" data-page="urilga" onclick="navigate('urilga')">💌 Урилга</a></li>
+      <li><a class="nav-link" id="navAdminLink" data-page="admin" onclick="navigate('admin')" style="display:none;">⚙️ Админ</a></li>
     </ul>
     <div class="nav-actions">
       <div id="navAuthButtons">
@@ -97,12 +99,8 @@
 
 
 <main>
-  <div id="page-saved" class="page active">
-    <div class="container">
-      <h1 style="margin-bottom: 6px;">❤️ Хадгалсан санаанууд</h1>
-      <p style="color: var(--text-light); margin-bottom: 24px;">Таны дуртай гэж тэмдэглэсэн болзооны санаанууд</p>
-      <div id="savedGrid" class="cards-grid"></div>
-    </div>
+  <div id="page-urilga" class="page active">
+    <div class="container" id="inviteRoot"></div>
   </div>
 </main>
 
@@ -161,11 +159,10 @@
 <script src="js/notifications.js"></script>
 <script src="js/storage-utils.js"></script>
 <script src="js/core.js"></script>
-<script src="js/ub.js"></script>
-<script src="js/saved.js"></script>
+<script src="js/invite.js"></script>
 <script src="js/main.js"></script>
 <script>
-renderSaved();
+initInvitePage();
 </script>
 
 </body>

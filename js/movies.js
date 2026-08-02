@@ -264,11 +264,14 @@ function openMovieDetail(id) {
         </div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
-        <a href="${m.watchUrl || 'https://lolokino.buzz/?s=' + encodeURIComponent(m.title)}" target="_blank" rel="noopener" class="cinema-watch-btn">▶ Lolokino-д үзэх</a>
+        ${m.watchUrl
+          ? `<a href="${m.watchUrl}" target="_blank" rel="noopener" class="cinema-watch-btn">▶ Lolokino-д үзэх</a>`
+          : `<a href="https://lolokino.buzz/?s=${encodeURIComponent(m.title)}" target="_blank" rel="noopener" class="cinema-watch-btn">🔍 Lolokino-с хайж үзэх</a>`}
         <button type="button" class="cinema-watchlist-btn" onclick="toggleMovieWatchlist(${m.id})">
           <span id="wlIcon${m.id}">${movieWatchlist.has(m.id)?'✓':'+'}</span> Watchlist
         </button>
       </div>
+      ${!m.watchUrl ? `<p style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:6px;">Тодорхой холбоос баталгаажаагүй тул Lolokino дээрх хайлтын үр дүн рүү очно</p>` : ""}
       <div class="cinema-detail-section">
         <h4>Тайлбар</h4>
         <p class="cinema-detail-desc">${m.desc}</p>

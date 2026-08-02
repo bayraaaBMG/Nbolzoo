@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NBolzoo - Монголын анхны болзооны санааны платформ</title>
+<title>Мэргэжилтэн зөвлөгөө - NBolzoo</title>
 <!-- OG Meta Tags - Social Share -->
-<meta property="og:title" content="NBolzoo - Монголын анхны болзооны санааны платформ">
-<meta property="og:description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, AI зөвлөх, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
+<meta property="og:title" content="Мэргэжилтэн зөвлөгөө - NBolzoo">
+<meta property="og:description" content="Харилцааны 5 үе шат, 5 хайрын хэл, 247 асуултын тоглоом, болзооны жагсаалт.">
 <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Gorkhi-Terelj_National_Park.jpg/640px-Gorkhi-Terelj_National_Park.jpg">
-<meta property="og:url" content="https://nbolzoo.vercel.app/index.html">
+<meta property="og:url" content="https://nbolzoo.vercel.app/expert.html">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="NBolzoo - Монголын анхны болзооны санааны платформ">
-<meta name="twitter:description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, AI зөвлөх, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
-<meta name="description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, AI зөвлөх, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
-<link rel="canonical" href="https://nbolzoo.vercel.app/index.html">
+<meta name="twitter:title" content="Мэргэжилтэн зөвлөгөө - NBolzoo">
+<meta name="twitter:description" content="Харилцааны 5 үе шат, 5 хайрын хэл, 247 асуултын тоглоом, болзооны жагсаалт.">
+<meta name="description" content="Харилцааны 5 үе шат, 5 хайрын хэл, 247 асуултын тоглоом, болзооны жагсаалт.">
+<link rel="canonical" href="https://nbolzoo.vercel.app/expert.html">
 <link rel="stylesheet" href="css/style.css">
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -34,10 +34,10 @@
       </div>
     </div>
     <ul class="nav-menu">
-      <li><a class="nav-link active" data-page="home" onclick="navigate('home')">🏠 Нүүр</a></li>
+      <li><a class="nav-link" data-page="home" onclick="navigate('home')">🏠 Нүүр</a></li>
       <li><a class="nav-link" data-page="ub" onclick="navigate('ub')">🏙 УБ 365</a></li>
       <li><a class="nav-link" data-page="aimags" onclick="navigate('aimags')">🌄 21 аймаг</a></li>
-      <li><a class="nav-link" data-page="expert" onclick="navigate('expert')">💎 Зөвлөгөө</a></li>
+      <li><a class="nav-link active" data-page="expert" onclick="navigate('expert')">💎 Зөвлөгөө</a></li>
       <li><a class="nav-link" data-page="gifts" onclick="navigate('gifts')">🎁 Бэлэг</a></li>
       <li><a class="nav-link" data-page="community" onclick="navigate('community')">👥 Нийгэмлэг</a></li>
       <li><a class="nav-link" data-page="ai" onclick="navigate('ai')">🤖 AI зөвлөх</a></li>
@@ -92,48 +92,54 @@
 
 
 <main>
-  <div id="page-home" class="page active">
-    <section class="hero">
-      <div class="hero-content">
-        <h1>Өнөөдөр хамт хаашаа явах вэ? 💕</h1>
-        <p>Монголын анхны болзооны санааны платформ — УБ-д 365 санаа + 21 аймагт 189 санаа</p>
-        <div class="search-box">
-          <input type="text" placeholder="Жишээ: Зайсан, кафе, төсөв 50,000₮" id="searchInput" onkeypress="if(event.key==='Enter')performSearch()"/>
-          <button class="btn btn-accent" onclick="performSearch()" type="button">Хайх</button>
-        </div>
-        <div style="margin-top: 14px;">
-          <button class="btn btn-random" onclick="openRandomIdea()" type="button">🎲 Санамсаргүй санаа авах</button>
-        </div>
-        <div class="hero-stats">
-          <div class="hero-stat"><span class="hero-stat-num">554</span><span class="hero-stat-label">болзооны санаа</span></div>
-          <div class="hero-stat"><span class="hero-stat-num">365</span><span class="hero-stat-label">УБ-д жилийн өдөр</span></div>
-          <div class="hero-stat"><span class="hero-stat-num">21</span><span class="hero-stat-label">аймаг</span></div>
-          <div class="hero-stat"><span class="hero-stat-num">189</span><span class="hero-stat-label">аймгийн санаа</span></div>
-        </div>
-      </div>
-    </section>
-
+  <div id="page-expert" class="page">
     <div class="container">
-      <div class="section-title">
-        <h2>🔥 Өнөөдрийн шилдэг санаанууд</h2>
-        <a onclick="navigate('ub')">Бүгдийг харах →</a>
+      <div class="expert-hero">
+        <span class="expert-badge">💎 Мэргэжилтэн зөвлөгөө</span>
+        <h1>Болзоог зүгээр л болзоо биш, харин харилцааны бүтээн байгуулалт болгох</h1>
+        <p>40 гаруй жилийн харилцааны сэтгэл судлал, нөхөн үржихүйн биологи, болзооны социологийн судалгаанд тулгуурласан практик зөвлөгөө. Болзоо хийх биш, харилцаагаа гүнзгийрүүлэх арга зүй.</p>
       </div>
-      <div class="cards-grid" id="featuredGrid"></div>
 
-      <div class="ai-box">
-        <div class="ai-avatar">🤖</div>
-        <div class="ai-content">
-          <h3>NBolzoo AI зөвлөх танд тусгайлан санал болгож байна</h3>
-          <p>Та өөрийнхөө сонирхол, зан чанар, төсвийг хэлээд бид танд тохирох болзооны төрөл, газар, бүр тохирох хүн санал болгоно.</p>
-          <button type="button" class="ai-btn" onclick="navigate('ai')">AI зөвлөхтэй ярилцах →</button>
+      <div class="expert-sections">
+        <div class="expert-section-card" onclick="showExpertSection('stages')">
+          <span class="icon">🌱</span>
+          <h3>Харилцааны 5 үе шат</h3>
+          <p>Шинэ танилцсанаас гэрлэхийн өмнөх хүртэл үе шат бүрд тохирох болзооны санаа</p>
+          <span class="count">5 үе шат →</span>
+        </div>
+        <div class="expert-section-card" onclick="showExpertSection('love')">
+          <span class="icon">💝</span>
+          <h3>5 хайрын хэл</h3>
+          <p>Хүн бүр өөрсдийнхөөрөө хайраа илэрхийлдэг. Хосынхоо "хэл"-ийг ол.</p>
+          <span class="count">5 хэл →</span>
+        </div>
+        <div class="expert-section-card" onclick="showExpertSection('mistakes')">
+          <span class="icon">⚠️</span>
+          <h3>7 том алдаа</h3>
+          <p>Анхны болзоонд хүмүүсийн хийдэг түгээмэл алдаа, түүнээс хэрхэн зайлсхийх</p>
+          <span class="count">7 алдаа →</span>
+        </div>
+        <div class="expert-section-card" onclick="showExpertSection('checklist')">
+          <span class="icon">📋</span>
+          <h3>Болзооны өмнөх жагсаалт</h3>
+          <p>Юу хувцаслах, юу яриулах, юу авч явах - бүгдийг нэг газар</p>
+          <span class="count">Жагсаалт →</span>
+        </div>
+        <div class="expert-section-card" onclick="showExpertSection('questions')">
+          <span class="icon">💬</span>
+          <h3>247 асуултын тоглоом</h3>
+          <p>Хэзээ ч давтагдахгүй 247 өвөрмөц асуулт — хосын дотно харилцааг гүнзгийрүүлэх</p>
+          <span class="count">247 асуулт →</span>
+        </div>
+        <div class="expert-section-card" onclick="showExpertSection('reset')">
+          <span class="icon">🔄</span>
+          <h3>Reset болзоо</h3>
+          <p>Зөрчилдсөн, холдсон үед харилцаагаа сэргээх тусгай төрлийн болзоо</p>
+          <span class="count">Засварын зөвлөгөө →</span>
         </div>
       </div>
 
-      <div class="section-title">
-        <h2>🌄 Аймагт хамт явах уу?</h2>
-        <a onclick="navigate('aimags')">21 аймаг үзэх →</a>
-      </div>
-      <div class="aimag-grid" id="featuredAimags"></div>
+      <div id="expertContent"></div>
     </div>
   </div>
 
@@ -194,14 +200,12 @@
 <script src="js/notifications.js"></script>
 <script src="js/storage-utils.js"></script>
 <script src="js/core.js"></script>
-<script src="js/ub.js"></script>
-<script src="js/aimags.js"></script>
-<script src="js/home.js"></script>
+<script src="js/expert.js"></script>
 <script src="js/main.js"></script>
 <script>
-renderFeatured();
-renderFeaturedAimags();
-updateHeroStats();
+const __params = new URLSearchParams(location.search);
+const __section = __params.get("section");
+if (__section) showExpertSection(__section);
 </script>
 
 </body>

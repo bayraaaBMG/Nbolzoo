@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+    function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+
+    // ---- users/{uid} : public profile ----
+    match /users/{uid} {
+      allow read: if true;
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ---- posts/{postId} : community feed ----
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+      // Owner can edit their own post; anyone signed-in may update ONLY likeCount/commentCount
+      // (those are maintained via transactions from toggleLike/addComment), author/content stay immutable for non-owners.
+      allow update: if isSignedIn() && (
+        resource.data.authorId == request.auth.uid ||
+        isAdmin() ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'commentCount'])
+      );
+      allow delete: if isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
+    }
+
+    // ---- comments/{commentId} ----
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+      allow update: if false;
+      allow delete: if isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
+    }
+
+    // ---- likes/{uid_targetId} : one doc per (user, post|idea) ----
+    match /likes/{likeId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && likeId == request.auth.uid + '_' + request.resource.data.targetId;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // ---- saved/{uid_ideaId} : per-user saved date-ideas, private ----
+    match /saved/{savedId} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && savedId == request.auth.uid + '_' + request.resource.data.ideaId;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // ---- notifications/{notifId} : per-recipient, private ----
+    match /notifications/{notifId} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      // Any signed-in user may create a notification FOR another user (e.g. commenting on their post)
+      allow create: if isSignedIn();
+      // Only the recipient may mark as read / delete
+      allow update: if isSignedIn() && resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // ---- movies/{movieId} : curated catalog, admin-only writes ----
+    match /movies/{movieId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ---- movieSuggestions/{suggestionId} : public "add a movie" goes here for review ----
+    match /movieSuggestions/{suggestionId} {
+      allow read: if isSignedIn() && (resource.data.submittedBy == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.submittedBy == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isSignedIn() && (resource.data.submittedBy == request.auth.uid || isAdmin());
+    }
+
+    // ---- admins/{uid} : existence = is admin. Only settable from Firebase Console / CLI. ----
+    match /admins/{uid} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+  }
+}

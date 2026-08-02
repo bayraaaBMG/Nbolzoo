@@ -1,0 +1,28 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { return isSignedIn() && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid)); }
+    function isImage() { return request.resource.contentType.matches('image/.*'); }
+    function underSize(mb) { return request.resource.size < mb * 1024 * 1024; }
+
+    // Profile avatars — owner only, 5MB cap
+    match /profiles/{uid}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.uid == uid && isImage() && underSize(5);
+    }
+
+    // Community post images — post author only, 8MB cap
+    match /posts/{uid}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.uid == uid && isImage() && underSize(8);
+    }
+
+    // Movie posters — admin only, 8MB cap
+    match /movies/{movieId}/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() && isImage() && underSize(8);
+    }
+  }
+}

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Кино каталог - NBolzoo</title>
+<!-- OG Meta Tags - Social Share -->
+<meta property="og:title" content="Кино каталог - NBolzoo">
+<meta property="og:description" content="Хосуудад зориулсан монгол хадмал болон монгол кинонуудын цуглуулга.">
+<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Gorkhi-Terelj_National_Park.jpg/640px-Gorkhi-Terelj_National_Park.jpg">
+<meta property="og:url" content="https://nbolzoo.vercel.app/movies.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Кино каталог - NBolzoo">
+<meta name="twitter:description" content="Хосуудад зориулсан монгол хадмал болон монгол кинонуудын цуглуулга.">
+<meta name="description" content="Хосуудад зориулсан монгол хадмал болон монгол кинонуудын цуглуулга.">
+<link rel="canonical" href="https://nbolzoo.vercel.app/movies.html">
+<link rel="stylesheet" href="css/style.css">
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+</head>
+<body>
+
+<header class="header">
+  <nav class="nav">
+    <div class="logo" onclick="navigate('home')">
+      <div class="logo-icon">N</div>
+      <div>
+        <span class="logo-text">NBolzoo</span>
+        <span class="logo-tagline">.mn · 554 санаа</span>
+      </div>
+    </div>
+    <ul class="nav-menu">
+      <li><a class="nav-link" data-page="home" onclick="navigate('home')">🏠 Нүүр</a></li>
+      <li><a class="nav-link" data-page="ub" onclick="navigate('ub')">🏙 УБ 365</a></li>
+      <li><a class="nav-link" data-page="aimags" onclick="navigate('aimags')">🌄 21 аймаг</a></li>
+      <li><a class="nav-link" data-page="expert" onclick="navigate('expert')">💎 Зөвлөгөө</a></li>
+      <li><a class="nav-link" data-page="gifts" onclick="navigate('gifts')">🎁 Бэлэг</a></li>
+      <li><a class="nav-link" data-page="community" onclick="navigate('community')">👥 Нийгэмлэг</a></li>
+      <li><a class="nav-link" data-page="ai" onclick="navigate('ai')">🤖 AI зөвлөх</a></li>
+      <li><a class="nav-link active" data-page="movies" onclick="navigate('movies')">🎬 Кино</a></li>
+      <li><a class="nav-link" data-page="saved" onclick="navigate('saved')">❤️ Хадгалсан</a></li>
+      <li><a class="nav-link" id="navAdminLink" data-page="admin" onclick="navigate('admin')" style="display:none;">⚙️ Админ</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div id="navAuthButtons">
+        <button type="button" class="btn btn-ghost" onclick="openAuth('login')">Нэвтрэх</button>
+        <button type="button" class="btn btn-primary" onclick="openAuth('signup')">Бүртгүүлэх</button>
+      </div>
+      <div id="navUserInfo" style="display:none; align-items:center; gap:8px;">
+        <div class="notif-bell" id="notifBell" onclick="toggleNotifDropdown()">
+          🔔<span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+          <div class="notif-dropdown" id="notifDropdown" style="display:none;"></div>
+        </div>
+        <div class="avatar" id="navAvatar" style="width:34px;height:34px;font-size:13px;cursor:pointer;" onclick="openProfileModal()"></div>
+        <button type="button" class="btn btn-ghost" style="font-size:13px;padding:8px 12px;" onclick="logoutUser()">Гарах</button>
+      </div>
+      <button type="button" class="mobile-menu-btn" onclick="openMobileMenu()" title="Цэс нээх">☰</button>
+    </div>
+  </nav>
+</header>
+
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+<div class="mobile-nav-drawer" id="mobileNavDrawer">
+  <div class="mobile-nav-header">
+    <div class="logo">
+      <div class="logo-icon" style="width:34px;height:34px;font-size:16px;">N</div>
+      <span class="logo-text" style="font-size:18px;">NBolzoo</span>
+    </div>
+    <button type="button" class="mobile-nav-close" onclick="closeMobileMenu()">✕</button>
+  </div>
+  <div class="mobile-nav-items">
+    <a onclick="navigate('home');closeMobileMenu()">🏠 Нүүр</a>
+    <a onclick="navigate('ub');closeMobileMenu()">🏙 УБ 365</a>
+    <a onclick="navigate('aimags');closeMobileMenu()">🌄 21 аймаг</a>
+    <a onclick="navigate('expert');closeMobileMenu()">💎 Зөвлөгөө</a>
+    <a onclick="navigate('gifts');closeMobileMenu()">🎁 Бэлэг</a>
+    <a onclick="navigate('community');closeMobileMenu()">👥 Нийгэмлэг</a>
+    <a onclick="navigate('ai');closeMobileMenu()">🤖 AI зөвлөх</a>
+    <a onclick="navigate('movies');closeMobileMenu()">🎬 Кино</a>
+    <a onclick="navigate('saved');closeMobileMenu()">❤️ Хадгалсан</a>
+  </div>
+  <div class="mobile-nav-divider"></div>
+  <div class="mobile-nav-actions" id="mobileAuthButtons">
+    <button type="button" class="btn btn-ghost" style="width:100%" onclick="openAuth('login');closeMobileMenu()">Нэвтрэх</button>
+    <button type="button" class="btn btn-primary" style="width:100%" onclick="openAuth('signup');closeMobileMenu()">Бүртгүүлэх</button>
+  </div>
+</div>
+
+
+<main>
+  <div id="page-movies" class="page cinema-page">
+    <!-- Cinema Header -->
+    <div class="cinema-header">
+      <div class="container">
+        <h1 class="cinema-title">🎬 Кино каталог</h1>
+        <p class="cinema-subtitle">Хосуудад зориулсан монгол хадмал болон монгол кинонуудын цуглуулга</p>
+        <div class="cinema-search-bar">
+          <span class="cinema-search-icon">🔍</span>
+          <input type="text" id="movieSearchInput" class="cinema-search-input" placeholder="Кино нэрээр хайх..." oninput="filterAndRenderMovies()">
+          <button type="button" class="cinema-search-clear" id="movieSearchClear" onclick="clearMovieSearch()" style="display:none">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Cinema Tabs -->
+      <div class="cinema-tabs">
+        <button type="button" class="cinema-tab active" onclick="setCinemaTab('all',this)">Бүгд</button>
+        <button type="button" class="cinema-tab" onclick="setCinemaTab('trending',this)">🔥 Тренд</button>
+        <button type="button" class="cinema-tab" onclick="setCinemaTab('mongolian',this)">🇲🇳 Монгол</button>
+        <button type="button" class="cinema-tab" onclick="setCinemaTab('dubbed',this)">🎙 Хадмал</button>
+      </div>
+
+      <!-- Filters Row -->
+      <div class="cinema-filters">
+        <div class="cinema-filter-row">
+          <div class="cinema-filter-group">
+            <span class="filter-label">Төрөл:</span>
+            <div class="cinema-genre-chips">
+              <button type="button" class="cchip active" data-cgenre="all" onclick="setMovieGenre('all',this)">Бүгд</button>
+              <button type="button" class="cchip" data-cgenre="romantic" onclick="setMovieGenre('romantic',this)">💕 Романтик</button>
+              <button type="button" class="cchip" data-cgenre="comedy" onclick="setMovieGenre('comedy',this)">😄 Инээдмийн</button>
+              <button type="button" class="cchip" data-cgenre="action" onclick="setMovieGenre('action',this)">💥 Адал явдалт</button>
+              <button type="button" class="cchip" data-cgenre="drama" onclick="setMovieGenre('drama',this)">🎭 Драм</button>
+              <button type="button" class="cchip" data-cgenre="animation" onclick="setMovieGenre('animation',this)">🎨 Анимэшн</button>
+              <button type="button" class="cchip" data-cgenre="mongolian" onclick="setMovieGenre('mongolian',this)">🇲🇳 Монгол</button>
+            </div>
+          </div>
+          <div class="cinema-sort-row">
+            <span class="filter-label">Эрэмбэ:</span>
+            <select class="cinema-sort-select" id="movieSortSelect" title="Кино эрэмбэлэх" onchange="setMovieSort(this.value)">
+              <option value="rating">⭐ Рейтинг</option>
+              <option value="year-desc">📅 Шинэ эхэнд</option>
+              <option value="year-asc">📅 Хуучин эхэнд</option>
+              <option value="added">🆕 Нэмэгдсэн</option>
+            </select>
+          </div>
+        </div>
+        <div class="cinema-count" id="movieCount"></div>
+      </div>
+
+      <!-- Movie Grid -->
+      <div class="cinema-grid" id="movieGrid"></div>
+
+      <!-- Add Movie Button -->
+      <div style="text-align:center; padding: 24px 0 40px;">
+        <button type="button" class="cinema-add-btn" onclick="openAddMovieModal()">＋ Кино нэмэх</button>
+        <p style="color:rgba(255,255,255,0.3); font-size:12px; margin-top:8px;">Таны санал админ хянасны дараа каталогт нэмэгдэнэ</p>
+      </div>
+    </div>
+
+    <!-- Movie Detail Overlay -->
+    <div id="movieDetailOverlay" class="cinema-detail-overlay" style="display:none">
+      <div id="movieDetailContent" class="cinema-detail-inner"></div>
+    </div>
+
+    <!-- Add Movie Modal -->
+    <div id="addMovieOverlay" class="cinema-detail-overlay" style="display:none">
+      <div class="cinema-add-form">
+        <div class="cinema-detail-topbar">
+          <button type="button" class="cinema-back-btn" onclick="closeAddMovieModal()">← Буцах</button>
+          <h3 style="color:#fff; margin:0; font-size:18px;">＋ Шинэ кино нэмэх</h3>
+          <div></div>
+        </div>
+        <div style="padding:24px; max-width:600px; margin:0 auto;">
+          <!-- TMDB Auto-search -->
+          <div style="background:rgba(226,183,20,0.08);border:1px solid rgba(226,183,20,0.25);border-radius:12px;padding:16px;margin-bottom:20px;">
+            <label class="cinema-label" style="color:#e2b714;font-size:13px;font-weight:700;">🔍 TMDB-аас автоматаар мэдээлэл татах</label>
+            <p style="color:rgba(255,255,255,0.45);font-size:12px;margin:4px 0 10px;">Кино нэрийг англиар бичээд "Хайх" дарна уу — poster, rating, тайлбар автоматаар орно</p>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="tmdbSearchInput" class="cinema-input" placeholder="жишээ: Interstellar, Parasite..." style="flex:1" onkeypress="if(event.key==='Enter')doTMDBSearch()">
+              <button type="button" id="tmdbSearchBtn" onclick="doTMDBSearch()" style="background:#e2b714;color:#000;border:none;padding:0 18px;border-radius:8px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Хайх</button>
+            </div>
+            <div id="tmdbResults" class="tmdb-results" style="display:none;margin-top:8px;"></div>
+          </div>
+
+          <div class="add-movie-grid">
+            <div class="form-group">
+              <label class="cinema-label">Киноны нэр *</label>
+              <input type="text" id="amTitle" class="cinema-input" placeholder="жишээ: Interstellar">
+            </div>
+            <div class="form-group">
+              <label class="cinema-label">Гарсан он</label>
+              <input type="text" id="amYear" class="cinema-input" placeholder="жишээ: 2014">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="cinema-label">Poster зургийн URL <span style="color:rgba(255,255,255,0.3)">(TMDB хайлтаар автоматаар орно)</span></label>
+              <input type="text" id="amPoster" class="cinema-input" placeholder="https://image.tmdb.org/t/p/w500/...">
+            </div>
+            <div class="form-group">
+              <label class="cinema-label">Рейтинг (0-10)</label>
+              <input type="text" id="amRating" class="cinema-input" placeholder="жишээ: 8.5">
+            </div>
+            <div class="form-group">
+              <label class="cinema-label">Хугацаа</label>
+              <input type="text" id="amDuration" class="cinema-input" placeholder="жишээ: 120 мин">
+            </div>
+            <div class="form-group">
+              <label class="cinema-label">Хэл</label>
+              <select id="amLang" class="cinema-input">
+                <option value="dubbed">🎙 Монгол хадмал</option>
+                <option value="mongolian">🇲🇳 Монгол хэлээр</option>
+                <option value="original">🌐 Эх хэлээр</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="cinema-label">Төрөл <span style="color:rgba(255,255,255,0.3)">(автоматаар орно)</span></label>
+              <input type="text" id="amGenres" class="cinema-input" placeholder="romantic, drama, action...">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="cinema-label">🔗 Lolokino / үзэх холбоос</label>
+              <input type="text" id="amWatchUrl" class="cinema-input" placeholder="https://lolokino.buzz/... (хоосон бол автоматаар хайна)">
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="cinema-label">Тайлбар <span style="color:rgba(255,255,255,0.3)">(TMDB-аас автоматаар орно)</span></label>
+              <textarea id="amDesc" class="cinema-input" rows="3" placeholder="Киноны товч тайлбар..."></textarea>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="cinema-label">💑 Яагаад хосуудад тохиромжтой вэ?</label>
+              <input type="text" id="amWhy" class="cinema-input" placeholder="жишээ: Хамтдаа уйлахад тохиромжтой">
+            </div>
+          </div>
+          <div id="addMovieStatus" style="min-height:20px;margin-top:10px;font-size:13px;text-align:center;"></div>
+          <div style="display:flex; gap:12px; margin-top:16px;">
+            <button type="button" class="btn btn-primary" id="submitMovieBtn" onclick="submitAddMovie()" style="flex:1; padding:14px;">✓ Нэмэх</button>
+            <button type="button" class="btn btn-outline" onclick="closeAddMovieModal()" style="padding:14px 20px;">Болих</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<button type="button" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Дээш буцах">↑</button>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo" style="margin-bottom:10px;">
+        <div class="logo-icon">N</div>
+        <span class="logo-text">NBolzoo</span>
+      </div>
+      <p>Монголын анхны болзооны санааны платформ. УБ-д 365 санаа + 21 аймагт 189 санаа + AI зөвлөх.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Санаанууд</h4>
+      <a onclick="navigate('ub')">🏙 УБ 365 санаа</a>
+      <a onclick="navigate('aimags')">🌄 21 аймаг</a>
+      <a onclick="navigate('movies')">🎬 Хосын кино</a>
+      <a onclick="navigate('gifts')">🎁 Бэлгийн санаа</a>
+    </div>
+    <div class="footer-col">
+      <h4>Зөвлөгөө</h4>
+      <a onclick="navigate('expert')">💎 Мэргэжилтэн зөвлөгөө</a>
+      <a onclick="navigate('ai')">🤖 AI зөвлөх</a>
+      <a onclick="navigate('community')">👥 Нийгэмлэг</a>
+      <a onclick="navigate('expert','questions')">247 асуулт</a>
+    </div>
+    <div class="footer-col">
+      <h4>Холбоо барих</h4>
+      <a>📧 info@nbolzoo.mn</a>
+      <a>📱 Instagram: @nbolzoo</a>
+      <a>💬 Facebook: NBolzoo</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 NBolzoo.mn · Монголын хайрын платформ 💕</span>
+    <div class="footer-social">
+      <a title="Instagram">📷</a>
+      <a title="Facebook">📘</a>
+      <a title="TikTok">🎵</a>
+    </div>
+  </div>
+</footer>
+
+<div class="modal-backdrop" id="modal">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="modal-backdrop" id="authModal">
+  <div class="modal" style="max-width: 420px;" id="authModalContent"></div>
+</div>
+
+<script src="js/firebase-init.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/storage-utils.js"></script>
+<script src="js/core.js"></script>
+<script src="js/movies.js"></script>
+<script src="js/main.js"></script>
+<script>
+initFirebase();
+renderMovies();
+</script>
+
+</body>
+</html>

@@ -185,6 +185,13 @@ function mapEmbedHtml(query) {
     </div>`;
 }
 
+// YouTube — тодорхой видео ID биш ХАЙЛТЫН холбоос ашиглана (movies.js-ийн trailer линктэй ижил арга барил),
+// учир нь тодорхой video ID хугацааны явцад устах/хаагдах эрсдэлтэй, харин хайлтын холбоос үргэлж ажиллана.
+function youtubeSearchHtml(query, label) {
+  const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+  return `<a href="${url}" target="_blank" rel="noopener" class="youtube-search-link">▶ ${label || "YouTube-с жишээ бичлэг үзэх"}</a>`;
+}
+
 // Кино/аймаг/хуудас бүр өөрийн HTML файл, өөрийн URL-тай тул
 // navigate() зүгээр л тухайн файл руу шилждэг (жинхэнэ browser navigation).
 const NAV_FILE_MAP = { home: "index.html", "aimag-detail": "aimags.html" };

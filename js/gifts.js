@@ -606,6 +606,7 @@ function openGiftModal(idx) {
         <h4>💡 Яагаад энэ бэлэг хамаарах вэ?</h4>
         <p>${g.why}</p>
       </div>
+      ${youtubeSearchHtml(g.title + " gift idea DIY", "Хийх аргыг YouTube-с үзэх")}
       <button class="btn btn-accent" style="width:100%; margin-top:14px;" onclick="showToast('💝 ${g.title.replace(/'/g,'')} хадгалагдлаа!'); closeModal();" type="button">💝 Бэлгийн жагсаалтад нэмэх</button>
     </div>`;
   document.getElementById("modal").classList.add("show");
@@ -665,6 +666,7 @@ function renderProposals() {
       </div>
       <div class="proposal-desc">${p.desc}</div>
       <div class="proposal-tip"><strong>💡 Зөвлөгөө:</strong> ${p.tip}</div>
+      ${youtubeSearchHtml(p.title + " romantic marriage proposal idea", "Жишээ санал YouTube-с үзэх")}
       ${guideHtml}
     </div>`;
   }).join("");

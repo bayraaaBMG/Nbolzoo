@@ -1276,3 +1276,11 @@ body {
   color: var(--primary); font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer;
 }
 .map-open-link:hover { background: var(--primary-soft); }
+
+/* ===== YouTube search link ===== */
+.youtube-search-link {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 10px;
+  padding: 9px 14px; border-radius: 8px; background: #FEECEC; color: #CC0000;
+  font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer;
+}
+.youtube-search-link:hover { background: #FBD5D5; }

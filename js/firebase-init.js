@@ -1,12 +1,12 @@
 // ===== FIREBASE INIT (бүх хуудсанд ачаалагдана) =====
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyA5alJmYGx7Gi6xizrl7NSXRqkm5uJtOo0",
-  authDomain: "nbolzoo.firebaseapp.com",
-  projectId: "nbolzoo",
-  storageBucket: "nbolzoo.firebasestorage.app",
-  messagingSenderId: "845704242758",
-  appId: "1:845704242758:web:a63a20f9a4ca8b6f168c47",
-  measurementId: "G-L90C02EMXJ"
+  apiKey: "AIzaSyBGAAuDyU13Z13KfZIEcXFvHFjPJhC1JKY",
+  authDomain: "nbolzoo-e2267.firebaseapp.com",
+  projectId: "nbolzoo-e2267",
+  storageBucket: "nbolzoo-e2267.firebasestorage.app",
+  messagingSenderId: "315466158652",
+  appId: "1:315466158652:web:f1ecbefcbc26bd164ce939",
+  measurementId: "G-W0CJ2GPCVK"
 };
 
 let db = null;

@@ -105,12 +105,23 @@
               <div class="avatar">Та</div>
               <textarea placeholder="Болзооны санаагаа хуваалц..." id="newPost"></textarea>
             </div>
+            <div id="postAttachments" class="post-attachments"></div>
+            <input type="file" id="postImageInput" accept="image/*" style="display:none" onchange="onPostImageSelected(this)">
+            <div id="postLocationRow" class="post-inline-row" style="display:none;">
+              <input type="text" id="postLocationInput" placeholder="📍 Байршил (жишээ: Зайсан толгой)" onkeypress="if(event.key==='Enter')commitPostLocation()">
+              <button type="button" class="btn btn-primary" onclick="commitPostLocation()">✓</button>
+            </div>
+            <div id="postBudgetRow" class="post-inline-row" style="display:none;">
+              <input type="text" id="postBudgetInput" placeholder="💸 Зардал (жишээ: 50,000₮)" onkeypress="if(event.key==='Enter')commitPostBudget()">
+              <button type="button" class="btn btn-primary" onclick="commitPostBudget()">✓</button>
+            </div>
+            <div id="postFeelingRow" class="post-feeling-picker" style="display:none;"></div>
             <div class="post-form-actions">
               <div style="display: flex; gap: 8px; color: var(--text-light); font-size: 18px;">
-                <span style="cursor: pointer;">📷</span>
-                <span style="cursor: pointer;">📍</span>
-                <span style="cursor: pointer;">😊</span>
-                <span style="cursor: pointer;">💸</span>
+                <span style="cursor: pointer;" onclick="document.getElementById('postImageInput').click()" title="Зураг нэмэх">📷</span>
+                <span style="cursor: pointer;" onclick="togglePostRow('postLocationRow')" title="Байршил тэмдэглэх">📍</span>
+                <span style="cursor: pointer;" onclick="togglePostFeelingPicker()" title="Сэтгэгдэл сонгох">😊</span>
+                <span style="cursor: pointer;" onclick="togglePostRow('postBudgetRow')" title="Зардал нэмэх">💸</span>
               </div>
               <button type="button" class="btn btn-primary" onclick="submitPost()">Нийтлэх</button>
             </div>

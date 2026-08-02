@@ -41,16 +41,7 @@ body {
 
 .logo-icon {
   width: 42px; height: 42px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  border-radius: 12px; display: flex; align-items: center; justify-content: center;
-  color: white; font-weight: 700; font-size: 20px; position: relative;
-}
-
-.logo-icon::after {
-  content: "♥"; position: absolute; bottom: -3px; right: -3px;
-  width: 20px; height: 20px; background: var(--accent); border-radius: 50%;
-  font-size: 11px; display: flex; align-items: center; justify-content: center;
-  border: 2px solid white;
+  border-radius: 12px; display: block; flex-shrink: 0;
 }
 
 .logo-text { font-size: 22px; font-weight: 700; color: var(--text); }

@@ -1433,6 +1433,22 @@ body {
   .inv-card{animation:none;}
 }
 
+/* Эвлүүлэх тоглоом (memory/matching game) */
+.inv-mem-grid{ display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px; }
+.inv-mem-card{ aspect-ratio:1/1;perspective:600px;cursor:pointer; }
+.inv-mem-card-inner{
+  position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;
+}
+.inv-mem-card.inv-mem-flipped .inv-mem-card-inner,
+.inv-mem-card.inv-mem-matched .inv-mem-card-inner{ transform:rotateY(180deg); }
+.inv-mem-face{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  border-radius:12px;-webkit-backface-visibility:hidden;backface-visibility:hidden;font-size:26px;
+}
+.inv-mem-back{ background:linear-gradient(135deg,var(--inv-rose),var(--inv-rose-deep));color:#fff; }
+.inv-mem-front{ background:#fff;border:2px solid var(--inv-line);transform:rotateY(180deg); }
+.inv-mem-card.inv-mem-matched .inv-mem-front{ border-color:var(--inv-rose);background:linear-gradient(135deg,#fff0f2,#ffe6ea); }
+
 /* Category picker + forms (site-consistent styling, not inv-namespaced since these use our own .btn/.card) */
 .inv-type-grid{ display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:20px 0; }
 .inv-type-card{
@@ -1443,6 +1459,10 @@ body {
 .inv-type-card .icon{font-size:36px;margin-bottom:10px;}
 .inv-type-card h3{font-size:16px;margin-bottom:4px;}
 .inv-type-card p{font-size:12px;color:var(--text-light);}
+.inv-type-grid-sub{ grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; }
+.inv-type-card-sub{ padding:16px 10px; border-radius:14px; }
+.inv-type-card-sub .icon{ font-size:26px; margin-bottom:6px; }
+.inv-type-card-sub h3{ font-size:13px; margin-bottom:0; font-weight:600; }
 .inv-form{ max-width:480px;margin:0 auto; }
 .inv-qr-box{ text-align:center;padding:24px;background:#fff;border-radius:16px;border:1px solid var(--primary-extra-soft); }
 .inv-qr-box img{ border-radius:12px;margin-bottom:14px; }

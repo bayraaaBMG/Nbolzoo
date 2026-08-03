@@ -2,11 +2,23 @@
 // Бүх өгөгдлийг URL-ийн ?d= param дотор base64url-ээр кодолж дамжуулна —
 // Firestore бичих шаардлагагүй тул илгээх/хүлээн авах хоёул нэвтрэх шаардлагагүй, шууд ажиллана.
 
+// family нь тухайн төрөл ямар маягтын/харагдацын логик ашиглахыг заана:
+// "event" — ерөнхий гарчиг/огноо/цаг/байршил/мессеж маягт, "wedding" — хосын нэртэй маягт,
+// "date"/"proposal" — тусгай интерактив урсгал.
 const INVITE_TYPES = {
-  event:    { label: "Үйл ажиллагаа", emoji: "🎉", desc: "Төрсөн өдөр, цуглаан, ажлын арга хэмжээ" },
-  wedding:  { label: "Хурим",         emoji: "💍", desc: "Хуримын урилга найз нөхөд, төрөл садандаа" },
-  date:     { label: "Болзооны урилга", emoji: "💕", desc: "Хамт болзох уу гэж асуудаг интерактив урилга" },
-  proposal: { label: "Гэрлэх санал",  emoji: "💐", desc: "Амьдралын хамгийн чухал асуултаа тавь" },
+  birthday:  { label: "Төрсөн өдөр",           emoji: "🎂", family: "event", group: "event" },
+  party:     { label: "Үдэшлэг",                emoji: "🥳", family: "event", group: "event" },
+  meeting:   { label: "Уулзалт",                emoji: "👥", family: "event", group: "event" },
+  work:      { label: "Ажлын арга хэмжээ",      emoji: "💼", family: "event", group: "event" },
+  education: { label: "Боловсрол",              emoji: "🎓", family: "event", group: "event" },
+  sport:     { label: "Спорт",                  emoji: "🏆", family: "event", group: "event" },
+  culture:   { label: "Соёл урлаг",             emoji: "🎭", family: "event", group: "event" },
+  other:     { label: "Бусад",                  emoji: "🚀", family: "event", group: "event" },
+  wedding:   { label: "Хурим",                  emoji: "💍", family: "wedding" },
+  date:      { label: "Болзоо",                 emoji: "💕", family: "date", desc: "Хамт болзох уу гэж асуудаг интерактив урилга" },
+  proposal:  { label: "Гэрлэх санал",           emoji: "💐", family: "proposal", desc: "Амьдралын хамгийн чухал асуултаа тавь" },
+  family:    { label: "Гэр бүлийн арга хэмжээ", emoji: "👶", family: "event" },
+  holiday:   { label: "Баярын урилга",          emoji: "🎊", family: "event" },
 };
 
 function encodeInviteData(obj) {
@@ -33,35 +45,48 @@ function initInvitePage() {
 }
 
 function renderTypePicker() {
+  const eventTypes = Object.entries(INVITE_TYPES).filter(([, t]) => t.group === "event");
+  const otherTypes = Object.entries(INVITE_TYPES).filter(([, t]) => !t.group);
   document.getElementById("inviteRoot").innerHTML = `
     <h1 style="margin-bottom:6px;">💌 Урилга үүсгэх</h1>
-    <p style="color:var(--text-light);margin-bottom:8px;">Төрлөө сонгоод, дэлгэрэнгүйгээ бөглөөд шууд QR код хэлбэрээр аваарай.</p>
+    <p style="color:var(--text-light);margin-bottom:16px;">Төрлөө сонгоод, дэлгэрэнгүйгээ бөглөөд шууд QR код хэлбэрээр аваарай.</p>
+    <div class="section-title"><h2 style="font-size:16px;">🎉 Үйл ажиллагаа</h2></div>
+    <div class="inv-type-grid inv-type-grid-sub">
+      ${eventTypes.map(([id, t]) => `
+        <div class="inv-type-card inv-type-card-sub" onclick="selectInviteType('${id}')">
+          <div class="icon">${t.emoji}</div>
+          <h3>${t.label}</h3>
+        </div>`).join("")}
+    </div>
+    <div class="section-title" style="margin-top:22px;"><h2 style="font-size:16px;">Бусад төрөл</h2></div>
     <div class="inv-type-grid">
-      ${Object.entries(INVITE_TYPES).map(([id, t]) => `
+      ${otherTypes.map(([id, t]) => `
         <div class="inv-type-card" onclick="selectInviteType('${id}')">
           <div class="icon">${t.emoji}</div>
           <h3>${t.label}</h3>
-          <p>${t.desc}</p>
+          <p>${t.desc || ""}</p>
         </div>`).join("")}
     </div>`;
 }
 
 function selectInviteType(type) {
-  if (type === "date") return renderDateForm();
-  if (type === "proposal") return renderProposalForm();
+  const t = INVITE_TYPES[type];
+  if (!t) return;
+  if (t.family === "date") return renderDateForm();
+  if (t.family === "proposal") return renderProposalForm();
   renderGenericForm(type);
 }
 
 function renderGenericForm(type) {
   const t = INVITE_TYPES[type];
-  const isWedding = type === "wedding";
+  const isWedding = t.family === "wedding";
   document.getElementById("inviteRoot").innerHTML = `
     <a class="back-btn" onclick="renderTypePicker()">← Буцах</a>
     <h2 style="margin:10px 0 4px;">${t.emoji} ${t.label} урилга</h2>
     <div class="inv-form">
       ${isWedding
         ? `<div class="form-group"><label>Хосын нэр</label><input id="invField1" placeholder="Бат & Сараа"></div>`
-        : `<div class="form-group"><label>Гарчиг</label><input id="invField1" placeholder="жишээ: Төрсөн өдрийн баяр"></div>`}
+        : `<div class="form-group"><label>Гарчиг</label><input id="invField1" placeholder="жишээ: ${escapeHtml(t.label)}"></div>`}
       <div class="form-group"><label>Огноо</label><input type="date" id="invDate"></div>
       <div class="form-group"><label>Цаг</label><input type="time" id="invTime"></div>
       <div class="form-group"><label>Байршил</label><input id="invLocation" placeholder="жишээ: ... ресторан"></div>
@@ -93,11 +118,12 @@ function renderProposalForm() {
 }
 
 function generateInviteQr(type) {
+  const t = INVITE_TYPES[type];
   let data = {};
-  if (type === "wedding") data = { names: invVal("invField1"), date: invVal("invDate"), time: invVal("invTime"), location: invVal("invLocation"), message: invVal("invMessage") };
-  else if (type === "event") data = { title: invVal("invField1"), date: invVal("invDate"), time: invVal("invTime"), location: invVal("invLocation"), message: invVal("invMessage") };
-  else if (type === "proposal") data = { recipient: invVal("invField1"), message: invVal("invMessage") };
-  else if (type === "date") data = { recipient: invVal("invField1") };
+  if (t.family === "wedding") data = { names: invVal("invField1"), date: invVal("invDate"), time: invVal("invTime"), location: invVal("invLocation"), message: invVal("invMessage") };
+  else if (t.family === "event") data = { title: invVal("invField1"), date: invVal("invDate"), time: invVal("invTime"), location: invVal("invLocation"), message: invVal("invMessage") };
+  else if (t.family === "proposal") data = { recipient: invVal("invField1"), message: invVal("invMessage") };
+  else if (t.family === "date") data = { recipient: invVal("invField1") };
 
   const encoded = encodeInviteData(data);
   const url = `${location.origin}${location.pathname}?type=${type}&d=${encoded}`;
@@ -127,11 +153,11 @@ function copyInviteLink() {
 
 // ---------- Recipient view ----------
 function renderInviteView(type, data) {
-  if (type === "date") return renderDateInviteExperience(data.recipient || "");
-  if (type === "proposal") return renderProposalExperience(data.recipient || "", data.message || "");
-
   const t = INVITE_TYPES[type];
-  const isWedding = type === "wedding";
+  if (t.family === "date") return renderDateInviteExperience(data.recipient || "");
+  if (t.family === "proposal") return renderProposalExperience(data.recipient || "", data.message || "");
+
+  const isWedding = t.family === "wedding";
   document.getElementById("inviteRoot").innerHTML = `
     <div class="inv-view-card">
       <div class="icon">${t.emoji}</div>
@@ -193,8 +219,15 @@ function renderDateInviteExperience(recipientName) {
         <div class="inv-options" id="inv-opts-q3">
           <div class="inv-opt" data-val="Өдрөөр" onclick="invPick('inv-opts-q3', this, 'q3', 'inv-s-date')"><span class="inv-emoji">🌅</span> Өдрөөр</div>
           <div class="inv-opt" data-val="Оройн наашаа" onclick="invPick('inv-opts-q3', this, 'q3', 'inv-s-date')"><span class="inv-emoji">🌆</span> Оройн наашаа</div>
-          <div class="inv-opt" data-val="Шөнөдөө" onclick="invPick('inv-opts-q3', this, 'q3', 'inv-s-date')"><span class="inv-emoji">🌙</span> Шөнөдөө</div>
+          <div class="inv-opt" data-val="Шөнөдөө" onclick="invPick('inv-opts-q3', this, 'q3', 'inv-s-memory')"><span class="inv-emoji">🌙</span> Шөнөдөө</div>
         </div>
+      </div>
+      <div class="inv-card" id="inv-s-memory">
+        <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
+        <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
+        <p class="inv-sub">Ижил emoji-г олж хос болгоорой ✨</p>
+        <div class="inv-mem-grid" id="invMemGrid"></div>
+        <button class="inv-btn" id="invMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-date')">Дараах →</button>
       </div>
       <div class="inv-card" id="inv-s-date">
         <div class="inv-progress"><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span></div>
@@ -232,6 +265,7 @@ function renderDateInviteExperience(recipientName) {
   invCalDate = new Date();
   invCalDate.setDate(1);
   invRenderCalendar();
+  invSetupMemoryGame();
 }
 
 function invGoTo(id) {
@@ -249,6 +283,70 @@ function invPick(groupId, el, key, nextScreen) {
   el.classList.add("inv-picked");
   invAnswers[key] = el.dataset.val;
   setTimeout(() => invGoTo(nextScreen), 380);
+}
+
+// ---------- Эвлүүлэх тоглоом (6 хос emoji, 3D flip) ----------
+const invMemEmojis = ["❤️", "🌸", "✨", "🎁", "🎵", "😍"];
+let invMemFlipped = [];
+let invMemMatchedCount = 0;
+let invMemLock = false;
+
+function invSetupMemoryGame() {
+  const grid = document.getElementById("invMemGrid");
+  if (!grid) return;
+  invMemFlipped = [];
+  invMemMatchedCount = 0;
+  invMemLock = false;
+  const nextBtn = document.getElementById("invMemNextBtn");
+  if (nextBtn) nextBtn.style.display = "none";
+
+  const deck = [...invMemEmojis, ...invMemEmojis];
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  grid.innerHTML = deck.map((emoji, idx) => `
+    <div class="inv-mem-card" id="inv-mem-${idx}" onclick="invFlipMemCard(${idx})">
+      <div class="inv-mem-card-inner">
+        <div class="inv-mem-face inv-mem-back">💌</div>
+        <div class="inv-mem-face inv-mem-front" data-emoji="${emoji}">${emoji}</div>
+      </div>
+    </div>`).join("");
+}
+
+function invFlipMemCard(idx) {
+  if (invMemLock) return;
+  const card = document.getElementById("inv-mem-" + idx);
+  if (!card || card.classList.contains("inv-mem-flipped") || card.classList.contains("inv-mem-matched")) return;
+  card.classList.add("inv-mem-flipped");
+  invMemFlipped.push(idx);
+  if (invMemFlipped.length < 2) return;
+
+  invMemLock = true;
+  const [i1, i2] = invMemFlipped;
+  const c1 = document.getElementById("inv-mem-" + i1);
+  const c2 = document.getElementById("inv-mem-" + i2);
+  const e1 = c1.querySelector(".inv-mem-front").dataset.emoji;
+  const e2 = c2.querySelector(".inv-mem-front").dataset.emoji;
+
+  if (e1 === e2) {
+    c1.classList.add("inv-mem-matched");
+    c2.classList.add("inv-mem-matched");
+    invMemMatchedCount++;
+    invMemFlipped = [];
+    invMemLock = false;
+    if (invMemMatchedCount === invMemEmojis.length) {
+      const nextBtn = document.getElementById("invMemNextBtn");
+      if (nextBtn) nextBtn.style.display = "inline-block";
+    }
+  } else {
+    setTimeout(() => {
+      c1.classList.remove("inv-mem-flipped");
+      c2.classList.remove("inv-mem-flipped");
+      invMemFlipped = [];
+      invMemLock = false;
+    }, 900);
+  }
 }
 
 function invStartPetals() {

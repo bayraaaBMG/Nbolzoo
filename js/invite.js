@@ -6,19 +6,19 @@
 // "event" — ерөнхий гарчиг/огноо/цаг/байршил/мессеж маягт, "wedding" — хосын нэртэй маягт,
 // "date"/"proposal" — тусгай интерактив урсгал.
 const INVITE_TYPES = {
-  birthday:  { label: "Төрсөн өдөр",           emoji: "🎂", family: "event", group: "event" },
+  birthday:  { label: "Төрсөн өдөр",           emoji: "🎂", family: "birthday", group: "event" },
   party:     { label: "Үдэшлэг",                emoji: "🥳", family: "event", group: "event" },
   meeting:   { label: "Уулзалт",                emoji: "👥", family: "event", group: "event" },
-  work:      { label: "Ажлын арга хэмжээ",      emoji: "💼", family: "event", group: "event" },
+  work:      { label: "Ажлын арга хэмжээ",      emoji: "💼", family: "work", group: "event" },
   education: { label: "Боловсрол",              emoji: "🎓", family: "event", group: "event" },
   sport:     { label: "Спорт",                  emoji: "🏆", family: "event", group: "event" },
   culture:   { label: "Соёл урлаг",             emoji: "🎭", family: "event", group: "event" },
   other:     { label: "Бусад",                  emoji: "🚀", family: "event", group: "event" },
-  wedding:   { label: "Хурим",                  emoji: "💍", family: "wedding" },
+  wedding:   { label: "Хурим",                  emoji: "💍", family: "wedding", desc: "Хосын түүх, RSVP, дуу хүсэлт бүхий интерактив урилга" },
   date:      { label: "Болзоо",                 emoji: "💕", family: "date", desc: "Хамт болзох уу гэж асуудаг интерактив урилга" },
   proposal:  { label: "Гэрлэх санал",           emoji: "💐", family: "proposal", desc: "Амьдралын хамгийн чухал асуултаа тавь" },
-  family:    { label: "Гэр бүлийн арга хэмжээ", emoji: "👶", family: "event" },
-  holiday:   { label: "Баярын урилга",          emoji: "🎊", family: "event" },
+  family:    { label: "Гэр бүлийн арга хэмжээ", emoji: "👶", family: "family" },
+  holiday:   { label: "Баярын урилга",          emoji: "🎊", family: "holiday" },
 };
 
 function encodeInviteData(obj) {
@@ -74,6 +74,11 @@ function selectInviteType(type) {
   if (!t) return;
   if (t.family === "date") return renderDateForm();
   if (t.family === "proposal") return renderProposalForm();
+  if (t.family === "wedding") return renderWeddingForm();
+  if (t.family === "birthday") return renderBirthdayForm();
+  if (t.family === "work") return renderWorkForm();
+  if (t.family === "family") return renderFamilyForm();
+  if (t.family === "holiday") return renderHolidayForm();
   renderGenericForm(type);
 }
 
@@ -110,19 +115,101 @@ function renderProposalForm() {
   document.getElementById("inviteRoot").innerHTML = `
     <a class="back-btn" onclick="renderTypePicker()">← Буцах</a>
     <h2 style="margin:10px 0 4px;">💐 Гэрлэх санал</h2>
+    <p style="color:var(--text-light);font-size:13px;margin-bottom:16px;">Дурсамж, сонирхолтой баримт, тоолж эргэлзүүлэх мөч бүхий интерактив урилга.</p>
     <div class="inv-form">
       <div class="form-group"><label>Хэнд зориулав вэ?</label><input id="invField1" placeholder="жишээ: Наранцэцэг"></div>
+      <div class="form-group"><label>Нандин дурсамж (заавал биш)</label><textarea id="invExtra1" rows="2" placeholder="Жишээ: Анх танилцсан өдрөө санаж байна уу?"></textarea></div>
+      <div class="form-group"><label>Сонирхолтой баримтууд (мөр бүрд нэг, заавал биш)</label><textarea id="invExtra2" rows="3" placeholder="Хамт X жил байна&#10;Y газар анх уулзсан&#10;Z дуртай зүйл хоёулаа адилхан"></textarea></div>
       <div class="form-group"><label>Хувийн мессеж (заавал биш)</label><textarea id="invMessage" rows="3" placeholder="Чиний хэлмээр байгаа зүйлээ бичээрэй..."></textarea></div>
       <button class="btn btn-primary" style="width:100%" type="button" onclick="generateInviteQr('proposal')">📱 QR код үүсгэх</button>
+    </div>`;
+}
+
+function renderWeddingForm() {
+  document.getElementById("inviteRoot").innerHTML = `
+    <a class="back-btn" onclick="renderTypePicker()">← Буцах</a>
+    <h2 style="margin:10px 0 4px;">💍 Хуримын урилга</h2>
+    <p style="color:var(--text-light);font-size:13px;margin-bottom:16px;">Хосын түүх, RSVP, хувцасны код, дуу хүсэлт зэрэгтэй интерактив урилга.</p>
+    <div class="inv-form">
+      <div class="form-group"><label>Хосын нэр</label><input id="invField1" placeholder="Бат & Сараа"></div>
+      <div class="form-group"><label>Огноо</label><input type="date" id="invDate"></div>
+      <div class="form-group"><label>Цаг</label><input type="time" id="invTime"></div>
+      <div class="form-group"><label>Байршил</label><input id="invLocation" placeholder="жишээ: ... зочид буудал"></div>
+      <div class="form-group"><label>Хосын түүх (заавал биш)</label><textarea id="invExtra1" rows="2" placeholder="Бид хэрхэн танилцсан бэ?"></textarea></div>
+      <div class="form-group"><label>Хувцасны код (заавал биш)</label><input id="invExtra2" placeholder="жишээ: Хөх, цагаан өнгийн загвар"></div>
+      <div class="form-group"><label>Мессеж / бэлгийн тухай тэмдэглэл (заавал биш)</label><textarea id="invMessage" rows="2" placeholder="Бэлгийн оронд ерөөл хүсье гэх мэт..."></textarea></div>
+      <button class="btn btn-primary" style="width:100%" type="button" onclick="generateInviteQr('wedding')">📱 QR код үүсгэх</button>
+    </div>`;
+}
+
+function renderBirthdayForm() {
+  document.getElementById("inviteRoot").innerHTML = `
+    <a class="back-btn" onclick="renderTypePicker()">← Буцах</a>
+    <h2 style="margin:10px 0 4px;">🎂 Төрсөн өдрийн урилга</h2>
+    <div class="inv-form">
+      <div class="form-group"><label>Хэний төрсөн өдөр вэ?</label><input id="invField1" placeholder="жишээ: Болороо"></div>
+      <div class="form-group"><label>Огноо</label><input type="date" id="invDate"></div>
+      <div class="form-group"><label>Цаг</label><input type="time" id="invTime"></div>
+      <div class="form-group"><label>Байршил</label><input id="invLocation" placeholder="жишээ: ... кафе"></div>
+      <div class="form-group"><label>Мессеж (заавал биш)</label><textarea id="invMessage" rows="3" placeholder="Урилгын дэлгэрэнгүй..."></textarea></div>
+      <button class="btn btn-primary" style="width:100%" type="button" onclick="generateInviteQr('birthday')">📱 QR код үүсгэх</button>
+    </div>`;
+}
+
+function renderWorkForm() {
+  document.getElementById("inviteRoot").innerHTML = `
+    <a class="back-btn" onclick="renderTypePicker()">← Буцах</a>
+    <h2 style="margin:10px 0 4px;">💼 Ажлын арга хэмжээний урилга</h2>
+    <div class="inv-form">
+      <div class="form-group"><label>Арга хэмжээний нэр</label><input id="invField1" placeholder="жишээ: Улирлын дүгнэлт"></div>
+      <div class="form-group"><label>Огноо</label><input type="date" id="invDate"></div>
+      <div class="form-group"><label>Цаг</label><input type="time" id="invTime"></div>
+      <div class="form-group"><label>Байршил</label><input id="invLocation" placeholder="жишээ: ... оффис"></div>
+      <div class="form-group"><label>Хөтөлбөр (мөр бүрд нэг зүйл, заавал биш)</label><textarea id="invExtra1" rows="3" placeholder="09:00 Нээлт&#10;10:00 Илтгэл&#10;12:00 Үдийн хоол"></textarea></div>
+      <div class="form-group"><label>Хувцасны код (заавал биш)</label><input id="invExtra2" placeholder="жишээ: Business casual"></div>
+      <button class="btn btn-primary" style="width:100%" type="button" onclick="generateInviteQr('work')">📱 QR код үүсгэх</button>
+    </div>`;
+}
+
+function renderFamilyForm() {
+  document.getElementById("inviteRoot").innerHTML = `
+    <a class="back-btn" onclick="renderTypePicker()">← Буцах</a>
+    <h2 style="margin:10px 0 4px;">👶 Гэр бүлийн арга хэмжээний урилга</h2>
+    <div class="inv-form">
+      <div class="form-group"><label>Арга хэмжээний нэр</label><input id="invField1" placeholder="жишээ: Нэрийн өдөр"></div>
+      <div class="form-group"><label>Огноо</label><input type="date" id="invDate"></div>
+      <div class="form-group"><label>Цаг</label><input type="time" id="invTime"></div>
+      <div class="form-group"><label>Байршил</label><input id="invLocation" placeholder="жишээ: гэрийн хаяг"></div>
+      <div class="form-group"><label>Юу авчрах вэ (заавал биш)</label><input id="invExtra1" placeholder="жишээ: хүүхдийн хоол, тоглоом"></div>
+      <div class="form-group"><label>Мессеж (заавал биш)</label><textarea id="invMessage" rows="2" placeholder="Урилгын дэлгэрэнгүй..."></textarea></div>
+      <button class="btn btn-primary" style="width:100%" type="button" onclick="generateInviteQr('family')">📱 QR код үүсгэх</button>
+    </div>`;
+}
+
+function renderHolidayForm() {
+  document.getElementById("inviteRoot").innerHTML = `
+    <a class="back-btn" onclick="renderTypePicker()">← Буцах</a>
+    <h2 style="margin:10px 0 4px;">🎊 Баярын урилга</h2>
+    <div class="inv-form">
+      <div class="form-group"><label>Ямар баяр вэ?</label><input id="invField1" placeholder="жишээ: Шинэ жил, Цагаан сар"></div>
+      <div class="form-group"><label>Огноо</label><input type="date" id="invDate"></div>
+      <div class="form-group"><label>Цаг</label><input type="time" id="invTime"></div>
+      <div class="form-group"><label>Байршил</label><input id="invLocation" placeholder="жишээ: гэрийн хаяг"></div>
+      <div class="form-group"><label>Мессеж (заавал биш)</label><textarea id="invMessage" rows="2" placeholder="Баярын мэндчилгээ..."></textarea></div>
+      <button class="btn btn-primary" style="width:100%" type="button" onclick="generateInviteQr('holiday')">📱 QR код үүсгэх</button>
     </div>`;
 }
 
 function generateInviteQr(type) {
   const t = INVITE_TYPES[type];
   let data = {};
-  if (t.family === "wedding") data = { names: invVal("invField1"), date: invVal("invDate"), time: invVal("invTime"), location: invVal("invLocation"), message: invVal("invMessage") };
+  if (t.family === "wedding") data = { names: invVal("invField1"), date: invVal("invDate"), time: invVal("invTime"), location: invVal("invLocation"), loveStory: invVal("invExtra1"), dressCode: invVal("invExtra2"), message: invVal("invMessage") };
+  else if (t.family === "birthday") data = { recipient: invVal("invField1"), date: invVal("invDate"), time: invVal("invTime"), location: invVal("invLocation"), message: invVal("invMessage") };
+  else if (t.family === "work") data = { title: invVal("invField1"), date: invVal("invDate"), time: invVal("invTime"), location: invVal("invLocation"), agenda: invVal("invExtra1"), dressCode: invVal("invExtra2") };
+  else if (t.family === "family") data = { title: invVal("invField1"), date: invVal("invDate"), time: invVal("invTime"), location: invVal("invLocation"), bring: invVal("invExtra1"), message: invVal("invMessage") };
+  else if (t.family === "holiday") data = { holidayName: invVal("invField1"), date: invVal("invDate"), time: invVal("invTime"), location: invVal("invLocation"), message: invVal("invMessage") };
   else if (t.family === "event") data = { title: invVal("invField1"), date: invVal("invDate"), time: invVal("invTime"), location: invVal("invLocation"), message: invVal("invMessage") };
-  else if (t.family === "proposal") data = { recipient: invVal("invField1"), message: invVal("invMessage") };
+  else if (t.family === "proposal") data = { recipient: invVal("invField1"), memory: invVal("invExtra1"), funFacts: invVal("invExtra2"), message: invVal("invMessage") };
   else if (t.family === "date") data = { recipient: invVal("invField1") };
 
   const encoded = encodeInviteData(data);
@@ -155,13 +242,17 @@ function copyInviteLink() {
 function renderInviteView(type, data) {
   const t = INVITE_TYPES[type];
   if (t.family === "date") return renderDateInviteExperience(data.recipient || "");
-  if (t.family === "proposal") return renderProposalExperience(data.recipient || "", data.message || "");
+  if (t.family === "proposal") return renderProposalExperience(data.recipient || "", data);
+  if (t.family === "wedding") return renderWeddingExperience(data);
+  if (t.family === "birthday") return renderBirthdayExperience(data);
+  if (t.family === "work") return renderWorkExperience(data);
+  if (t.family === "family") return renderFamilyExperience(data);
+  if (t.family === "holiday") return renderHolidayExperience(data);
 
-  const isWedding = t.family === "wedding";
   document.getElementById("inviteRoot").innerHTML = `
     <div class="inv-view-card">
       <div class="icon">${t.emoji}</div>
-      <h2>${escapeHtml((isWedding ? data.names : data.title) || t.label)}</h2>
+      <h2>${escapeHtml(data.title || t.label)}</h2>
       <div class="inv-view-detail">
         📅 ${escapeHtml(data.date || "Тодорхойгүй")}${data.time ? " · " + escapeHtml(data.time) : ""}<br>
         📍 ${escapeHtml(data.location || "Тодорхойгүй")}
@@ -171,7 +262,7 @@ function renderInviteView(type, data) {
 }
 
 // ================= БОЛЗООНЫ ИНТЕРАКТИВ УРИЛГА (дасан зохицуулсан, эх загвар) =================
-const invAnswers = { q1: null, q2: null, q3: null, date: null };
+const invAnswers = { q1: null, q2: null, q3: null, q4: null, q5: null, date: null };
 let invCalDate = new Date();
 const invMonthNames = ["1-р сар","2-р сар","3-р сар","4-р сар","5-р сар","6-р сар","7-р сар","8-р сар","9-р сар","10-р сар","11-р сар","12-р сар"];
 const invDowNames = ["Ням","Дав","Мяг","Лха","Пүр","Баа","Бям"];
@@ -213,13 +304,34 @@ function renderDateInviteExperience(recipientName) {
         </div>
       </div>
       <div class="inv-card" id="inv-s-q3">
-        <div class="inv-progress"><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span></span></div>
-        <div class="inv-eyebrow">Асуулт 3 / 3</div>
+        <div class="inv-progress"><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span></span><span></span></div>
+        <div class="inv-eyebrow">Асуулт 3 / 5</div>
         <h1 style="font-size:32px;">Хэдэн цагт тохиромжтой вэ? ⏰</h1>
         <div class="inv-options" id="inv-opts-q3">
-          <div class="inv-opt" data-val="Өдрөөр" onclick="invPick('inv-opts-q3', this, 'q3', 'inv-s-date')"><span class="inv-emoji">🌅</span> Өдрөөр</div>
-          <div class="inv-opt" data-val="Оройн наашаа" onclick="invPick('inv-opts-q3', this, 'q3', 'inv-s-date')"><span class="inv-emoji">🌆</span> Оройн наашаа</div>
-          <div class="inv-opt" data-val="Шөнөдөө" onclick="invPick('inv-opts-q3', this, 'q3', 'inv-s-memory')"><span class="inv-emoji">🌙</span> Шөнөдөө</div>
+          <div class="inv-opt" data-val="Өдрөөр" onclick="invPick('inv-opts-q3', this, 'q3', 'inv-s-q4')"><span class="inv-emoji">🌅</span> Өдрөөр</div>
+          <div class="inv-opt" data-val="Оройн наашаа" onclick="invPick('inv-opts-q3', this, 'q3', 'inv-s-q4')"><span class="inv-emoji">🌆</span> Оройн наашаа</div>
+          <div class="inv-opt" data-val="Шөнөдөө" onclick="invPick('inv-opts-q3', this, 'q3', 'inv-s-q4')"><span class="inv-emoji">🌙</span> Шөнөдөө</div>
+        </div>
+      </div>
+      <div class="inv-card" id="inv-s-q4">
+        <div class="inv-progress"><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span></span></div>
+        <div class="inv-eyebrow">Асуулт 4 / 5</div>
+        <h1 style="font-size:32px;">Ямар хоол сонирхдог вэ? 🍽</h1>
+        <div class="inv-options" id="inv-opts-q4">
+          <div class="inv-opt" data-val=" Азийн хоол" onclick="invPick('inv-opts-q4', this, 'q4', 'inv-s-q5')"><span class="inv-emoji">🍜</span> Azийн хоол</div>
+          <div class="inv-opt" data-val="Итали хоол" onclick="invPick('inv-opts-q4', this, 'q4', 'inv-s-q5')"><span class="inv-emoji">🍕</span> Итали хоол</div>
+          <div class="inv-opt" data-val="Монгол хоол" onclick="invPick('inv-opts-q4', this, 'q4', 'inv-s-q5')"><span class="inv-emoji">🥟</span> Монгол хоол</div>
+          <div class="inv-opt" data-val="Хамаагүй" onclick="invPick('inv-opts-q4', this, 'q4', 'inv-s-q5')"><span class="inv-emoji">🤷</span> Хамаагүй</div>
+        </div>
+      </div>
+      <div class="inv-card" id="inv-s-q5">
+        <div class="inv-progress"><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span></div>
+        <div class="inv-eyebrow">Асуулт 5 / 5</div>
+        <h1 style="font-size:32px;">Төсөв хэр их вэ? 💸</h1>
+        <div class="inv-options" id="inv-opts-q5">
+          <div class="inv-opt" data-val="Хямд (~30,000₮)" onclick="invPick('inv-opts-q5', this, 'q5', 'inv-s-memory')"><span class="inv-emoji">💸</span> Хямд (~30,000₮)</div>
+          <div class="inv-opt" data-val="Дунд (~80,000₮)" onclick="invPick('inv-opts-q5', this, 'q5', 'inv-s-memory')"><span class="inv-emoji">💰</span> Дунд (~80,000₮)</div>
+          <div class="inv-opt" data-val="Тансаг (150,000₮+)" onclick="invPick('inv-opts-q5', this, 'q5', 'inv-s-memory')"><span class="inv-emoji">💎</span> Тансаг (150,000₮+)</div>
         </div>
       </div>
       <div class="inv-card" id="inv-s-memory">
@@ -230,7 +342,6 @@ function renderDateInviteExperience(recipientName) {
         <button class="inv-btn" id="invMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-date')">Дараах →</button>
       </div>
       <div class="inv-card" id="inv-s-date">
-        <div class="inv-progress"><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span></div>
         <div class="inv-eyebrow">Сүүлчийн алхам</div>
         <h1 style="font-size:30px;">Хэзээ болзох вэ? 📅</h1>
         <div class="inv-cal-head">
@@ -247,10 +358,17 @@ function renderDateInviteExperience(recipientName) {
         <h1>Чи надтай болзох уу? 💕</h1>
         <p class="inv-sub">Дараа нь бид гоё цаг өнгөрүүлнэ, амлана.</p>
         <div class="inv-final-buttons">
-          <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateDate()">Зөвшөөрөх ❤️</button>
+          <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invGoTo('inv-s-wish')">Зөвшөөрөх ❤️</button>
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
             onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Үгүй</button>
         </div>
+      </div>
+      <div class="inv-card" id="inv-s-wish">
+        <div class="inv-eyebrow">Бараг л боллоо 🥰</div>
+        <h1 style="font-size:28px;">Юуг хамгийн ихээр хүлээж байна?</h1>
+        <p class="inv-sub">Нэг өгүүлбэрээр бичээрэй (заавал биш)</p>
+        <textarea id="invWishInput" rows="3" style="width:100%;border:2px solid var(--inv-line);border-radius:12px;padding:12px;font-family:inherit;font-size:14px;margin-bottom:16px;resize:vertical;" placeholder="Жишээ: Чамтай хамт байхыг хамгийн ихээр хүлээж байна..."></textarea>
+        <button class="inv-btn" type="button" onclick="invCelebrateDate()">Дуусгах 🎉</button>
       </div>
       <div class="inv-card" id="inv-s-celebrate">
         <div class="inv-eyebrow">Баяр хүргэе 🎉</div>
@@ -265,7 +383,7 @@ function renderDateInviteExperience(recipientName) {
   invCalDate = new Date();
   invCalDate.setDate(1);
   invRenderCalendar();
-  invSetupMemoryGame();
+  invSetupMemoryGame("invMemGrid", "invMemNextBtn", invMemDefaultEmojis, "💌");
 }
 
 function invGoTo(id) {
@@ -285,30 +403,39 @@ function invPick(groupId, el, key, nextScreen) {
   setTimeout(() => invGoTo(nextScreen), 380);
 }
 
-// ---------- Эвлүүлэх тоглоом (6 хос emoji, 3D flip) ----------
-const invMemEmojis = ["❤️", "🌸", "✨", "🎁", "🎵", "😍"];
+// ---------- Эвлүүлэх тоглоом (N хос emoji, 3D flip) — төрөл бүр өөр emoji/сэдвээр ашиглана ----------
+const invMemDefaultEmojis = ["❤️", "🌸", "✨", "🎁", "🎵", "😍"];
 let invMemFlipped = [];
 let invMemMatchedCount = 0;
 let invMemLock = false;
+let invMemGridId = "invMemGrid";
+let invMemNextBtnId = "invMemNextBtn";
+let invMemEmojiSet = invMemDefaultEmojis;
+let invMemBackSymbol = "💌";
 
-function invSetupMemoryGame() {
-  const grid = document.getElementById("invMemGrid");
+function invSetupMemoryGame(gridId, nextBtnId, emojiSet, backSymbol) {
+  invMemGridId = gridId || "invMemGrid";
+  invMemNextBtnId = nextBtnId || "invMemNextBtn";
+  invMemEmojiSet = emojiSet || invMemDefaultEmojis;
+  invMemBackSymbol = backSymbol || "💌";
+
+  const grid = document.getElementById(invMemGridId);
   if (!grid) return;
   invMemFlipped = [];
   invMemMatchedCount = 0;
   invMemLock = false;
-  const nextBtn = document.getElementById("invMemNextBtn");
+  const nextBtn = document.getElementById(invMemNextBtnId);
   if (nextBtn) nextBtn.style.display = "none";
 
-  const deck = [...invMemEmojis, ...invMemEmojis];
+  const deck = [...invMemEmojiSet, ...invMemEmojiSet];
   for (let i = deck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [deck[i], deck[j]] = [deck[j], deck[i]];
   }
   grid.innerHTML = deck.map((emoji, idx) => `
-    <div class="inv-mem-card" id="inv-mem-${idx}" onclick="invFlipMemCard(${idx})">
+    <div class="inv-mem-card" id="${invMemGridId}-${idx}" onclick="invFlipMemCard(${idx})">
       <div class="inv-mem-card-inner">
-        <div class="inv-mem-face inv-mem-back">💌</div>
+        <div class="inv-mem-face inv-mem-back">${invMemBackSymbol}</div>
         <div class="inv-mem-face inv-mem-front" data-emoji="${emoji}">${emoji}</div>
       </div>
     </div>`).join("");
@@ -316,7 +443,7 @@ function invSetupMemoryGame() {
 
 function invFlipMemCard(idx) {
   if (invMemLock) return;
-  const card = document.getElementById("inv-mem-" + idx);
+  const card = document.getElementById(invMemGridId + "-" + idx);
   if (!card || card.classList.contains("inv-mem-flipped") || card.classList.contains("inv-mem-matched")) return;
   card.classList.add("inv-mem-flipped");
   invMemFlipped.push(idx);
@@ -324,8 +451,8 @@ function invFlipMemCard(idx) {
 
   invMemLock = true;
   const [i1, i2] = invMemFlipped;
-  const c1 = document.getElementById("inv-mem-" + i1);
-  const c2 = document.getElementById("inv-mem-" + i2);
+  const c1 = document.getElementById(invMemGridId + "-" + i1);
+  const c2 = document.getElementById(invMemGridId + "-" + i2);
   const e1 = c1.querySelector(".inv-mem-front").dataset.emoji;
   const e2 = c2.querySelector(".inv-mem-front").dataset.emoji;
 
@@ -335,8 +462,8 @@ function invFlipMemCard(idx) {
     invMemMatchedCount++;
     invMemFlipped = [];
     invMemLock = false;
-    if (invMemMatchedCount === invMemEmojis.length) {
-      const nextBtn = document.getElementById("invMemNextBtn");
+    if (invMemMatchedCount === invMemEmojiSet.length) {
+      const nextBtn = document.getElementById(invMemNextBtnId);
       if (nextBtn) nextBtn.style.display = "inline-block";
     }
   } else {
@@ -458,6 +585,7 @@ function invHeartBurst(total, hearts) {
 }
 
 function invCelebrateDate() {
+  const wish = (document.getElementById("invWishInput")?.value || "").trim();
   invGoTo("inv-s-celebrate");
   const dateStr = invAnswers.date
     ? invAnswers.date.toLocaleDateString("mn-MN", { year: "numeric", month: "long", day: "numeric" })
@@ -466,15 +594,24 @@ function invCelebrateDate() {
     "📍 Хаашаа: <b>" + escapeHtml(invAnswers.q1 || "—") + "</b><br>" +
     "✨ Юу хийх: <b>" + escapeHtml(invAnswers.q2 || "—") + "</b><br>" +
     "⏰ Хэзээ өдрийн цаг: <b>" + escapeHtml(invAnswers.q3 || "—") + "</b><br>" +
-    "📅 Болзооны өдөр: <b>" + escapeHtml(dateStr) + "</b>";
+    "🍽 Хоол: <b>" + escapeHtml(invAnswers.q4 || "—") + "</b><br>" +
+    "💸 Төсөв: <b>" + escapeHtml(invAnswers.q5 || "—") + "</b><br>" +
+    "📅 Болзооны өдөр: <b>" + escapeHtml(dateStr) + "</b>" +
+    (wish ? "<br>💌 Хүлээж байгаа зүйл: <b>" + escapeHtml(wish) + "</b>" : "");
   invHeartBurst(60, ["❤️","💕","💗","💖","💘"]);
   setTimeout(() => invHeartBurst(40, ["❤️","💕","💗","💖"]), 1800);
 }
 
 // ================= ГЭРЛЭХ САНАЛ (энгийн хувилбар — асуулт/огноо шаардахгүй) =================
-function renderProposalExperience(recipientName, customMessage) {
+function renderProposalExperience(recipientName, data) {
+  data = data || {};
   const app = document.getElementById("inviteRoot");
   const heading = recipientName ? `${escapeHtml(recipientName)} аа, чамд нэг асуулт байна...` : "Чамд нэг асуулт байна...";
+  const memory = data.memory || "";
+  const facts = (data.funFacts || "").split("\n").map(s => s.trim()).filter(Boolean);
+  const hasMemory = !!memory;
+  const hasFacts = facts.length > 0;
+
   app.innerHTML = `
   <div id="inviteApp">
     <div id="inv-petals"></div>
@@ -483,7 +620,33 @@ function renderProposalExperience(recipientName, customMessage) {
       <div class="inv-card active" id="inv-s-intro">
         <div class="inv-eyebrow">Хамгийн чухал асуулт</div>
         <h1>${heading}</h1>
-        <p class="inv-sub">${customMessage ? escapeHtml(customMessage) : "Миний амьдралын хамгийн онцгой хүн чи."}</p>
+        <p class="inv-sub">Дараагийн хэдэн секундэд миний амьдралын хамгийн чухал асуулт байх болно 🥹</p>
+        <button class="inv-btn" type="button" onclick="${hasMemory ? "invGoTo('inv-s-memory')" : (hasFacts ? "invGoTo('inv-s-facts')" : "invGoToCountdown()")}">Үргэлжлүүлэх ✨</button>
+      </div>
+      ${hasMemory ? `
+      <div class="inv-card" id="inv-s-memory">
+        <div class="inv-eyebrow">Нандин дурсамж 💭</div>
+        <h1 style="font-size:26px;">Санаж байна уу?</h1>
+        <p class="inv-sub" style="font-style:italic;">"${escapeHtml(memory)}"</p>
+        <button class="inv-btn" type="button" onclick="${hasFacts ? "invGoTo('inv-s-facts')" : "invGoToCountdown()"}">Үргэлжлүүлэх ✨</button>
+      </div>` : ""}
+      ${hasFacts ? `
+      <div class="inv-card" id="inv-s-facts">
+        <div class="inv-eyebrow">Чи мэдэх үү... 💡</div>
+        <h1 style="font-size:26px;">Бидний тухай баримтууд</h1>
+        <div class="inv-summary">
+          ${facts.map(f => `<div>✨ ${escapeHtml(f)}</div>`).join("")}
+        </div>
+        <button class="inv-btn" type="button" onclick="invGoToCountdown()">Үргэлжлүүлэх ✨</button>
+      </div>` : ""}
+      <div class="inv-card" id="inv-s-countdown">
+        <div class="inv-eyebrow">Бэлэн үү?</div>
+        <h1 style="font-size:26px;">Асуулт 3 секундийн дараа...</h1>
+        <div id="invCountdownNum" style="font-family:'Caveat',cursive;font-size:72px;color:var(--inv-rose-deep);margin:16px 0;">3</div>
+      </div>
+      <div class="inv-card" id="inv-s-final">
+        <div class="inv-eyebrow">Хамгийн чухал асуулт</div>
+        <h1>${data.message ? escapeHtml(data.message) : "Чи надтай гэрлэх үү?"} 💍</h1>
         <div class="inv-final-buttons">
           <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateProposal()">Тийм ээ! 💍</button>
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
@@ -500,8 +663,425 @@ function renderProposalExperience(recipientName, customMessage) {
   invStartPetals();
 }
 
+function invGoToCountdown() {
+  invGoTo("inv-s-countdown");
+  invStartProposalCountdown();
+}
+
+function invStartProposalCountdown() {
+  let n = 3;
+  const el = document.getElementById("invCountdownNum");
+  if (!el) return;
+  el.textContent = String(n);
+  const timer = setInterval(() => {
+    n--;
+    const numEl = document.getElementById("invCountdownNum");
+    if (!numEl) { clearInterval(timer); return; }
+    if (n <= 0) {
+      clearInterval(timer);
+      invGoTo("inv-s-final");
+    } else {
+      numEl.textContent = String(n);
+    }
+  }, 800);
+}
+
 function invCelebrateProposal() {
   invGoTo("inv-s-celebrate");
   invHeartBurst(60, ["❤️","💍","💕","💖","💘"]);
   setTimeout(() => invHeartBurst(40, ["❤️","💍","💕","💖"]), 1800);
+}
+
+// ================= ХУРИМ (хосын түүх, дэлгэрэнгүй, dress code, RSVP, дуу хүсэлт) =================
+function renderWeddingExperience(data) {
+  const app = document.getElementById("inviteRoot");
+  const names = data.names || "Хос";
+  const steps = [];
+  steps.push(`
+    <div class="inv-card active" id="inv-s-intro">
+      <div class="inv-eyebrow">Урилга</div>
+      <h1>💍 ${escapeHtml(names)} хоёрын хуримд тавтай морил</h1>
+      <p class="inv-sub">Та тэдний хамгийн онцгой өдрөөр хамт байхыг урьж байна.</p>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-story')">Дэлгэрэнгүй →</button>
+    </div>`);
+
+  if (data.loveStory) {
+    steps.push(`
+    <div class="inv-card" id="inv-s-story">
+      <div class="inv-eyebrow">Тэдний түүх 💕</div>
+      <h1 style="font-size:26px;">Хэрхэн танилцсан бэ?</h1>
+      <p class="inv-sub" style="font-style:italic;">"${escapeHtml(data.loveStory)}"</p>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-details')">Үргэлжлүүлэх →</button>
+    </div>`);
+  } else {
+    steps.push(`<div class="inv-card" id="inv-s-story"><div class="inv-eyebrow">💕</div><h1 style="font-size:26px;">Онцгой өдөр ирлээ</h1><button class="inv-btn" type="button" onclick="invGoTo('inv-s-details')">Үргэлжлүүлэх →</button></div>`);
+  }
+
+  steps.push(`
+    <div class="inv-card" id="inv-s-details">
+      <div class="inv-eyebrow">Дэлгэрэнгүй мэдээлэл 📋</div>
+      <h1 style="font-size:26px;">Хэзээ, хаана?</h1>
+      <div class="inv-summary">
+        📅 ${escapeHtml(data.date || "Тодорхойгүй")} ${data.time ? "· " + escapeHtml(data.time) : ""}<br>
+        📍 ${escapeHtml(data.location || "Тодорхойгүй")}
+      </div>
+      ${data.location ? mapEmbedHtml(data.location) : ""}
+      <button class="inv-btn" type="button" onclick="invGoTo('${data.dressCode ? "inv-s-dress" : "inv-s-rsvp"}')">Үргэлжлүүлэх →</button>
+    </div>`);
+
+  if (data.dressCode) {
+    steps.push(`
+    <div class="inv-card" id="inv-s-dress">
+      <div class="inv-eyebrow">Хувцасны код 👗</div>
+      <h1 style="font-size:26px;">Юу өмсөх вэ?</h1>
+      <p class="inv-sub">${escapeHtml(data.dressCode)}</p>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-rsvp')">Үргэлжлүүлэх →</button>
+    </div>`);
+  }
+
+  steps.push(`
+    <div class="inv-card" id="inv-s-rsvp">
+      <div class="inv-eyebrow">RSVP</div>
+      <h1>Та ирэх үү? 💌</h1>
+      <p class="inv-sub">Тэднийг дэмжихийн тулд ирнэ гэдгээ баталгаажуулаарай.</p>
+      <div class="inv-final-buttons">
+        <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invGoTo('${data.message ? "inv-s-note" : "inv-s-song"}')">Заавал ирнэ! 🎉</button>
+        <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
+          onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
+      </div>
+    </div>`);
+
+  if (data.message) {
+    steps.push(`
+    <div class="inv-card" id="inv-s-note">
+      <div class="inv-eyebrow">Тэмдэглэл 💌</div>
+      <h1 style="font-size:24px;">Мэдэгдэл</h1>
+      <p class="inv-sub">${escapeHtml(data.message)}</p>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-song')">Үргэлжлүүлэх →</button>
+    </div>`);
+  }
+
+  steps.push(`
+    <div class="inv-card" id="inv-s-song">
+      <div class="inv-eyebrow">Бага хүсэлт 🎵</div>
+      <h1 style="font-size:24px;">Ямар дуу тоглуулаасай гэж хүсэж байна?</h1>
+      <textarea id="invSongInput" rows="2" style="width:100%;border:2px solid var(--inv-line);border-radius:12px;padding:12px;font-family:inherit;font-size:14px;margin-bottom:16px;resize:vertical;" placeholder="Дуу/дуучны нэрээ бичээрэй (заавал биш)"></textarea>
+      <button class="inv-btn" type="button" onclick="invCelebrateWedding()">Дуусгах 🎉</button>
+    </div>`);
+
+  steps.push(`
+    <div class="inv-card" id="inv-s-celebrate">
+      <div class="inv-eyebrow">Баярлалаа 🎉</div>
+      <h1>${escapeHtml(names)}-д баяр хүргэе!</h1>
+      <p class="inv-sub" id="invWeddingCelebrateNote">Тэдэнтэй хамт баярлахыг тэсэн ядан хүлээж байна 💍</p>
+    </div>`);
+
+  app.innerHTML = `
+  <div id="inviteApp">
+    <div id="inv-petals"></div>
+    <div id="inv-heartRain"></div>
+    <div id="inv-stage">${steps.join("")}</div>
+  </div>`;
+  invStartPetals();
+}
+
+function invCelebrateWedding() {
+  const song = (document.getElementById("invSongInput")?.value || "").trim();
+  invGoTo("inv-s-celebrate");
+  const note = document.getElementById("invWeddingCelebrateNote");
+  if (note && song) note.innerHTML = `Тэдэнтэй хамт баярлахыг тэсэн ядан хүлээж байна 💍<br><br>🎵 Хүссэн дуу: <b>${escapeHtml(song)}</b>`;
+  invHeartBurst(50, ["💍","🎉","🎊","✨","🥂"]);
+  setTimeout(() => invHeartBurst(35, ["💍","🎉","🎊","✨"]), 1600);
+}
+
+// ================= ТӨРСӨН ӨДӨР (лаа унтраах, хүслийн тэмдэглэл, тоглоом) =================
+function renderBirthdayExperience(data) {
+  const app = document.getElementById("inviteRoot");
+  const name = data.recipient || "найз";
+  app.innerHTML = `
+  <div id="inviteApp">
+    <div id="inv-petals"></div>
+    <div id="inv-heartRain"></div>
+    <div id="inv-stage">
+      <div class="inv-card active" id="inv-s-intro">
+        <div class="inv-eyebrow">Урилга 🎉</div>
+        <h1>🎂 ${escapeHtml(name)}-ийн төрсөн өдөрт тавтай морил!</h1>
+        <p class="inv-sub">${data.message ? escapeHtml(data.message) : "Хамт баярлацгаая!"}</p>
+        <button class="inv-btn" type="button" onclick="invGoTo('inv-s-candles')">Дэлгэрэнгүй →</button>
+      </div>
+      <div class="inv-card" id="inv-s-candles">
+        <div class="inv-eyebrow">Хүслээ хийгээрэй 🕯</div>
+        <h1 style="font-size:26px;">Лаагаа дар аа!</h1>
+        <p class="inv-sub">Лаа бүр дээр дараад, бүгдийг унтраагаарай 🎂</p>
+        <div id="invCandleRow" style="display:flex;justify-content:center;gap:14px;font-size:36px;margin:20px 0;"></div>
+        <button class="inv-btn" id="invCandleNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-details')">Дараах →</button>
+      </div>
+      <div class="inv-card" id="inv-s-details">
+        <div class="inv-eyebrow">Дэлгэрэнгүй мэдээлэл 📋</div>
+        <h1 style="font-size:26px;">Хэзээ, хаана?</h1>
+        <div class="inv-summary">
+          📅 ${escapeHtml(data.date || "Тодорхойгүй")} ${data.time ? "· " + escapeHtml(data.time) : ""}<br>
+          📍 ${escapeHtml(data.location || "Тодорхойгүй")}
+        </div>
+        ${data.location ? mapEmbedHtml(data.location) : ""}
+        <button class="inv-btn" type="button" onclick="invGoTo('inv-s-memory')">Үргэлжлүүлэх →</button>
+      </div>
+      <div class="inv-card" id="inv-s-memory">
+        <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
+        <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
+        <p class="inv-sub">Баярын emoji-г хос болгоорой ✨</p>
+        <div class="inv-mem-grid" id="invBdayMemGrid"></div>
+        <button class="inv-btn" id="invBdayMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-wish')">Дараах →</button>
+      </div>
+      <div class="inv-card" id="inv-s-wish">
+        <div class="inv-eyebrow">Хүслийн тэмдэглэл ✍️</div>
+        <h1 style="font-size:26px;">Төрсөн өдрийн мэндчилгээ бичээрэй</h1>
+        <textarea id="invBdayWishInput" rows="3" style="width:100%;border:2px solid var(--inv-line);border-radius:12px;padding:12px;font-family:inherit;font-size:14px;margin-bottom:16px;resize:vertical;" placeholder="Сайхан төрсөн өдөр өнгөрүүлээрэй!"></textarea>
+        <button class="inv-btn" type="button" onclick="invGoTo('inv-s-rsvp')">Үргэлжлүүлэх →</button>
+      </div>
+      <div class="inv-card" id="inv-s-rsvp">
+        <div class="inv-eyebrow">RSVP</div>
+        <h1>Ирэх үү? 🎈</h1>
+        <div class="inv-final-buttons">
+          <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateBirthday()">Заавал ирнэ! 🎉</button>
+          <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
+            onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
+        </div>
+      </div>
+      <div class="inv-card" id="inv-s-celebrate">
+        <div class="inv-eyebrow">Баяр хүргэе 🎉</div>
+        <h1>Сайхан баярлацгаая!</h1>
+        <div class="inv-summary" id="invBdaySummary"></div>
+      </div>
+    </div>
+  </div>`;
+  invStartPetals();
+  invSetupBirthdayCandles();
+  invSetupMemoryGame("invBdayMemGrid", "invBdayMemNextBtn", ["🎂","🎈","🎁","🕯️","🎉","🍰"], "🎊");
+}
+
+let invCandlesLit = 6;
+function invSetupBirthdayCandles() {
+  invCandlesLit = 6;
+  const row = document.getElementById("invCandleRow");
+  if (!row) return;
+  row.innerHTML = Array.from({ length: 6 }).map((_, i) => `<span id="invCandle${i}" onclick="invBlowCandle(${i})" style="cursor:pointer;">🕯️</span>`).join("");
+}
+function invBlowCandle(i) {
+  const el = document.getElementById("invCandle" + i);
+  if (!el || el.dataset.out === "1") return;
+  el.textContent = "💨";
+  el.dataset.out = "1";
+  invCandlesLit--;
+  if (invCandlesLit <= 0) {
+    const nextBtn = document.getElementById("invCandleNextBtn");
+    if (nextBtn) nextBtn.style.display = "inline-block";
+  }
+}
+
+function invCelebrateBirthday() {
+  const wish = (document.getElementById("invBdayWishInput")?.value || "").trim();
+  invGoTo("inv-s-celebrate");
+  document.getElementById("invBdaySummary").innerHTML = wish ? `✍️ ${escapeHtml(wish)}` : "🎂 Баярын мэнд хүргэе!";
+  invHeartBurst(55, ["🎉","🎈","🎂","🎁","✨"]);
+  setTimeout(() => invHeartBurst(35, ["🎉","🎈","🎊"]), 1500);
+}
+
+// ================= АЖЛЫН АРГА ХЭМЖЭЭ (хөтөлбөр, dress code, RSVP + хоолны сонголт) =================
+function renderWorkExperience(data) {
+  const app = document.getElementById("inviteRoot");
+  const agendaItems = (data.agenda || "").split("\n").map(s => s.trim()).filter(Boolean);
+  const steps = [];
+  steps.push(`
+    <div class="inv-card active" id="inv-s-intro">
+      <div class="inv-eyebrow">Урилга 💼</div>
+      <h1 style="font-size:30px;">${escapeHtml(data.title || "Ажлын арга хэмжээ")}</h1>
+      <p class="inv-sub">Танийг манай арга хэмжээнд урьж байна.</p>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-details')">Дэлгэрэнгүй →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-details">
+      <div class="inv-eyebrow">Дэлгэрэнгүй мэдээлэл 📋</div>
+      <h1 style="font-size:26px;">Хэзээ, хаана?</h1>
+      <div class="inv-summary">
+        📅 ${escapeHtml(data.date || "Тодорхойгүй")} ${data.time ? "· " + escapeHtml(data.time) : ""}<br>
+        📍 ${escapeHtml(data.location || "Тодорхойгүй")}
+      </div>
+      ${data.location ? mapEmbedHtml(data.location) : ""}
+      <button class="inv-btn" type="button" onclick="invGoTo('${agendaItems.length ? "inv-s-agenda" : (data.dressCode ? "inv-s-dress" : "inv-s-rsvp")}')">Үргэлжлүүлэх →</button>
+    </div>`);
+  if (agendaItems.length) {
+    steps.push(`
+    <div class="inv-card" id="inv-s-agenda">
+      <div class="inv-eyebrow">Хөтөлбөр 🗓</div>
+      <h1 style="font-size:26px;">Өдрийн хөтөлбөр</h1>
+      <div class="inv-summary">${agendaItems.map(a => `<div>▸ ${escapeHtml(a)}</div>`).join("")}</div>
+      <button class="inv-btn" type="button" onclick="invGoTo('${data.dressCode ? "inv-s-dress" : "inv-s-rsvp"}')">Үргэлжлүүлэх →</button>
+    </div>`);
+  }
+  if (data.dressCode) {
+    steps.push(`
+    <div class="inv-card" id="inv-s-dress">
+      <div class="inv-eyebrow">Хувцасны код 👔</div>
+      <h1 style="font-size:26px;">Юу өмсөх вэ?</h1>
+      <p class="inv-sub">${escapeHtml(data.dressCode)}</p>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-rsvp')">Үргэлжлүүлэх →</button>
+    </div>`);
+  }
+  steps.push(`
+    <div class="inv-card" id="inv-s-rsvp">
+      <div class="inv-eyebrow">RSVP</div>
+      <h1>Та ирэх үү?</h1>
+      <div class="inv-final-buttons">
+        <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invGoTo('inv-s-meal')">Ирнэ ✅</button>
+        <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
+          onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
+      </div>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-meal">
+      <div class="inv-eyebrow">Хоолны сонголт 🍽</div>
+      <h1 style="font-size:26px;">Ямар хоол илүүд үзэх вэ?</h1>
+      <div class="inv-options" id="inv-opts-meal">
+        <div class="inv-opt" data-val="Ердийн" onclick="invPick('inv-opts-meal', this, 'meal', 'inv-s-celebrate-work')"><span class="inv-emoji">🍖</span> Ердийн</div>
+        <div class="inv-opt" data-val="Веган" onclick="invPick('inv-opts-meal', this, 'meal', 'inv-s-celebrate-work')"><span class="inv-emoji">🥗</span> Веган</div>
+        <div class="inv-opt" data-val="Аллерги/бусад" onclick="invPick('inv-opts-meal', this, 'meal', 'inv-s-celebrate-work')"><span class="inv-emoji">⚠️</span> Аллерги/бусад</div>
+      </div>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-celebrate-work">
+      <div class="inv-eyebrow">Баталгаажлаа ✅</div>
+      <h1 style="font-size:26px;">Уулзацгаая!</h1>
+      <p class="inv-sub">Таны ирцийг бүртгэлээ. Тэнд уулзацгаая 💼</p>
+    </div>`);
+
+  app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
+}
+
+// ================= ГЭР БҮЛИЙН АРГА ХЭМЖЭЭ (юу авчрах, зочны тоо, мессеж) =================
+function renderFamilyExperience(data) {
+  const app = document.getElementById("inviteRoot");
+  const steps = [];
+  steps.push(`
+    <div class="inv-card active" id="inv-s-intro">
+      <div class="inv-eyebrow">Урилга 👶</div>
+      <h1 style="font-size:30px;">${escapeHtml(data.title || "Гэр бүлийн арга хэмжээ")}</h1>
+      <p class="inv-sub">${data.message ? escapeHtml(data.message) : "Гэр бүлээрээ ирээрэй!"}</p>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-details')">Дэлгэрэнгүй →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-details">
+      <div class="inv-eyebrow">Дэлгэрэнгүй мэдээлэл 📋</div>
+      <h1 style="font-size:26px;">Хэзээ, хаана?</h1>
+      <div class="inv-summary">
+        📅 ${escapeHtml(data.date || "Тодорхойгүй")} ${data.time ? "· " + escapeHtml(data.time) : ""}<br>
+        📍 ${escapeHtml(data.location || "Тодорхойгүй")}
+      </div>
+      ${data.location ? mapEmbedHtml(data.location) : ""}
+      <button class="inv-btn" type="button" onclick="invGoTo('${data.bring ? "inv-s-bring" : "inv-s-guests"}')">Үргэлжлүүлэх →</button>
+    </div>`);
+  if (data.bring) {
+    steps.push(`
+    <div class="inv-card" id="inv-s-bring">
+      <div class="inv-eyebrow">Юу авчрах вэ 🧺</div>
+      <h1 style="font-size:26px;">Санал болгож буй зүйлс</h1>
+      <p class="inv-sub">${escapeHtml(data.bring)}</p>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-guests')">Үргэлжлүүлэх →</button>
+    </div>`);
+  }
+  steps.push(`
+    <div class="inv-card" id="inv-s-guests">
+      <div class="inv-eyebrow">Хэдэн хүнтэй ирэх вэ? 👨‍👩‍👧‍👦</div>
+      <h1 style="font-size:26px;">Гэр бүлийн тоогоо сонгоно уу</h1>
+      <div class="inv-options" id="inv-opts-guests">
+        <div class="inv-opt" data-val="1-2 хүн" onclick="invPick('inv-opts-guests', this, 'guests', 'inv-s-rsvp')"><span class="inv-emoji">🧑</span> 1-2 хүн</div>
+        <div class="inv-opt" data-val="3-4 хүн" onclick="invPick('inv-opts-guests', this, 'guests', 'inv-s-rsvp')"><span class="inv-emoji">👨‍👩‍👧</span> 3-4 хүн</div>
+        <div class="inv-opt" data-val="5+ хүн" onclick="invPick('inv-opts-guests', this, 'guests', 'inv-s-rsvp')"><span class="inv-emoji">👨‍👩‍👧‍👦</span> 5+ хүн</div>
+      </div>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-rsvp">
+      <div class="inv-eyebrow">RSVP</div>
+      <h1>Ирэх үү? 🏡</h1>
+      <div class="inv-final-buttons">
+        <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateFamily()">Заавал ирнэ! ✅</button>
+        <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
+          onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
+      </div>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-celebrate">
+      <div class="inv-eyebrow">Баярлалаа 🎉</div>
+      <h1>Тэгвэл хамт цуглацгаая!</h1>
+      <p class="inv-sub">Гэр бүлээрээ ирнэ гэдгийг тань бүртгэлээ 🏡</p>
+    </div>`);
+
+  app.innerHTML = `
+  <div id="inviteApp">
+    <div id="inv-heartRain"></div>
+    <div id="inv-stage">${steps.join("")}</div>
+  </div>`;
+}
+
+function invCelebrateFamily() {
+  invGoTo("inv-s-celebrate");
+  invHeartBurst(45, ["🎉","🏡","👨‍👩‍👧‍👦","✨"]);
+}
+
+// ================= БАЯРЫН УРИЛГА (баярын тоглоом, мэндчилгээ, RSVP) =================
+function renderHolidayExperience(data) {
+  const app = document.getElementById("inviteRoot");
+  const holidayName = data.holidayName || "Баяр";
+  app.innerHTML = `
+  <div id="inviteApp">
+    <div id="inv-petals"></div>
+    <div id="inv-heartRain"></div>
+    <div id="inv-stage">
+      <div class="inv-card active" id="inv-s-intro">
+        <div class="inv-eyebrow">Урилга 🎊</div>
+        <h1 style="font-size:28px;">🎊 ${escapeHtml(holidayName)}-ийн мэнд хүргэе!</h1>
+        <p class="inv-sub">${data.message ? escapeHtml(data.message) : "Баярын өдрөөр хамт байхыг урьж байна."}</p>
+        <button class="inv-btn" type="button" onclick="invGoTo('inv-s-details')">Дэлгэрэнгүй →</button>
+      </div>
+      <div class="inv-card" id="inv-s-details">
+        <div class="inv-eyebrow">Дэлгэрэнгүй мэдээлэл 📋</div>
+        <h1 style="font-size:26px;">Хэзээ, хаана?</h1>
+        <div class="inv-summary">
+          📅 ${escapeHtml(data.date || "Тодорхойгүй")} ${data.time ? "· " + escapeHtml(data.time) : ""}<br>
+          📍 ${escapeHtml(data.location || "Тодорхойгүй")}
+        </div>
+        ${data.location ? mapEmbedHtml(data.location) : ""}
+        <button class="inv-btn" type="button" onclick="invGoTo('inv-s-memory')">Үргэлжлүүлэх →</button>
+      </div>
+      <div class="inv-card" id="inv-s-memory">
+        <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
+        <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
+        <p class="inv-sub">Баярын emoji-г хос болгоорой ✨</p>
+        <div class="inv-mem-grid" id="invHolMemGrid"></div>
+        <button class="inv-btn" id="invHolMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-rsvp')">Дараах →</button>
+      </div>
+      <div class="inv-card" id="inv-s-rsvp">
+        <div class="inv-eyebrow">RSVP</div>
+        <h1>Ирэх үү? 🎉</h1>
+        <div class="inv-final-buttons">
+          <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateHoliday()">Заавал ирнэ! 🎊</button>
+          <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
+            onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
+        </div>
+      </div>
+      <div class="inv-card" id="inv-s-celebrate">
+        <div class="inv-eyebrow">Баяр хүргэе 🎊</div>
+        <h1>${escapeHtml(holidayName)} гэсэн үгс мэндлэе!</h1>
+        <p class="inv-sub">Баярын өдрийг хамтдаа тэмдэглэцгээе 🥳</p>
+      </div>
+    </div>
+  </div>`;
+  invStartPetals();
+  invSetupMemoryGame("invHolMemGrid", "invHolMemNextBtn", ["🎄","🎁","🔔","⭐","❄️","🥂"], "🎊");
+}
+
+function invCelebrateHoliday() {
+  invGoTo("inv-s-celebrate");
+  invHeartBurst(55, ["🎉","🎊","❄️","⭐","🥂"]);
+  setTimeout(() => invHeartBurst(35, ["🎉","🎊","✨"]), 1500);
 }

@@ -348,7 +348,7 @@ function renderInviteView(type, data) {
 }
 
 // ================= БОЛЗООНЫ ИНТЕРАКТИВ УРИЛГА (дасан зохицуулсан, эх загвар) =================
-const invAnswers = { q1: null, q2: null, q3: null, q4: null, q5: null, date: null };
+const invAnswers = { q1: null, q2: null, q3: null, q4: null, date: null };
 let invCalDate = new Date();
 const invMonthNames = ["1-р сар","2-р сар","3-р сар","4-р сар","5-р сар","6-р сар","7-р сар","8-р сар","9-р сар","10-р сар","11-р сар","12-р сар"];
 const invDowNames = ["Ням","Дав","Мяг","Лха","Пүр","Баа","Бям"];
@@ -390,8 +390,8 @@ function renderDateInviteExperience(recipientName) {
         </div>
       </div>
       <div class="inv-card" id="inv-s-q3">
-        <div class="inv-progress"><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span></span><span></span></div>
-        <div class="inv-eyebrow">Асуулт 3 / 5</div>
+        <div class="inv-progress"><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span></span></div>
+        <div class="inv-eyebrow">Асуулт 3 / 4</div>
         <h1 style="font-size:32px;">Хэдэн цагт тохиромжтой вэ? ⏰</h1>
         <div class="inv-options" id="inv-opts-q3">
           <div class="inv-opt" data-val="Өдрөөр" onclick="invPick('inv-opts-q3', this, 'q3', 'inv-s-q4')"><span class="inv-emoji">🌅</span> Өдрөөр</div>
@@ -400,25 +400,23 @@ function renderDateInviteExperience(recipientName) {
         </div>
       </div>
       <div class="inv-card" id="inv-s-q4">
-        <div class="inv-progress"><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span></span></div>
-        <div class="inv-eyebrow">Асуулт 4 / 5</div>
+        <div class="inv-progress"><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span></div>
+        <div class="inv-eyebrow">Асуулт 4 / 4</div>
         <h1 style="font-size:32px;">Ямар хоол сонирхдог вэ? 🍽</h1>
         <div class="inv-options" id="inv-opts-q4">
-          <div class="inv-opt" data-val=" Азийн хоол" onclick="invPick('inv-opts-q4', this, 'q4', 'inv-s-q5')"><span class="inv-emoji">🍜</span> Azийн хоол</div>
-          <div class="inv-opt" data-val="Итали хоол" onclick="invPick('inv-opts-q4', this, 'q4', 'inv-s-q5')"><span class="inv-emoji">🍕</span> Итали хоол</div>
-          <div class="inv-opt" data-val="Монгол хоол" onclick="invPick('inv-opts-q4', this, 'q4', 'inv-s-q5')"><span class="inv-emoji">🥟</span> Монгол хоол</div>
-          <div class="inv-opt" data-val="Хамаагүй" onclick="invPick('inv-opts-q4', this, 'q4', 'inv-s-q5')"><span class="inv-emoji">🤷</span> Хамаагүй</div>
+          <div class="inv-opt" data-val=" Азийн хоол" onclick="invPick('inv-opts-q4', this, 'q4', 'inv-s-clicker')"><span class="inv-emoji">🍜</span> Azийн хоол</div>
+          <div class="inv-opt" data-val="Итали хоол" onclick="invPick('inv-opts-q4', this, 'q4', 'inv-s-clicker')"><span class="inv-emoji">🍕</span> Итали хоол</div>
+          <div class="inv-opt" data-val="Монгол хоол" onclick="invPick('inv-opts-q4', this, 'q4', 'inv-s-clicker')"><span class="inv-emoji">🥟</span> Монгол хоол</div>
+          <div class="inv-opt" data-val="Хамаагүй" onclick="invPick('inv-opts-q4', this, 'q4', 'inv-s-clicker')"><span class="inv-emoji">🤷</span> Хамаагүй</div>
         </div>
       </div>
-      <div class="inv-card" id="inv-s-q5">
-        <div class="inv-progress"><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span><span class="inv-done"></span></div>
-        <div class="inv-eyebrow">Асуулт 5 / 5</div>
-        <h1 style="font-size:32px;">Төсөв хэр их вэ? 💸</h1>
-        <div class="inv-options" id="inv-opts-q5">
-          <div class="inv-opt" data-val="Хямд (~30,000₮)" onclick="invPick('inv-opts-q5', this, 'q5', 'inv-s-memory')"><span class="inv-emoji">💸</span> Хямд (~30,000₮)</div>
-          <div class="inv-opt" data-val="Дунд (~80,000₮)" onclick="invPick('inv-opts-q5', this, 'q5', 'inv-s-memory')"><span class="inv-emoji">💰</span> Дунд (~80,000₮)</div>
-          <div class="inv-opt" data-val="Тансаг (150,000₮+)" onclick="invPick('inv-opts-q5', this, 'q5', 'inv-s-memory')"><span class="inv-emoji">💎</span> Тансаг (150,000₮+)</div>
-        </div>
+      <div class="inv-card" id="inv-s-clicker">
+        <div class="inv-eyebrow">Бонус тоглоом 💕</div>
+        <h1 style="font-size:28px;">5 секундэд хэдэн удаа дарж чадах вэ?</h1>
+        <p class="inv-sub" id="invClickerSub">Зүрхэн дээр дараад эхэлье!</p>
+        <div id="invClickerHeart" onclick="invClickerTap()" style="font-size:80px;cursor:pointer;user-select:none;margin:10px 0 16px;transition:transform .1s;">💗</div>
+        <div style="font-size:20px;font-weight:700;color:var(--inv-rose-deep);margin-bottom:16px;">Оноо: <span id="invClickerScore">0</span></div>
+        <button class="inv-btn" id="invClickerNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-memory')">Дараах →</button>
       </div>
       <div class="inv-card" id="inv-s-memory">
         <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
@@ -470,6 +468,7 @@ function renderDateInviteExperience(recipientName) {
   invCalDate.setDate(1);
   invRenderCalendar();
   invSetupMemoryGame("invMemGrid", "invMemNextBtn", invMemDefaultEmojis, "💌");
+  invSetupClickerGame();
 }
 
 function invGoTo(id) {
@@ -487,6 +486,55 @@ function invPick(groupId, el, key, nextScreen) {
   el.classList.add("inv-picked");
   invAnswers[key] = el.dataset.val;
   setTimeout(() => invGoTo(nextScreen), 380);
+}
+
+// ---------- 5 секундийн зүрх дарах хурдны тоглоом ----------
+let invClickerScore = 0;
+let invClickerActive = false;
+let invClickerTimer = null;
+
+function invSetupClickerGame() {
+  invClickerScore = 0;
+  invClickerActive = false;
+  if (invClickerTimer) { clearTimeout(invClickerTimer); invClickerTimer = null; }
+  const scoreEl = document.getElementById("invClickerScore");
+  if (scoreEl) scoreEl.textContent = "0";
+  const sub = document.getElementById("invClickerSub");
+  if (sub) sub.textContent = "Зүрхэн дээр дараад эхэлье!";
+  const nextBtn = document.getElementById("invClickerNextBtn");
+  if (nextBtn) nextBtn.style.display = "none";
+}
+
+function invClickerTap() {
+  if (!invClickerActive && invClickerTimer === null) {
+    invClickerActive = true;
+    invClickerScore = 0;
+    const sub = document.getElementById("invClickerSub");
+    if (sub) sub.textContent = "Дар, дар, дар! ⏱";
+    invClickerTimer = setTimeout(invClickerEnd, 5000);
+  }
+  if (!invClickerActive) return;
+  invClickerScore++;
+  const scoreEl = document.getElementById("invClickerScore");
+  if (scoreEl) scoreEl.textContent = String(invClickerScore);
+  const heart = document.getElementById("invClickerHeart");
+  if (heart) {
+    heart.style.transform = "scale(1.3)";
+    setTimeout(() => { const h = document.getElementById("invClickerHeart"); if (h) h.style.transform = "scale(1)"; }, 100);
+  }
+}
+
+function invClickerEnd() {
+  invClickerActive = false;
+  invClickerTimer = null;
+  const sub = document.getElementById("invClickerSub");
+  let msg;
+  if (invClickerScore >= 30) msg = "🔥 Хайрын мастер! Гараа шатаачихлаа шүү!";
+  else if (invClickerScore >= 15) msg = "💖 Маш сайн! Чи их хайртай юм байна.";
+  else msg = "💗 Гоё оролдлого!";
+  if (sub) sub.textContent = msg;
+  const nextBtn = document.getElementById("invClickerNextBtn");
+  if (nextBtn) nextBtn.style.display = "inline-block";
 }
 
 // ---------- Эвлүүлэх тоглоом (N хос emoji, 3D flip) — төрөл бүр өөр emoji/сэдвээр ашиглана ----------
@@ -681,8 +729,8 @@ function invCelebrateDate() {
     "✨ Юу хийх: <b>" + escapeHtml(invAnswers.q2 || "—") + "</b><br>" +
     "⏰ Хэзээ өдрийн цаг: <b>" + escapeHtml(invAnswers.q3 || "—") + "</b><br>" +
     "🍽 Хоол: <b>" + escapeHtml(invAnswers.q4 || "—") + "</b><br>" +
-    "💸 Төсөв: <b>" + escapeHtml(invAnswers.q5 || "—") + "</b><br>" +
-    "📅 Болзооны өдөр: <b>" + escapeHtml(dateStr) + "</b>" +
+    "📅 Болзооны өдөр: <b>" + escapeHtml(dateStr) + "</b><br>" +
+    "💗 Зүрх дарах оноо: <b>" + invClickerScore + "</b>" +
     (wish ? "<br>💌 Хүлээж байгаа зүйл: <b>" + escapeHtml(wish) + "</b>" : "");
   invHeartBurst(60, ["❤️","💕","💗","💖","💘"]);
   setTimeout(() => invHeartBurst(40, ["❤️","💕","💗","💖"]), 1800);

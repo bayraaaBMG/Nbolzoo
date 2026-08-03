@@ -1,6 +1,9 @@
-// ===== УРИЛГА (invitation builder): stateless, backend шаардахгүй =====
-// Бүх өгөгдлийг URL-ийн ?d= param дотор base64url-ээр кодолж дамжуулна —
-// Firestore бичих шаардлагагүй тул илгээх/хүлээн авах хоёул нэвтрэх шаардлагагүй, шууд ажиллана.
+// ===== УРИЛГА (invitation builder) =====
+// Илгээгч Google/имэйлээр нэвтэрсэн байх ёстой (Firestore-д invites/{id} баримт үүсгэнэ,
+// senderUid-аар хамаарна). QR/холбоос нь ?id= — тухайн Firestore баримтын ID.
+// Хүлээн авагч НЭВТРЭХ ШААРДЛАГАГҮЙ: холбоос өөрөө нэг удаагийн "нууц түлхүүр" мэт үүрэг гүйцэтгэнэ,
+// хариулмагц response талбарыг нэг л удаа бичиж (status: sent → responded), илгээгч "Миний урилгууд"
+// хэсэгт хариултыг харна. Хуучин ?type=&d= холбоосууд (backend-гүй үеийн) уншигдсаар байна (backward-compat).
 
 // family нь тухайн төрөл ямар маягтын/харагдацын логик ашиглахыг заана:
 // "event" — ерөнхий гарчиг/огноо/цаг/байршил/мессеж маягт, "wedding" — хосын нэртэй маягт,
@@ -33,10 +36,17 @@ function decodeInviteData(str) {
 }
 function invVal(id) { return (document.getElementById(id)?.value || "").trim(); }
 
+// Идэвхтэй хүлээн авагчийн Firestore invite ID (?id= холбоосоор орж ирсэн бол).
+// Хуучин ?type=&d= холбоосоор орж ирсэн бол null хэвээр — тэр тохиолдолд хариулт хадгалагдахгүй.
+let currentInviteId = null;
+let currentInviteResponded = false;
+
 function initInvitePage() {
   const params = new URLSearchParams(location.search);
+  const id = params.get("id");
   const type = params.get("type");
   const d = params.get("d");
+  if (id) { loadInviteById(id); return; }
   if (type && INVITE_TYPES[type] && d) {
     const data = decodeInviteData(d);
     if (data) { renderInviteView(type, data); return; }
@@ -44,12 +54,55 @@ function initInvitePage() {
   renderTypePicker();
 }
 
+async function loadInviteById(id) {
+  document.getElementById("inviteRoot").innerHTML = `<p style="padding:60px 0;text-align:center;color:var(--text-light);">Ачааллаж байна...</p>`;
+  if (typeof db === "undefined" || !db) { renderTypePicker(); return; }
+  try {
+    const snap = await db.collection("invites").doc(id).get();
+    if (!snap.exists) {
+      document.getElementById("inviteRoot").innerHTML = `
+        <div class="inv-view-card"><div class="icon">😕</div><h2>Урилга олдсонгүй</h2>
+        <p style="color:var(--text-light);">Холбоос буруу эсвэл устсан байж магадгүй.</p></div>`;
+      return;
+    }
+    const inv = snap.data();
+    if (!INVITE_TYPES[inv.type]) { renderTypePicker(); return; }
+    currentInviteId = id;
+    currentInviteResponded = inv.status === "responded";
+    renderInviteView(inv.type, inv.data || {});
+  } catch (e) {
+    console.warn("loadInviteById error:", e);
+    document.getElementById("inviteRoot").innerHTML = `
+      <div class="inv-view-card"><div class="icon">⚠️</div><h2>Алдаа гарлаа</h2>
+      <p style="color:var(--text-light);">Дахин ачаална уу.</p></div>`;
+  }
+}
+
+// currentInviteId-тэй бол хариултыг Firestore-д нэг л удаа бичнэ (status: sent → responded).
+// Хуучин ?d= холбоос (currentInviteId===null) эсвэл db байхгүй үед чимээгүй алгасна.
+async function submitInviteResponse(response) {
+  if (!currentInviteId || currentInviteResponded) return;
+  if (typeof db === "undefined" || !db || typeof firebase === "undefined") return;
+  currentInviteResponded = true;
+  try {
+    await db.collection("invites").doc(currentInviteId).update({
+      status: "responded",
+      response: { ...response, respondedAt: firebase.firestore.FieldValue.serverTimestamp() },
+    });
+  } catch (e) { console.warn("submitInviteResponse error:", e); }
+}
+
 function renderTypePicker() {
   const eventTypes = Object.entries(INVITE_TYPES).filter(([, t]) => t.group === "event");
   const otherTypes = Object.entries(INVITE_TYPES).filter(([, t]) => !t.group);
   document.getElementById("inviteRoot").innerHTML = `
-    <h1 style="margin-bottom:6px;">💌 Урилга үүсгэх</h1>
-    <p style="color:var(--text-light);margin-bottom:16px;">Төрлөө сонгоод, дэлгэрэнгүйгээ бөглөөд шууд QR код хэлбэрээр аваарай.</p>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+      <div>
+        <h1 style="margin-bottom:6px;">💌 Урилга үүсгэх</h1>
+        <p style="color:var(--text-light);margin-bottom:16px;">Төрлөө сонгоод, дэлгэрэнгүйгээ бөглөөд шууд QR код хэлбэрээр аваарай.</p>
+      </div>
+      <button type="button" class="btn btn-ghost" style="white-space:nowrap;" onclick="renderMyInvites()">📋 Миний урилгууд</button>
+    </div>
     <div class="section-title"><h2 style="font-size:16px;">🎉 Үйл ажиллагаа</h2></div>
     <div class="inv-type-grid inv-type-grid-sub">
       ${eventTypes.map(([id, t]) => `
@@ -276,7 +329,7 @@ function renderCultureForm() {
     </div>`;
 }
 
-function generateInviteQr(type) {
+async function generateInviteQr(type) {
   const t = INVITE_TYPES[type];
   let data = {};
   if (t.family === "wedding") data = { names: invVal("invField1"), date: invVal("invDate"), time: invVal("invTime"), location: invVal("invLocation"), loveStory: invVal("invExtra1"), dressCode: invVal("invExtra2"), message: invVal("invMessage") };
@@ -293,9 +346,28 @@ function generateInviteQr(type) {
   else if (t.family === "proposal") data = { recipient: invVal("invField1"), memory: invVal("invExtra1"), funFacts: invVal("invExtra2"), message: invVal("invMessage") };
   else if (t.family === "date") data = { recipient: invVal("invField1") };
 
-  const encoded = encodeInviteData(data);
-  const url = `${location.origin}${location.pathname}?type=${type}&d=${encoded}`;
-  showInviteQr(url);
+  if (typeof currentUser === "undefined" || !currentUser) {
+    showToast("⚠️ Урилга илгээхийн тулд эхлээд нэвтэрнэ үү");
+    if (typeof openAuth === "function") openAuth("login");
+    return;
+  }
+  if (typeof db === "undefined" || !db) { showToast("⚠️ Firebase холбогдоогүй байна"); return; }
+
+  showToast("⏳ Урилгаа үүсгэж байна...");
+  try {
+    const ref = await db.collection("invites").add({
+      type, data,
+      senderUid: currentUser.uid,
+      senderName: currentUser.name || "",
+      status: "sent",
+      response: null,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    const url = `${location.origin}${location.pathname}?id=${ref.id}`;
+    showInviteQr(url);
+  } catch (e) {
+    showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
+  }
 }
 
 function showInviteQr(url) {
@@ -304,11 +376,12 @@ function showInviteQr(url) {
     <a class="back-btn" onclick="renderTypePicker()">← Шинэ урилга үүсгэх</a>
     <div class="inv-qr-box">
       <img src="${qrImg}" width="240" height="240" alt="QR код">
-      <p style="font-size:13px;color:var(--text-light);margin-bottom:10px;">Энэ QR кодыг уншуулж эсвэл доорх холбоосыг илгээж урилгаа хуваалцаарай</p>
+      <p style="font-size:13px;color:var(--text-light);margin-bottom:10px;">Энэ QR кодыг уншуулж эсвэл доорх холбоосыг илгээж урилгаа хуваалцаарай. Хүлээн авагч хариулмагц хариултыг чиний "Миний урилгууд" жагсаалтад харах боломжтой.</p>
       <div class="inv-link-row">
         <input type="text" readonly value="${escapeHtml(url)}" id="inviteLinkInput" onclick="this.select()">
         <button class="btn btn-primary" type="button" onclick="copyInviteLink()">Хуулах</button>
       </div>
+      <button class="btn btn-ghost" type="button" style="margin-top:14px;width:100%" onclick="renderMyInvites()">📋 Миний урилгуудыг харах</button>
     </div>`;
 }
 
@@ -317,6 +390,72 @@ function copyInviteLink() {
   if (!input) return;
   input.select();
   if (navigator.clipboard) navigator.clipboard.writeText(input.value).then(() => showToast("🔗 Холбоос хуулагдлаа!"));
+}
+
+// ---------- Илгээгчийн "Миний урилгууд" жагсаалт (хариулт хараагаад) ----------
+async function renderMyInvites() {
+  if (typeof currentUser === "undefined" || !currentUser) {
+    showToast("⚠️ Эхлээд нэвтэрнэ үү");
+    if (typeof openAuth === "function") openAuth("login");
+    return;
+  }
+  document.getElementById("inviteRoot").innerHTML = `
+    <a class="back-btn" onclick="renderTypePicker()">← Буцах</a>
+    <h2 style="margin:10px 0 16px;">📋 Миний илгээсэн урилгууд</h2>
+    <div class="inv-my-list" id="myInvitesList"><p style="color:var(--text-light);">Ачааллаж байна...</p></div>`;
+  if (typeof db === "undefined" || !db) return;
+  try {
+    const snap = await db.collection("invites")
+      .where("senderUid", "==", currentUser.uid)
+      .orderBy("createdAt", "desc")
+      .limit(50)
+      .get();
+    const list = document.getElementById("myInvitesList");
+    if (!list) return;
+    if (snap.empty) { list.innerHTML = `<p style="color:var(--text-light);">Та одоогоор урилга илгээгээгүй байна.</p>`; return; }
+    list.innerHTML = snap.docs.map(doc => {
+      const inv = doc.data();
+      const t = INVITE_TYPES[inv.type] || { label: inv.type, emoji: "💌" };
+      const responded = inv.status === "responded";
+      const idata = inv.data || {};
+      const who = idata.recipient || idata.names || idata.title || idata.holidayName || "";
+      const when = inv.createdAt && inv.createdAt.toDate ? inv.createdAt.toDate().toLocaleDateString("mn-MN") : "";
+      return `
+      <div class="inv-my-item ${responded ? "inv-my-responded" : ""}">
+        <div class="inv-my-head">
+          <span class="inv-my-emoji">${t.emoji}</span>
+          <div class="inv-my-info">
+            <div class="inv-my-title">${escapeHtml(t.label)}${who ? " — " + escapeHtml(who) : ""}</div>
+            <div class="inv-my-date">${escapeHtml(when)}</div>
+          </div>
+          <span class="inv-my-status ${responded ? "responded" : ""}">${responded ? "✅ Хариулсан" : "⏳ Хүлээгдэж байна"}</span>
+        </div>
+        ${responded && inv.response ? `<div class="inv-my-response">${formatInviteResponse(inv.response)}</div>` : ""}
+      </div>`;
+    }).join("");
+  } catch (e) {
+    console.warn("renderMyInvites error:", e);
+    const list = document.getElementById("myInvitesList");
+    if (list) list.innerHTML = `<p style="color:var(--text-light);">⚠️ Ачаалахад алдаа гарлаа.</p>`;
+  }
+}
+
+// Төрөл бүрийн response object-д давхцаж болох талбаруудыг нэг стандарт байдлаар харуулна
+function formatInviteResponse(r) {
+  const parts = [];
+  if (r.q1) parts.push("📍 Хаашаа: <b>" + escapeHtml(r.q1) + "</b>");
+  if (r.q2) parts.push("✨ Юу хийх: <b>" + escapeHtml(r.q2) + "</b>");
+  if (r.q3) parts.push("⏰ Цаг: <b>" + escapeHtml(r.q3) + "</b>");
+  if (r.q4) parts.push("🍽 Хоол: <b>" + escapeHtml(r.q4) + "</b>");
+  if (r.date) parts.push("📅 Огноо: <b>" + escapeHtml(r.date) + "</b>");
+  if (typeof r.clickerScore === "number") parts.push("💗 Зүрх дарах оноо: <b>" + r.clickerScore + "</b>");
+  if (r.answer === "yes") parts.push("💍 Хариулт: <b>Тийм ээ!</b>");
+  if (r.rsvp) parts.push("✅ RSVP: <b>" + escapeHtml(r.rsvp) + "</b>");
+  if (r.meal) parts.push("🍽 Хоолны сонголт: <b>" + escapeHtml(r.meal) + "</b>");
+  if (r.guests) parts.push("👨‍👩‍👧 Хүний тоо: <b>" + escapeHtml(r.guests) + "</b>");
+  if (r.song) parts.push("🎵 Дуу хүсэлт: <b>" + escapeHtml(r.song) + "</b>");
+  if (r.wish) parts.push("💌 " + escapeHtml(r.wish));
+  return parts.join("<br>") || "—";
 }
 
 // ---------- Recipient view ----------
@@ -734,6 +873,7 @@ function invCelebrateDate() {
     (wish ? "<br>💌 Хүлээж байгаа зүйл: <b>" + escapeHtml(wish) + "</b>" : "");
   invHeartBurst(60, ["❤️","💕","💗","💖","💘"]);
   setTimeout(() => invHeartBurst(40, ["❤️","💕","💗","💖"]), 1800);
+  submitInviteResponse({ q1: invAnswers.q1, q2: invAnswers.q2, q3: invAnswers.q3, q4: invAnswers.q4, date: dateStr, clickerScore: invClickerScore, wish });
 }
 
 // ================= ГЭРЛЭХ САНАЛ (энгийн хувилбар — асуулт/огноо шаардахгүй) =================
@@ -824,6 +964,7 @@ function invCelebrateProposal() {
   invGoTo("inv-s-celebrate");
   invHeartBurst(60, ["❤️","💍","💕","💖","💘"]);
   setTimeout(() => invHeartBurst(40, ["❤️","💍","💕","💖"]), 1800);
+  submitInviteResponse({ answer: "yes" });
 }
 
 // ================= ХУРИМ (хосын түүх, дэлгэрэнгүй, dress code, RSVP, дуу хүсэлт) =================
@@ -926,6 +1067,7 @@ function invCelebrateWedding() {
   if (note && song) note.innerHTML = `Тэдэнтэй хамт баярлахыг тэсэн ядан хүлээж байна 💍<br><br>🎵 Хүссэн дуу: <b>${escapeHtml(song)}</b>`;
   invHeartBurst(50, ["💍","🎉","🎊","✨","🥂"]);
   setTimeout(() => invHeartBurst(35, ["💍","🎉","🎊","✨"]), 1600);
+  submitInviteResponse({ rsvp: "ирнэ", song });
 }
 
 // ================= ТӨРСӨН ӨДӨР (лаа унтраах, хүслийн тэмдэглэл, тоглоом) =================
@@ -1019,6 +1161,7 @@ function invCelebrateBirthday() {
   document.getElementById("invBdaySummary").innerHTML = wish ? `✍️ ${escapeHtml(wish)}` : "🎂 Баярын мэнд хүргэе!";
   invHeartBurst(55, ["🎉","🎈","🎂","🎁","✨"]);
   setTimeout(() => invHeartBurst(35, ["🎉","🎈","🎊"]), 1500);
+  submitInviteResponse({ rsvp: "ирнэ", wish });
 }
 
 // ================= АЖЛЫН АРГА ХЭМЖЭЭ (хөтөлбөр, dress code, RSVP + хоолны сонголт) =================
@@ -1077,9 +1220,9 @@ function renderWorkExperience(data) {
       <div class="inv-eyebrow">Хоолны сонголт 🍽</div>
       <h1 style="font-size:26px;">Ямар хоол илүүд үзэх вэ?</h1>
       <div class="inv-options" id="inv-opts-meal">
-        <div class="inv-opt" data-val="Ердийн" onclick="invPick('inv-opts-meal', this, 'meal', 'inv-s-celebrate-work')"><span class="inv-emoji">🍖</span> Ердийн</div>
-        <div class="inv-opt" data-val="Веган" onclick="invPick('inv-opts-meal', this, 'meal', 'inv-s-celebrate-work')"><span class="inv-emoji">🥗</span> Веган</div>
-        <div class="inv-opt" data-val="Аллерги/бусад" onclick="invPick('inv-opts-meal', this, 'meal', 'inv-s-celebrate-work')"><span class="inv-emoji">⚠️</span> Аллерги/бусад</div>
+        <div class="inv-opt" data-val="Ердийн" onclick="invCelebrateWork(this)"><span class="inv-emoji">🍖</span> Ердийн</div>
+        <div class="inv-opt" data-val="Веган" onclick="invCelebrateWork(this)"><span class="inv-emoji">🥗</span> Веган</div>
+        <div class="inv-opt" data-val="Аллерги/бусад" onclick="invCelebrateWork(this)"><span class="inv-emoji">⚠️</span> Аллерги/бусад</div>
       </div>
     </div>`);
   steps.push(`
@@ -1090,6 +1233,14 @@ function renderWorkExperience(data) {
     </div>`);
 
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
+}
+
+function invCelebrateWork(el) {
+  document.querySelectorAll("#inv-opts-meal .inv-opt").forEach(o => o.classList.remove("inv-picked"));
+  el.classList.add("inv-picked");
+  const meal = el.dataset.val;
+  submitInviteResponse({ rsvp: "ирнэ", meal });
+  setTimeout(() => invGoTo("inv-s-celebrate-work"), 380);
 }
 
 // ================= ГЭР БҮЛИЙН АРГА ХЭМЖЭЭ (юу авчрах, зочны тоо, мессеж) =================
@@ -1160,6 +1311,7 @@ function renderFamilyExperience(data) {
 function invCelebrateFamily() {
   invGoTo("inv-s-celebrate");
   invHeartBurst(45, ["🎉","🏡","👨‍👩‍👧‍👦","✨"]);
+  submitInviteResponse({ rsvp: "ирнэ", guests: invAnswers.guests });
 }
 
 // ================= БАЯРЫН УРИЛГА (баярын тоглоом, мэндчилгээ, RSVP) =================
@@ -1218,6 +1370,7 @@ function invCelebrateHoliday() {
   invGoTo("inv-s-celebrate");
   invHeartBurst(55, ["🎉","🎊","❄️","⭐","🥂"]);
   setTimeout(() => invHeartBurst(35, ["🎉","🎊","✨"]), 1500);
+  submitInviteResponse({ rsvp: "ирнэ" });
 }
 
 // ================= ҮДЭШЛЭГ (сэдэв, дуу хүсэлт, RSVP) =================
@@ -1283,6 +1436,7 @@ function invCelebrateParty() {
   const note = document.getElementById("invPartyNote");
   if (note && song) note.innerHTML = `Тэсэн ядан хүлээж байна 🥳<br><br>🎵 Хүссэн дуу: <b>${escapeHtml(song)}</b>`;
   invHeartBurst(55, ["🎉","🥳","🎊","🕺","✨"]);
+  submitInviteResponse({ rsvp: "ирнэ", song });
 }
 
 // ================= УУЛЗАЛТ (зорилго, RSVP) =================
@@ -1334,7 +1488,7 @@ function renderMeetingExperience(data) {
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
 }
-function invCelebrateMeeting() { invGoTo("inv-s-celebrate"); }
+function invCelebrateMeeting() { invGoTo("inv-s-celebrate"); submitInviteResponse({ rsvp: "ирнэ" }); }
 
 // ================= БОЛОВСРОЛ (хөтөлбөр, RSVP) =================
 function renderEducationExperience(data) {
@@ -1386,7 +1540,7 @@ function renderEducationExperience(data) {
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
 }
-function invCelebrateEducation() { invGoTo("inv-s-celebrate"); }
+function invCelebrateEducation() { invGoTo("inv-s-celebrate"); submitInviteResponse({ rsvp: "оролцоно" }); }
 
 // ================= СПОРТ (хэрэгсэл, RSVP) =================
 function renderSportExperience(data) {
@@ -1440,6 +1594,7 @@ function renderSportExperience(data) {
 function invCelebrateSport() {
   invGoTo("inv-s-celebrate");
   invHeartBurst(45, ["🏆","⚽","🎉","💪","✨"]);
+  submitInviteResponse({ rsvp: "ирнэ" });
 }
 
 // ================= СОЁЛ УРЛАГ (хувцасны код, RSVP) =================
@@ -1491,4 +1646,4 @@ function renderCultureExperience(data) {
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
 }
-function invCelebrateCulture() { invGoTo("inv-s-celebrate"); }
+function invCelebrateCulture() { invGoTo("inv-s-celebrate"); submitInviteResponse({ rsvp: "ирнэ" }); }

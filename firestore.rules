@@ -86,5 +86,21 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow write: if false;
     }
+
+    // ---- invites/{inviteId} : Урилга feature. Sender must be signed in to create;
+    // the doc id itself is the shareable secret (recipient never signs in), so anyone
+    // holding the link may read it and write a response exactly once. ----
+    match /invites/{inviteId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+        && request.resource.data.senderUid == request.auth.uid
+        && request.resource.data.status == 'sent'
+        && request.resource.data.response == null;
+      allow update: if resource.data.status == 'sent'
+        && request.resource.data.senderUid == resource.data.senderUid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'response'])
+        && request.resource.data.status == 'responded';
+      allow delete: if isSignedIn() && resource.data.senderUid == request.auth.uid;
+    }
   }
 }

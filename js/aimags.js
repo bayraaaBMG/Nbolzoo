@@ -5061,7 +5061,7 @@ function renderSumSection(a) {
       <input type="text" class="sum-search" placeholder="🔍 Сум хайх..." oninput="filterSums(this.value)" />
       <div class="sum-list" id="sumList">
         ${sums.map((s, idx) => `
-          <div class="sum-item" data-sumname="${s.name.toLowerCase()}" onclick="toggleSum(this)">
+          <div class="sum-item" data-sumname="${s.name.toLowerCase()}" data-sumquery="${escapeHtml(s.name + ' сум, ' + a.name + ' аймаг')}" onclick="toggleSum(this)">
             <div class="sum-item-head">
               <span class="sum-item-name">${idx+1}. ${s.name}${s.isCenter ? ' сум' : ' сум'}</span>
               <div style="display:flex; align-items:center; gap:8px;">
@@ -5087,6 +5087,7 @@ function renderSumSection(a) {
                 <div class="sum-detail-label">💕 Болзооны санаа</div>
                 <div class="sum-detail-text">${s.date}</div>
               </div>
+              <div class="sum-map-slot"></div>
             </div>
           </div>
         `).join("")}
@@ -5097,6 +5098,13 @@ function renderSumSection(a) {
 
 function toggleSum(el) {
   el.classList.toggle("open");
+  if (el.classList.contains("open")) {
+    const slot = el.querySelector(".sum-map-slot");
+    if (slot && !slot.dataset.loaded) {
+      slot.dataset.loaded = "1";
+      slot.innerHTML = mapEmbedHtml(el.dataset.sumquery);
+    }
+  }
 }
 
 function filterSums(query) {

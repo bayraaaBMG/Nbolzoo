@@ -1394,6 +1394,22 @@ body {
 .inv-mem-front{ background:#fff;border:2px solid var(--inv-line);transform:rotateY(180deg); }
 .inv-mem-card.inv-mem-matched .inv-mem-front{ border-color:var(--inv-rose);background:linear-gradient(135deg,#fff0f2,#ffe6ea); }
 
+/* Азын дугуй (wheel-spin тоглоом) */
+.inv-wheel-wrap{ position:relative;width:220px;height:220px;margin:8px auto 18px; }
+.inv-wheel-pointer{ position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:26px;z-index:3;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25)); }
+.inv-wheel{
+  width:100%;height:100%;border-radius:50%;border:4px solid var(--inv-rose-deep);
+  position:relative;box-shadow:0 8px 24px rgba(199,63,90,.25);
+}
+.inv-wheel-label{ position:absolute;top:50%;left:50%;font-size:20px;transform-origin:0 0;white-space:nowrap; }
+.inv-wheel-result-text{ font-family:'Caveat',cursive;font-size:24px;color:var(--inv-rose-deep);min-height:32px;margin:12px 0; }
+
+/* "Үгүй" сонголтыг зөөлнөөр няцаадаг зөвлөмж */
+.inv-rsvp-hint{ font-size:13px;color:var(--inv-plum-soft);margin-top:6px; }
+
+/* Урам зориг өгөх дунд шатны карт */
+.inv-encourage-emoji{ font-size:44px;margin-bottom:6px; }
+
 /* Category picker + forms (site-consistent styling, not inv-namespaced since these use our own .btn/.card) */
 .inv-type-grid{ display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:20px 0; }
 .inv-type-card{

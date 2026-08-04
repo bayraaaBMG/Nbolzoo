@@ -495,6 +495,7 @@ const invDowNames = ["Ням","Дав","Мяг","Лха","Пүр","Баа","Бя
 function renderDateInviteExperience(recipientName) {
   const app = document.getElementById("inviteRoot");
   const heading = recipientName ? `${escapeHtml(recipientName)} аа, чамайг олоход хэцүү байлаа 👀` : "Хөөх, чамайг олоход хэцүү байлаа 👀";
+  const encLines = invPickEncourageSet(true, 2);
   app.innerHTML = `
   <div id="inviteApp">
     <div id="inv-petals"></div>
@@ -562,8 +563,30 @@ function renderDateInviteExperience(recipientName) {
         <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
         <p class="inv-sub">Ижил emoji-г олж хос болгоорой ✨</p>
         <div class="inv-mem-grid" id="invMemGrid"></div>
-        <button class="inv-btn" id="invMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-date')">Дараах →</button>
+        <button class="inv-btn" id="invMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-poll')">Дараах →</button>
       </div>
+      <div class="inv-card" id="inv-s-poll">
+        <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
+        <h1 style="font-size:28px;">Хамгийн их дуртай зүйл чинь юу вэ? 💭</h1>
+        <div class="inv-options" id="inv-opts-poll">
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll', this, 'inv-s-wheel')"><span class="inv-emoji">😂</span> Хамт инээх мөч</div>
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll', this, 'inv-s-wheel')"><span class="inv-emoji">🤗</span> Чиний тэвэрлэг</div>
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll', this, 'inv-s-wheel')"><span class="inv-emoji">💬</span> Урт ярилцлага</div>
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll', this, 'inv-s-wheel')"><span class="inv-emoji">🌙</span> Чимээгүй хамт байх</div>
+        </div>
+      </div>
+      <div class="inv-card" id="inv-s-wheel">
+        <div class="inv-eyebrow">Азын дугуй 🎡</div>
+        <h1 style="font-size:26px;">Манай болзоо ямар байх бол?</h1>
+        <div class="inv-wheel-wrap">
+          <div class="inv-wheel-pointer">▼</div>
+          <div class="inv-wheel" id="invWheel1"></div>
+        </div>
+        <button class="inv-btn" type="button" onclick="invSpinWheel('invWheel1','invWheelResult1','invWheelNextBtn1', INV_WHEEL_DATE)">🎡 Эргүүл!</button>
+        <div id="invWheelResult1"></div>
+        <button class="inv-btn" id="invWheelNextBtn1" type="button" style="display:none;margin-top:10px;" onclick="invGoTo('inv-s-enc1')">Дараах →</button>
+      </div>
+      ${invEncourageChain(["inv-s-enc1", "inv-s-enc2"], encLines, "inv-s-date")}
       <div class="inv-card" id="inv-s-date">
         <div class="inv-eyebrow">Сүүлчийн алхам</div>
         <h1 style="font-size:30px;">Хэзээ болзох вэ? 📅</h1>
@@ -585,6 +608,7 @@ function renderDateInviteExperience(recipientName) {
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
             onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Үгүй</button>
         </div>
+        ${INV_RSVP_HINT}
       </div>
       <div class="inv-card" id="inv-s-wish">
         <div class="inv-eyebrow">Бараг л боллоо 🥰</div>
@@ -608,6 +632,7 @@ function renderDateInviteExperience(recipientName) {
   invRenderCalendar();
   invSetupMemoryGame("invMemGrid", "invMemNextBtn", invMemDefaultEmojis, "💌");
   invSetupClickerGame();
+  invSetupWheel("invWheel1", INV_WHEEL_DATE);
 }
 
 function invGoTo(id) {
@@ -749,6 +774,122 @@ function invFlipMemCard(idx) {
   }
 }
 
+// ---------- Азын дугуй тоглоомын сэдэвчилсэн сегментүүд (төрөл бүрд өөр) ----------
+const INV_WHEEL_DATE = [
+  { emoji: "🎬", label: "Кино" }, { emoji: "☕", label: "Кофе" }, { emoji: "🌳", label: "Парк" },
+  { emoji: "🍜", label: "Хоол" }, { emoji: "📸", label: "Зураг" }, { emoji: "🎵", label: "Дуу" },
+];
+const INV_WHEEL_PROPOSAL = [
+  { emoji: "💍", label: "Тийм" }, { emoji: "💕", label: "Мөнхөд" }, { emoji: "✨", label: "Хамтдаа" },
+  { emoji: "🥰", label: "Тийм ээ" }, { emoji: "💖", label: "Заавал" }, { emoji: "💫", label: "Одоо шүү" },
+];
+const INV_WHEEL_CELEBRATION = [
+  { emoji: "🎉", label: "Баяр" }, { emoji: "🎂", label: "Бялуу" }, { emoji: "🎁", label: "Бэлэг" },
+  { emoji: "🥳", label: "Хөгжилтэй" }, { emoji: "🎈", label: "Инээд" }, { emoji: "✨", label: "Дурсамж" },
+];
+const INV_WHEEL_FORMAL = [
+  { emoji: "✅", label: "Бэлэн" }, { emoji: "🤝", label: "Хамтдаа" }, { emoji: "💼", label: "Амжилт" },
+  { emoji: "🎯", label: "Зорилго" }, { emoji: "📈", label: "Ахиц" }, { emoji: "🙌", label: "Баяр хүргэе" },
+];
+
+// ---------- Азын дугуй (wheel-spin тоглоом) — сегмент бүр {emoji, label} ----------
+function invSetupWheel(wheelId, segments) {
+  const el = document.getElementById(wheelId);
+  if (!el) return;
+  const n = segments.length;
+  const colors = ["#ffd3e0", "#ffe8cc", "#d3f8e2", "#d3e4ff", "#f3d3ff", "#fff3d3"];
+  const gradient = segments.map((s, i) => `${colors[i % colors.length]} ${i * (360 / n)}deg ${(i + 1) * (360 / n)}deg`).join(", ");
+  el.style.background = `conic-gradient(${gradient})`;
+  el.innerHTML = segments.map((s, i) => {
+    const angle = (i + 0.5) * (360 / n);
+    return `<span class="inv-wheel-label" style="transform:rotate(${angle}deg) translate(0,-72px) rotate(${-angle}deg);">${s.emoji}</span>`;
+  }).join("");
+  el.style.transform = "rotate(0deg)";
+  el.dataset.spinning = "0";
+}
+
+function invSpinWheel(wheelId, resultId, nextBtnId, segments) {
+  const el = document.getElementById(wheelId);
+  if (!el || el.dataset.spinning === "1") return;
+  el.dataset.spinning = "1";
+  const n = segments.length;
+  const idx = Math.floor(Math.random() * n);
+  const segAngle = 360 / n;
+  const targetCenter = idx * segAngle + segAngle / 2;
+  const finalRotation = 5 * 360 + (360 - targetCenter);
+  el.style.transition = "transform 3s cubic-bezier(.17,.67,.16,1)";
+  el.style.transform = `rotate(${finalRotation}deg)`;
+  setTimeout(() => {
+    const resEl = document.getElementById(resultId);
+    if (resEl) resEl.innerHTML = `<div class="inv-wheel-result-text">${segments[idx].emoji} ${escapeHtml(segments[idx].label)}</div>`;
+    const nb = document.getElementById(nextBtnId);
+    if (nb) nb.style.display = "inline-block";
+  }, 3100);
+}
+
+// ---------- Хөгжилтэй сонголт (poll) — invPick-тэй адил боловч хариулт бүртгэхгүй, зөвхөн зугаа ----------
+function invPollPick(groupId, el, nextScreen) {
+  document.querySelectorAll("#" + groupId + " .inv-opt").forEach(o => o.classList.remove("inv-picked"));
+  el.classList.add("inv-picked");
+  setTimeout(() => invGoTo(nextScreen), 380);
+}
+
+// ---------- Урам зориг өгөх дунд шатны карт (санамсаргүй, давтагдахгүй эерэг үг) ----------
+const INV_ENCOURAGE_GENERAL = [
+  { e: "🌟", t: "Чамтай уулзахыг тэсэн ядан хүлээж байна!" },
+  { e: "💫", t: "Энэ мөч онцгой байх болно, амлаж байна" },
+  { e: "🎈", t: "Чи ирвэл бүх зүйл илүү сайхан болно" },
+  { e: "💛", t: "Хамтдаа байх цаг бол хамгийн үнэтэй зүйл шүү" },
+  { e: "🥰", t: "Чамайг харахыг үнэхээр хүсч байна" },
+  { e: "✨", t: "Энэ өдрийг чамтай хамт тэмдэглэхийг хүсч байна" },
+  { e: "🌸", t: "Чи маш онц хүн, тэгээд бид үүнийг мэднэ" },
+  { e: "😊", t: "Инээмсэглэл чинь энэ баярыг илүү гэрэлтүүлнэ" },
+  { e: "💭", t: "Чамгүйгээр энэ мөч бүрэн бус байх болно" },
+  { e: "🎊", t: "Бид чамайг үнэхээр хүлээж байгаа шүү" },
+  { e: "🌈", t: "Сайхан мөч бидний хамт хүлээж байна" },
+  { e: "💖", t: "Чиний оролцоо бидэнд маш их учиртай" },
+  { e: "🎉", t: "Энэ бол бидний хамт цуглах онцгой шалтгаан" },
+  { e: "🥳", t: "Чи ирэх нь бидний хамгийн том баяр байх болно" },
+];
+const INV_ENCOURAGE_ROMANTIC = [
+  { e: "💓", t: "Чамайг бодохоор зүрх минь хурдан цохилдог" },
+  { e: "🌟", t: "Чи миний өдрийг гэрэлтүүлдэг цорын ганц хүн" },
+  { e: "💕", t: "Чамтай өнгөрөөх минут бүр надад үнэтэй" },
+  { e: "🥰", t: "Чи миний хамгийн дуртай хүн шүү" },
+  { e: "🌸", t: "Чамгүйгээр амьдрал өнгөгүй мэт санагддаг" },
+  { e: "💫", t: "Чи над руу инээмсэглэхэд дэлхий зогсдог мэт санагддаг" },
+  { e: "💖", t: "Энэ мөчийг чамтай хуваалцахыг хүсч байна" },
+  { e: "💗", t: "Чи миний зүрхэнд тусгайлан оршдог" },
+  { e: "🎁", t: "Чамтай хамт байх бүр мөч миний хувьд бэлэг" },
+  { e: "🌷", t: "Чи миний өдрийг илүү гоё болгодог" },
+  { e: "💘", t: "Чамд хайртай гэдгээ өдөр бүр илүү мэдэрдэг" },
+  { e: "💫", t: "Чи миний эхлэл, дунд, төгсгөл бүгд болсон" },
+];
+
+// n ширхэг давхцалгүй урам зоригийн мөр сонгож авна (нэг урилга дотроо давтагдахгүй байхын тулд)
+function invPickEncourageSet(romantic, n) {
+  const pool = romantic ? INV_ENCOURAGE_ROMANTIC : INV_ENCOURAGE_GENERAL;
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
+
+// ids/lines ижил урттай массив — ids[0]→ids[1]→...→ids[last]→nextChain гинжлэнэ
+function invEncourageChain(ids, lines, nextChain) {
+  return ids.map((id, i) => {
+    const nxt = i < ids.length - 1 ? ids[i + 1] : nextChain;
+    const line = lines[i];
+    return `
+    <div class="inv-card" id="${id}">
+      <div class="inv-encourage-emoji">${line.e}</div>
+      <h1 style="font-size:24px;">${escapeHtml(line.t)}</h1>
+      <button class="inv-btn" type="button" onclick="invGoTo('${nxt}')">Үргэлжлүүлэх →</button>
+    </div>`;
+  }).join("");
+}
+
+// RSVP товчнуудын дор байнга харагдах, "Үгүй"-г зөөлнөөр няцаадаг бичвэр
+const INV_RSVP_HINT = `<p class="inv-rsvp-hint">😉 Энд “Үгүй” гэдэг сонголт байдаггүй шүү... зөвхөн “Тийм” 💛</p>`;
+
 function invStartPetals() {
   const petalEmojis = ["🌸", "🌺", "💮"];
   const container = document.getElementById("inv-petals");
@@ -885,6 +1026,7 @@ function renderProposalExperience(recipientName, data) {
   const facts = (data.funFacts || "").split("\n").map(s => s.trim()).filter(Boolean);
   const hasMemory = !!memory;
   const hasFacts = facts.length > 0;
+  const encLines = invPickEncourageSet(true, 6);
 
   app.innerHTML = `
   <div id="inviteApp">
@@ -911,8 +1053,50 @@ function renderProposalExperience(recipientName, data) {
         <div class="inv-summary">
           ${facts.map(f => `<div>✨ ${escapeHtml(f)}</div>`).join("")}
         </div>
-        <button class="inv-btn" type="button" onclick="invGoToCountdown()">Үргэлжлүүлэх ✨</button>
+        <button class="inv-btn" type="button" onclick="invGoTo('inv-s-clicker')">Үргэлжлүүлэх ✨</button>
       </div>` : ""}
+      <div class="inv-card" id="inv-s-clicker">
+        <div class="inv-eyebrow">Бонус тоглоом 💕</div>
+        <h1 style="font-size:28px;">5 секундэд хэдэн удаа дарж чадах вэ?</h1>
+        <p class="inv-sub" id="invClickerSub">Зүрхэн дээр дараад эхэлье!</p>
+        <div id="invClickerHeart" onclick="invClickerTap()" style="font-size:80px;cursor:pointer;user-select:none;margin:10px 0 16px;transition:transform .1s;">💗</div>
+        <div style="font-size:20px;font-weight:700;color:var(--inv-rose-deep);margin-bottom:16px;">Оноо: <span id="invClickerScore">0</span></div>
+        <button class="inv-btn" id="invClickerNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-memgame')">Дараах →</button>
+      </div>
+      <div class="inv-card" id="inv-s-memgame">
+        <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
+        <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
+        <p class="inv-sub">Ижил emoji-г олж хос болгоорой ✨</p>
+        <div class="inv-mem-grid" id="invPropMemGrid"></div>
+        <button class="inv-btn" id="invPropMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-poll1')">Дараах →</button>
+      </div>
+      <div class="inv-card" id="inv-s-poll1">
+        <div class="inv-eyebrow">Хөгжилтэй асуулт 💭</div>
+        <h1 style="font-size:28px;">Чиний хариулт ямар байх бол? 👀</h1>
+        <div class="inv-options" id="inv-opts-poll1">
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">😍</span> Мэдээж тийм!</div>
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">😭</span> Уйлчихна аа</div>
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🤭</span> Гайхаад амьсгаа боогдоно</div>
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">💃</span> Баясаад бүжиглэнэ</div>
+        </div>
+      </div>
+      <div class="inv-card" id="inv-s-wheel">
+        <div class="inv-eyebrow">Азын дугуй 🎡</div>
+        <h1 style="font-size:26px;">Хариулт чинь юу байх бол?</h1>
+        <div class="inv-wheel-wrap">
+          <div class="inv-wheel-pointer">▼</div>
+          <div class="inv-wheel" id="invWheel1"></div>
+        </div>
+        <button class="inv-btn" type="button" onclick="invSpinWheel('invWheel1','invWheelResult1','invWheelNextBtn1', INV_WHEEL_PROPOSAL)">🎡 Эргүүл!</button>
+        <div id="invWheelResult1"></div>
+        <button class="inv-btn" id="invWheelNextBtn1" type="button" style="display:none;margin-top:10px;" onclick="invGoTo('inv-s-trivia')">Дараах →</button>
+      </div>
+      <div class="inv-card" id="inv-s-trivia">
+        <div class="inv-eyebrow">Мэдэж байсан уу? 💡</div>
+        <h1 style="font-size:24px;">Хайртай хүнээ бодоход зүрх 3 дахин хурдан цохилдог гэдэг шүү</h1>
+        <button class="inv-btn" type="button" onclick="invGoTo('inv-s-enc1')">Үргэлжлүүлэх →</button>
+      </div>
+      ${invEncourageChain(["inv-s-enc1", "inv-s-enc2", "inv-s-enc3", "inv-s-enc4", "inv-s-enc5", "inv-s-enc6"], encLines, "inv-s-countdown")}
       <div class="inv-card" id="inv-s-countdown">
         <div class="inv-eyebrow">Бэлэн үү?</div>
         <h1 style="font-size:26px;">Асуулт 3 секундийн дараа...</h1>
@@ -926,6 +1110,7 @@ function renderProposalExperience(recipientName, data) {
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
             onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Үгүй</button>
         </div>
+        ${INV_RSVP_HINT}
       </div>
       <div class="inv-card" id="inv-s-celebrate">
         <div class="inv-eyebrow">Баяр хүргэе 🎉</div>
@@ -935,6 +1120,9 @@ function renderProposalExperience(recipientName, data) {
     </div>
   </div>`;
   invStartPetals();
+  invSetupClickerGame();
+  invSetupMemoryGame("invPropMemGrid", "invPropMemNextBtn", ["💍", "💕", "✨", "🥰", "💫", "💖"], "💍");
+  invSetupWheel("invWheel1", INV_WHEEL_PROPOSAL);
 }
 
 function invGoToCountdown() {
@@ -971,6 +1159,7 @@ function invCelebrateProposal() {
 function renderWeddingExperience(data) {
   const app = document.getElementById("inviteRoot");
   const names = data.names || "Хос";
+  const encLines = invPickEncourageSet(true, 6);
   const steps = [];
   steps.push(`
     <div class="inv-card active" id="inv-s-intro">
@@ -1001,8 +1190,58 @@ function renderWeddingExperience(data) {
         📍 ${escapeHtml(data.location || "Тодорхойгүй")}
       </div>
       ${data.location ? mapEmbedHtml(data.location) : ""}
-      <button class="inv-btn" type="button" onclick="invGoTo('${data.dressCode ? "inv-s-dress" : "inv-s-rsvp"}')">Үргэлжлүүлэх →</button>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-memgame')">Үргэлжлүүлэх →</button>
     </div>`);
+
+  steps.push(`
+    <div class="inv-card" id="inv-s-memgame">
+      <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
+      <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
+      <p class="inv-sub">Ижил emoji-г олж хос болгоорой ✨</p>
+      <div class="inv-mem-grid" id="invWedMemGrid"></div>
+      <button class="inv-btn" id="invWedMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-clicker')">Дараах →</button>
+    </div>`);
+
+  steps.push(`
+    <div class="inv-card" id="inv-s-clicker">
+      <div class="inv-eyebrow">Бонус тоглоом 💍</div>
+      <h1 style="font-size:28px;">5 секундэд хэдэн удаа дарж чадах вэ?</h1>
+      <p class="inv-sub" id="invClickerSub">Зүрхэн дээр дараад эхэлье!</p>
+      <div id="invClickerHeart" onclick="invClickerTap()" style="font-size:80px;cursor:pointer;user-select:none;margin:10px 0 16px;transition:transform .1s;">💗</div>
+      <div style="font-size:20px;font-weight:700;color:var(--inv-rose-deep);margin-bottom:16px;">Оноо: <span id="invClickerScore">0</span></div>
+      <button class="inv-btn" id="invClickerNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-poll1')">Дараах →</button>
+    </div>`);
+
+  steps.push(`
+    <div class="inv-card" id="inv-s-poll1">
+      <div class="inv-eyebrow">Хөгжилтэй асуулт 💭</div>
+      <h1 style="font-size:26px;">Хуримд юу хамгийн их таашаах вэ?</h1>
+      <div class="inv-options" id="inv-opts-poll1">
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🍰</span> Тортоо идэх</div>
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">💃</span> Бүжиглэх</div>
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🥂</span> Ерөөл айлдах</div>
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">📸</span> Зураг авахуулах</div>
+      </div>
+    </div>`);
+
+  steps.push(`
+    <div class="inv-card" id="inv-s-wheel">
+      <div class="inv-eyebrow">Азын дугуй 🎡</div>
+      <h1 style="font-size:26px;">Хуримын өдөр ямар байх бол?</h1>
+      <div class="inv-wheel-wrap">
+        <div class="inv-wheel-pointer">▼</div>
+        <div class="inv-wheel" id="invWheel1"></div>
+      </div>
+      <button class="inv-btn" type="button" onclick="invSpinWheel('invWheel1','invWheelResult1','invWheelNextBtn1', INV_WHEEL_CELEBRATION)">🎡 Эргүүл!</button>
+      <div id="invWheelResult1"></div>
+      <button class="inv-btn" id="invWheelNextBtn1" type="button" style="display:none;margin-top:10px;" onclick="invGoTo('inv-s-enc1')">Дараах →</button>
+    </div>`);
+
+  steps.push(invEncourageChain(
+    ["inv-s-enc1", "inv-s-enc2", "inv-s-enc3", "inv-s-enc4", "inv-s-enc5", "inv-s-enc6"],
+    encLines,
+    data.dressCode ? "inv-s-dress" : "inv-s-rsvp"
+  ));
 
   if (data.dressCode) {
     steps.push(`
@@ -1024,6 +1263,7 @@ function renderWeddingExperience(data) {
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
           onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
+      ${INV_RSVP_HINT}
     </div>`);
 
   if (data.message) {
@@ -1058,6 +1298,9 @@ function renderWeddingExperience(data) {
     <div id="inv-stage">${steps.join("")}</div>
   </div>`;
   invStartPetals();
+  invSetupMemoryGame("invWedMemGrid", "invWedMemNextBtn", ["💍", "🥂", "💐", "🎂", "✨", "👰"], "💌");
+  invSetupClickerGame();
+  invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);
 }
 
 function invCelebrateWedding() {
@@ -1074,6 +1317,7 @@ function invCelebrateWedding() {
 function renderBirthdayExperience(data) {
   const app = document.getElementById("inviteRoot");
   const name = data.recipient || "найз";
+  const encLines = invPickEncourageSet(false, 6);
   app.innerHTML = `
   <div id="inviteApp">
     <div id="inv-petals"></div>
@@ -1107,8 +1351,38 @@ function renderBirthdayExperience(data) {
         <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
         <p class="inv-sub">Баярын emoji-г хос болгоорой ✨</p>
         <div class="inv-mem-grid" id="invBdayMemGrid"></div>
-        <button class="inv-btn" id="invBdayMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-wish')">Дараах →</button>
+        <button class="inv-btn" id="invBdayMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-clicker')">Дараах →</button>
       </div>
+      <div class="inv-card" id="inv-s-clicker">
+        <div class="inv-eyebrow">Бонус тоглоом 🎉</div>
+        <h1 style="font-size:28px;">5 секундэд хэдэн удаа дарж чадах вэ?</h1>
+        <p class="inv-sub" id="invClickerSub">Товч дээр дараад эхэлье!</p>
+        <div id="invClickerHeart" onclick="invClickerTap()" style="font-size:80px;cursor:pointer;user-select:none;margin:10px 0 16px;transition:transform .1s;">🎂</div>
+        <div style="font-size:20px;font-weight:700;color:var(--inv-rose-deep);margin-bottom:16px;">Оноо: <span id="invClickerScore">0</span></div>
+        <button class="inv-btn" id="invClickerNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-poll1')">Дараах →</button>
+      </div>
+      <div class="inv-card" id="inv-s-poll1">
+        <div class="inv-eyebrow">Хөгжилтэй асуулт 🎁</div>
+        <h1 style="font-size:26px;">Ямар бэлэг хамгийн их таалагдах вэ?</h1>
+        <div class="inv-options" id="inv-opts-poll1">
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🎁</span> Гэнэтийн бэлэг</div>
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🎂</span> Амттай бялуу</div>
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">💌</span> Дулаахан мэндчилгээ</div>
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🎉</span> Хамт өнгөрөөх цаг</div>
+        </div>
+      </div>
+      <div class="inv-card" id="inv-s-wheel">
+        <div class="inv-eyebrow">Азын дугуй 🎡</div>
+        <h1 style="font-size:26px;">Энэ жил юу хүлээж байна вэ?</h1>
+        <div class="inv-wheel-wrap">
+          <div class="inv-wheel-pointer">▼</div>
+          <div class="inv-wheel" id="invWheel1"></div>
+        </div>
+        <button class="inv-btn" type="button" onclick="invSpinWheel('invWheel1','invWheelResult1','invWheelNextBtn1', INV_WHEEL_CELEBRATION)">🎡 Эргүүл!</button>
+        <div id="invWheelResult1"></div>
+        <button class="inv-btn" id="invWheelNextBtn1" type="button" style="display:none;margin-top:10px;" onclick="invGoTo('inv-s-enc1')">Дараах →</button>
+      </div>
+      ${invEncourageChain(["inv-s-enc1", "inv-s-enc2", "inv-s-enc3", "inv-s-enc4", "inv-s-enc5", "inv-s-enc6"], encLines, "inv-s-wish")}
       <div class="inv-card" id="inv-s-wish">
         <div class="inv-eyebrow">Хүслийн тэмдэглэл ✍️</div>
         <h1 style="font-size:26px;">Төрсөн өдрийн мэндчилгээ бичээрэй</h1>
@@ -1123,6 +1397,7 @@ function renderBirthdayExperience(data) {
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
             onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
         </div>
+        ${INV_RSVP_HINT}
       </div>
       <div class="inv-card" id="inv-s-celebrate">
         <div class="inv-eyebrow">Баяр хүргэе 🎉</div>
@@ -1134,6 +1409,8 @@ function renderBirthdayExperience(data) {
   invStartPetals();
   invSetupBirthdayCandles();
   invSetupMemoryGame("invBdayMemGrid", "invBdayMemNextBtn", ["🎂","🎈","🎁","🕯️","🎉","🍰"], "🎊");
+  invSetupClickerGame();
+  invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);
 }
 
 let invCandlesLit = 6;
@@ -1168,6 +1445,7 @@ function invCelebrateBirthday() {
 function renderWorkExperience(data) {
   const app = document.getElementById("inviteRoot");
   const agendaItems = (data.agenda || "").split("\n").map(s => s.trim()).filter(Boolean);
+  const encLines = invPickEncourageSet(false, 8);
   const steps = [];
   steps.push(`
     <div class="inv-card active" id="inv-s-intro">
@@ -1185,7 +1463,7 @@ function renderWorkExperience(data) {
         📍 ${escapeHtml(data.location || "Тодорхойгүй")}
       </div>
       ${data.location ? mapEmbedHtml(data.location) : ""}
-      <button class="inv-btn" type="button" onclick="invGoTo('${agendaItems.length ? "inv-s-agenda" : (data.dressCode ? "inv-s-dress" : "inv-s-rsvp")}')">Үргэлжлүүлэх →</button>
+      <button class="inv-btn" type="button" onclick="invGoTo('${agendaItems.length ? "inv-s-agenda" : (data.dressCode ? "inv-s-dress" : "inv-s-memgame")}')">Үргэлжлүүлэх →</button>
     </div>`);
   if (agendaItems.length) {
     steps.push(`
@@ -1193,7 +1471,7 @@ function renderWorkExperience(data) {
       <div class="inv-eyebrow">Хөтөлбөр 🗓</div>
       <h1 style="font-size:26px;">Өдрийн хөтөлбөр</h1>
       <div class="inv-summary">${agendaItems.map(a => `<div>▸ ${escapeHtml(a)}</div>`).join("")}</div>
-      <button class="inv-btn" type="button" onclick="invGoTo('${data.dressCode ? "inv-s-dress" : "inv-s-rsvp"}')">Үргэлжлүүлэх →</button>
+      <button class="inv-btn" type="button" onclick="invGoTo('${data.dressCode ? "inv-s-dress" : "inv-s-memgame"}')">Үргэлжлүүлэх →</button>
     </div>`);
   }
   if (data.dressCode) {
@@ -1202,9 +1480,39 @@ function renderWorkExperience(data) {
       <div class="inv-eyebrow">Хувцасны код 👔</div>
       <h1 style="font-size:26px;">Юу өмсөх вэ?</h1>
       <p class="inv-sub">${escapeHtml(data.dressCode)}</p>
-      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-rsvp')">Үргэлжлүүлэх →</button>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-memgame')">Үргэлжлүүлэх →</button>
     </div>`);
   }
+  steps.push(`
+    <div class="inv-card" id="inv-s-memgame">
+      <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
+      <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
+      <p class="inv-sub">Ижил emoji-г олж хос болгоорой ✨</p>
+      <div class="inv-mem-grid" id="invWorkMemGrid"></div>
+      <button class="inv-btn" id="invWorkMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-clicker')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-clicker">
+      <div class="inv-eyebrow">Бонус тоглоом ⚡</div>
+      <h1 style="font-size:28px;">5 секундэд хэдэн удаа дарж чадах вэ?</h1>
+      <p class="inv-sub" id="invClickerSub">Товч дээр дараад эхэлье!</p>
+      <div id="invClickerHeart" onclick="invClickerTap()" style="font-size:80px;cursor:pointer;user-select:none;margin:10px 0 16px;transition:transform .1s;">💼</div>
+      <div style="font-size:20px;font-weight:700;color:var(--inv-rose-deep);margin-bottom:16px;">Оноо: <span id="invClickerScore">0</span></div>
+      <button class="inv-btn" id="invClickerNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-wheel')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-wheel">
+      <div class="inv-eyebrow">Азын дугуй 🎡</div>
+      <h1 style="font-size:26px;">Энэ арга хэмжээ ямар байх бол?</h1>
+      <div class="inv-wheel-wrap">
+        <div class="inv-wheel-pointer">▼</div>
+        <div class="inv-wheel" id="invWheel1"></div>
+      </div>
+      <button class="inv-btn" type="button" onclick="invSpinWheel('invWheel1','invWheelResult1','invWheelNextBtn1', INV_WHEEL_FORMAL)">🎡 Эргүүл!</button>
+      <div id="invWheelResult1"></div>
+      <button class="inv-btn" id="invWheelNextBtn1" type="button" style="display:none;margin-top:10px;" onclick="invGoTo('inv-s-enc1')">Дараах →</button>
+    </div>`);
+  steps.push(invEncourageChain(["inv-s-enc1", "inv-s-enc2", "inv-s-enc3", "inv-s-enc4", "inv-s-enc5", "inv-s-enc6", "inv-s-enc7", "inv-s-enc8"], encLines, "inv-s-rsvp"));
   steps.push(`
     <div class="inv-card" id="inv-s-rsvp">
       <div class="inv-eyebrow">RSVP</div>
@@ -1214,6 +1522,7 @@ function renderWorkExperience(data) {
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
           onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
+      ${INV_RSVP_HINT}
     </div>`);
   steps.push(`
     <div class="inv-card" id="inv-s-meal">
@@ -1233,6 +1542,9 @@ function renderWorkExperience(data) {
     </div>`);
 
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
+  invSetupMemoryGame("invWorkMemGrid", "invWorkMemNextBtn", ["💼","📊","🤝","📈","✅","🗓️"], "💼");
+  invSetupClickerGame();
+  invSetupWheel("invWheel1", INV_WHEEL_FORMAL);
 }
 
 function invCelebrateWork(el) {
@@ -1246,6 +1558,7 @@ function invCelebrateWork(el) {
 // ================= ГЭР БҮЛИЙН АРГА ХЭМЖЭЭ (юу авчрах, зочны тоо, мессеж) =================
 function renderFamilyExperience(data) {
   const app = document.getElementById("inviteRoot");
+  const encLines = invPickEncourageSet(false, 7);
   const steps = [];
   steps.push(`
     <div class="inv-card active" id="inv-s-intro">
@@ -1279,11 +1592,41 @@ function renderFamilyExperience(data) {
       <div class="inv-eyebrow">Хэдэн хүнтэй ирэх вэ? 👨‍👩‍👧‍👦</div>
       <h1 style="font-size:26px;">Гэр бүлийн тоогоо сонгоно уу</h1>
       <div class="inv-options" id="inv-opts-guests">
-        <div class="inv-opt" data-val="1-2 хүн" onclick="invPick('inv-opts-guests', this, 'guests', 'inv-s-rsvp')"><span class="inv-emoji">🧑</span> 1-2 хүн</div>
-        <div class="inv-opt" data-val="3-4 хүн" onclick="invPick('inv-opts-guests', this, 'guests', 'inv-s-rsvp')"><span class="inv-emoji">👨‍👩‍👧</span> 3-4 хүн</div>
-        <div class="inv-opt" data-val="5+ хүн" onclick="invPick('inv-opts-guests', this, 'guests', 'inv-s-rsvp')"><span class="inv-emoji">👨‍👩‍👧‍👦</span> 5+ хүн</div>
+        <div class="inv-opt" data-val="1-2 хүн" onclick="invPick('inv-opts-guests', this, 'guests', 'inv-s-memgame')"><span class="inv-emoji">🧑</span> 1-2 хүн</div>
+        <div class="inv-opt" data-val="3-4 хүн" onclick="invPick('inv-opts-guests', this, 'guests', 'inv-s-memgame')"><span class="inv-emoji">👨‍👩‍👧</span> 3-4 хүн</div>
+        <div class="inv-opt" data-val="5+ хүн" onclick="invPick('inv-opts-guests', this, 'guests', 'inv-s-memgame')"><span class="inv-emoji">👨‍👩‍👧‍👦</span> 5+ хүн</div>
       </div>
     </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-memgame">
+      <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
+      <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
+      <p class="inv-sub">Ижил emoji-г олж хос болгоорой ✨</p>
+      <div class="inv-mem-grid" id="invFamMemGrid"></div>
+      <button class="inv-btn" id="invFamMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-clicker')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-clicker">
+      <div class="inv-eyebrow">Бонус тоглоом 🏡</div>
+      <h1 style="font-size:28px;">5 секундэд хэдэн удаа дарж чадах вэ?</h1>
+      <p class="inv-sub" id="invClickerSub">Товч дээр дараад эхэлье!</p>
+      <div id="invClickerHeart" onclick="invClickerTap()" style="font-size:80px;cursor:pointer;user-select:none;margin:10px 0 16px;transition:transform .1s;">🏡</div>
+      <div style="font-size:20px;font-weight:700;color:var(--inv-rose-deep);margin-bottom:16px;">Оноо: <span id="invClickerScore">0</span></div>
+      <button class="inv-btn" id="invClickerNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-wheel')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-wheel">
+      <div class="inv-eyebrow">Азын дугуй 🎡</div>
+      <h1 style="font-size:26px;">Энэ өдөр ямар байх бол?</h1>
+      <div class="inv-wheel-wrap">
+        <div class="inv-wheel-pointer">▼</div>
+        <div class="inv-wheel" id="invWheel1"></div>
+      </div>
+      <button class="inv-btn" type="button" onclick="invSpinWheel('invWheel1','invWheelResult1','invWheelNextBtn1', INV_WHEEL_CELEBRATION)">🎡 Эргүүл!</button>
+      <div id="invWheelResult1"></div>
+      <button class="inv-btn" id="invWheelNextBtn1" type="button" style="display:none;margin-top:10px;" onclick="invGoTo('inv-s-enc1')">Дараах →</button>
+    </div>`);
+  steps.push(invEncourageChain(["inv-s-enc1", "inv-s-enc2", "inv-s-enc3", "inv-s-enc4", "inv-s-enc5", "inv-s-enc6", "inv-s-enc7"], encLines, "inv-s-rsvp"));
   steps.push(`
     <div class="inv-card" id="inv-s-rsvp">
       <div class="inv-eyebrow">RSVP</div>
@@ -1293,6 +1636,7 @@ function renderFamilyExperience(data) {
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
           onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
+      ${INV_RSVP_HINT}
     </div>`);
   steps.push(`
     <div class="inv-card" id="inv-s-celebrate">
@@ -1306,6 +1650,9 @@ function renderFamilyExperience(data) {
     <div id="inv-heartRain"></div>
     <div id="inv-stage">${steps.join("")}</div>
   </div>`;
+  invSetupMemoryGame("invFamMemGrid", "invFamMemNextBtn", ["🏡","👨‍👩‍👧","🎈","🍰","✨","💛"], "🏡");
+  invSetupClickerGame();
+  invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);
 }
 
 function invCelebrateFamily() {
@@ -1318,6 +1665,7 @@ function invCelebrateFamily() {
 function renderHolidayExperience(data) {
   const app = document.getElementById("inviteRoot");
   const holidayName = data.holidayName || "Баяр";
+  const encLines = invPickEncourageSet(false, 7);
   app.innerHTML = `
   <div id="inviteApp">
     <div id="inv-petals"></div>
@@ -1344,8 +1692,38 @@ function renderHolidayExperience(data) {
         <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
         <p class="inv-sub">Баярын emoji-г хос болгоорой ✨</p>
         <div class="inv-mem-grid" id="invHolMemGrid"></div>
-        <button class="inv-btn" id="invHolMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-rsvp')">Дараах →</button>
+        <button class="inv-btn" id="invHolMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-clicker')">Дараах →</button>
       </div>
+      <div class="inv-card" id="inv-s-clicker">
+        <div class="inv-eyebrow">Бонус тоглоом 🎊</div>
+        <h1 style="font-size:28px;">5 секундэд хэдэн удаа дарж чадах вэ?</h1>
+        <p class="inv-sub" id="invClickerSub">Товч дээр дараад эхэлье!</p>
+        <div id="invClickerHeart" onclick="invClickerTap()" style="font-size:80px;cursor:pointer;user-select:none;margin:10px 0 16px;transition:transform .1s;">🎁</div>
+        <div style="font-size:20px;font-weight:700;color:var(--inv-rose-deep);margin-bottom:16px;">Оноо: <span id="invClickerScore">0</span></div>
+        <button class="inv-btn" id="invClickerNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-poll1')">Дараах →</button>
+      </div>
+      <div class="inv-card" id="inv-s-poll1">
+        <div class="inv-eyebrow">Хөгжилтэй асуулт 🎉</div>
+        <h1 style="font-size:26px;">Баярыг хэрхэн тэмдэглэх дуртай вэ?</h1>
+        <div class="inv-options" id="inv-opts-poll1">
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🎆</span> Гэрэлт харваа үзэх</div>
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🍽</span> Гэр бүлээрээ хооллох</div>
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🎁</span> Бэлэг солилцох</div>
+          <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🥂</span> Ерөөл айлдах</div>
+        </div>
+      </div>
+      <div class="inv-card" id="inv-s-wheel">
+        <div class="inv-eyebrow">Азын дугуй 🎡</div>
+        <h1 style="font-size:26px;">Энэ баяр ямар байх бол?</h1>
+        <div class="inv-wheel-wrap">
+          <div class="inv-wheel-pointer">▼</div>
+          <div class="inv-wheel" id="invWheel1"></div>
+        </div>
+        <button class="inv-btn" type="button" onclick="invSpinWheel('invWheel1','invWheelResult1','invWheelNextBtn1', INV_WHEEL_CELEBRATION)">🎡 Эргүүл!</button>
+        <div id="invWheelResult1"></div>
+        <button class="inv-btn" id="invWheelNextBtn1" type="button" style="display:none;margin-top:10px;" onclick="invGoTo('inv-s-enc1')">Дараах →</button>
+      </div>
+      ${invEncourageChain(["inv-s-enc1", "inv-s-enc2", "inv-s-enc3", "inv-s-enc4", "inv-s-enc5", "inv-s-enc6", "inv-s-enc7"], encLines, "inv-s-rsvp")}
       <div class="inv-card" id="inv-s-rsvp">
         <div class="inv-eyebrow">RSVP</div>
         <h1>Ирэх үү? 🎉</h1>
@@ -1354,6 +1732,7 @@ function renderHolidayExperience(data) {
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
             onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
         </div>
+        ${INV_RSVP_HINT}
       </div>
       <div class="inv-card" id="inv-s-celebrate">
         <div class="inv-eyebrow">Баяр хүргэе 🎊</div>
@@ -1364,6 +1743,8 @@ function renderHolidayExperience(data) {
   </div>`;
   invStartPetals();
   invSetupMemoryGame("invHolMemGrid", "invHolMemNextBtn", ["🎄","🎁","🔔","⭐","❄️","🥂"], "🎊");
+  invSetupClickerGame();
+  invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);
 }
 
 function invCelebrateHoliday() {
@@ -1376,6 +1757,7 @@ function invCelebrateHoliday() {
 // ================= ҮДЭШЛЭГ (сэдэв, дуу хүсэлт, RSVP) =================
 function renderPartyExperience(data) {
   const app = document.getElementById("inviteRoot");
+  const encLines = invPickEncourageSet(false, 6);
   const steps = [];
   steps.push(`
     <div class="inv-card active" id="inv-s-intro">
@@ -1409,8 +1791,49 @@ function renderPartyExperience(data) {
       <div class="inv-eyebrow">Дуу хүсэлт 🎵</div>
       <h1 style="font-size:24px;">Ямар дуу тоглуулаасай гэж хүсэж байна вэ?</h1>
       <textarea id="invPartySongInput" rows="2" style="width:100%;border:2px solid var(--inv-line);border-radius:12px;padding:12px;font-family:inherit;font-size:14px;margin-bottom:16px;resize:vertical;" placeholder="Дуу/дуучны нэрээ бичээрэй (заавал биш)"></textarea>
-      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-rsvp')">Үргэлжлүүлэх →</button>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-memgame')">Үргэлжлүүлэх →</button>
     </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-memgame">
+      <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
+      <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
+      <p class="inv-sub">Ижил emoji-г олж хос болгоорой ✨</p>
+      <div class="inv-mem-grid" id="invPartyMemGrid"></div>
+      <button class="inv-btn" id="invPartyMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-clicker')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-clicker">
+      <div class="inv-eyebrow">Бонус тоглоом 🥳</div>
+      <h1 style="font-size:28px;">5 секундэд хэдэн удаа дарж чадах вэ?</h1>
+      <p class="inv-sub" id="invClickerSub">Товч дээр дараад эхэлье!</p>
+      <div id="invClickerHeart" onclick="invClickerTap()" style="font-size:80px;cursor:pointer;user-select:none;margin:10px 0 16px;transition:transform .1s;">🎉</div>
+      <div style="font-size:20px;font-weight:700;color:var(--inv-rose-deep);margin-bottom:16px;">Оноо: <span id="invClickerScore">0</span></div>
+      <button class="inv-btn" id="invClickerNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-poll1')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-poll1">
+      <div class="inv-eyebrow">Хөгжилтэй асуулт 🕺</div>
+      <h1 style="font-size:26px;">Үдэшлэгт юу хамгийн ихээр хийх дуртай вэ?</h1>
+      <div class="inv-options" id="inv-opts-poll1">
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">💃</span> Бүжиглэх</div>
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">📸</span> Зураг авах</div>
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🎤</span> Караоке дуулах</div>
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">😂</span> Инээж хөгжих</div>
+      </div>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-wheel">
+      <div class="inv-eyebrow">Азын дугуй 🎡</div>
+      <h1 style="font-size:26px;">Энэ үдэшлэг ямар байх бол?</h1>
+      <div class="inv-wheel-wrap">
+        <div class="inv-wheel-pointer">▼</div>
+        <div class="inv-wheel" id="invWheel1"></div>
+      </div>
+      <button class="inv-btn" type="button" onclick="invSpinWheel('invWheel1','invWheelResult1','invWheelNextBtn1', INV_WHEEL_CELEBRATION)">🎡 Эргүүл!</button>
+      <div id="invWheelResult1"></div>
+      <button class="inv-btn" id="invWheelNextBtn1" type="button" style="display:none;margin-top:10px;" onclick="invGoTo('inv-s-enc1')">Дараах →</button>
+    </div>`);
+  steps.push(invEncourageChain(["inv-s-enc1", "inv-s-enc2", "inv-s-enc3", "inv-s-enc4", "inv-s-enc5", "inv-s-enc6"], encLines, "inv-s-rsvp"));
   steps.push(`
     <div class="inv-card" id="inv-s-rsvp">
       <div class="inv-eyebrow">RSVP</div>
@@ -1420,6 +1843,7 @@ function renderPartyExperience(data) {
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
           onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
+      ${INV_RSVP_HINT}
     </div>`);
   steps.push(`
     <div class="inv-card" id="inv-s-celebrate">
@@ -1428,6 +1852,9 @@ function renderPartyExperience(data) {
       <p class="inv-sub" id="invPartyNote">Тэсэн ядан хүлээж байна 🥳</p>
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-heartRain"></div><div id="inv-stage">${steps.join("")}</div></div>`;
+  invSetupMemoryGame("invPartyMemGrid", "invPartyMemNextBtn", ["🥳","🎉","🎊","🕺","🎵","✨"], "🎈");
+  invSetupClickerGame();
+  invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);
 }
 
 function invCelebrateParty() {
@@ -1442,6 +1869,7 @@ function invCelebrateParty() {
 // ================= УУЛЗАЛТ (зорилго, RSVP) =================
 function renderMeetingExperience(data) {
   const app = document.getElementById("inviteRoot");
+  const encLines = invPickEncourageSet(false, 8);
   const steps = [];
   steps.push(`
     <div class="inv-card active" id="inv-s-intro">
@@ -1459,7 +1887,7 @@ function renderMeetingExperience(data) {
         📍 ${escapeHtml(data.location || "Тодорхойгүй")}
       </div>
       ${data.location ? mapEmbedHtml(data.location) : ""}
-      <button class="inv-btn" type="button" onclick="invGoTo('${data.purpose ? "inv-s-purpose" : "inv-s-rsvp"}')">Үргэлжлүүлэх →</button>
+      <button class="inv-btn" type="button" onclick="invGoTo('${data.purpose ? "inv-s-purpose" : "inv-s-memgame"}')">Үргэлжлүүлэх →</button>
     </div>`);
   if (data.purpose) {
     steps.push(`
@@ -1467,9 +1895,39 @@ function renderMeetingExperience(data) {
       <div class="inv-eyebrow">Зорилго 🎯</div>
       <h1 style="font-size:26px;">Юуны талаар ярилцах вэ?</h1>
       <p class="inv-sub">${escapeHtml(data.purpose)}</p>
-      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-rsvp')">Үргэлжлүүлэх →</button>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-memgame')">Үргэлжлүүлэх →</button>
     </div>`);
   }
+  steps.push(`
+    <div class="inv-card" id="inv-s-memgame">
+      <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
+      <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
+      <p class="inv-sub">Ижил emoji-г олж хос болгоорой ✨</p>
+      <div class="inv-mem-grid" id="invMeetMemGrid"></div>
+      <button class="inv-btn" id="invMeetMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-clicker')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-clicker">
+      <div class="inv-eyebrow">Бонус тоглоом ⚡</div>
+      <h1 style="font-size:28px;">5 секундэд хэдэн удаа дарж чадах вэ?</h1>
+      <p class="inv-sub" id="invClickerSub">Товч дээр дараад эхэлье!</p>
+      <div id="invClickerHeart" onclick="invClickerTap()" style="font-size:80px;cursor:pointer;user-select:none;margin:10px 0 16px;transition:transform .1s;">👥</div>
+      <div style="font-size:20px;font-weight:700;color:var(--inv-rose-deep);margin-bottom:16px;">Оноо: <span id="invClickerScore">0</span></div>
+      <button class="inv-btn" id="invClickerNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-wheel')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-wheel">
+      <div class="inv-eyebrow">Азын дугуй 🎡</div>
+      <h1 style="font-size:26px;">Энэ уулзалт ямар байх бол?</h1>
+      <div class="inv-wheel-wrap">
+        <div class="inv-wheel-pointer">▼</div>
+        <div class="inv-wheel" id="invWheel1"></div>
+      </div>
+      <button class="inv-btn" type="button" onclick="invSpinWheel('invWheel1','invWheelResult1','invWheelNextBtn1', INV_WHEEL_FORMAL)">🎡 Эргүүл!</button>
+      <div id="invWheelResult1"></div>
+      <button class="inv-btn" id="invWheelNextBtn1" type="button" style="display:none;margin-top:10px;" onclick="invGoTo('inv-s-enc1')">Дараах →</button>
+    </div>`);
+  steps.push(invEncourageChain(["inv-s-enc1", "inv-s-enc2", "inv-s-enc3", "inv-s-enc4", "inv-s-enc5", "inv-s-enc6", "inv-s-enc7", "inv-s-enc8"], encLines, "inv-s-rsvp"));
   steps.push(`
     <div class="inv-card" id="inv-s-rsvp">
       <div class="inv-eyebrow">RSVP</div>
@@ -1479,6 +1937,7 @@ function renderMeetingExperience(data) {
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
           onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
+      ${INV_RSVP_HINT}
     </div>`);
   steps.push(`
     <div class="inv-card" id="inv-s-celebrate">
@@ -1487,6 +1946,9 @@ function renderMeetingExperience(data) {
       <p class="inv-sub">Таны ирцийг бүртгэлээ 👥</p>
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
+  invSetupMemoryGame("invMeetMemGrid", "invMeetMemNextBtn", ["👥","🤝","💼","📋","✅","🎯"], "👥");
+  invSetupClickerGame();
+  invSetupWheel("invWheel1", INV_WHEEL_FORMAL);
 }
 function invCelebrateMeeting() { invGoTo("inv-s-celebrate"); submitInviteResponse({ rsvp: "ирнэ" }); }
 
@@ -1494,6 +1956,7 @@ function invCelebrateMeeting() { invGoTo("inv-s-celebrate"); submitInviteRespons
 function renderEducationExperience(data) {
   const app = document.getElementById("inviteRoot");
   const programItems = (data.program || "").split("\n").map(s => s.trim()).filter(Boolean);
+  const encLines = invPickEncourageSet(false, 8);
   const steps = [];
   steps.push(`
     <div class="inv-card active" id="inv-s-intro">
@@ -1511,7 +1974,7 @@ function renderEducationExperience(data) {
         📍 ${escapeHtml(data.location || "Тодорхойгүй")}
       </div>
       ${data.location ? mapEmbedHtml(data.location) : ""}
-      <button class="inv-btn" type="button" onclick="invGoTo('${programItems.length ? "inv-s-program" : "inv-s-rsvp"}')">Үргэлжлүүлэх →</button>
+      <button class="inv-btn" type="button" onclick="invGoTo('${programItems.length ? "inv-s-program" : "inv-s-memgame"}')">Үргэлжлүүлэх →</button>
     </div>`);
   if (programItems.length) {
     steps.push(`
@@ -1519,9 +1982,39 @@ function renderEducationExperience(data) {
       <div class="inv-eyebrow">Хөтөлбөр 📖</div>
       <h1 style="font-size:26px;">Юу болох вэ?</h1>
       <div class="inv-summary">${programItems.map(p => `<div>▸ ${escapeHtml(p)}</div>`).join("")}</div>
-      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-rsvp')">Үргэлжлүүлэх →</button>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-memgame')">Үргэлжлүүлэх →</button>
     </div>`);
   }
+  steps.push(`
+    <div class="inv-card" id="inv-s-memgame">
+      <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
+      <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
+      <p class="inv-sub">Ижил emoji-г олж хос болгоорой ✨</p>
+      <div class="inv-mem-grid" id="invEduMemGrid"></div>
+      <button class="inv-btn" id="invEduMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-clicker')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-clicker">
+      <div class="inv-eyebrow">Бонус тоглоом 🎓</div>
+      <h1 style="font-size:28px;">5 секундэд хэдэн удаа дарж чадах вэ?</h1>
+      <p class="inv-sub" id="invClickerSub">Товч дээр дараад эхэлье!</p>
+      <div id="invClickerHeart" onclick="invClickerTap()" style="font-size:80px;cursor:pointer;user-select:none;margin:10px 0 16px;transition:transform .1s;">🎓</div>
+      <div style="font-size:20px;font-weight:700;color:var(--inv-rose-deep);margin-bottom:16px;">Оноо: <span id="invClickerScore">0</span></div>
+      <button class="inv-btn" id="invClickerNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-wheel')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-wheel">
+      <div class="inv-eyebrow">Азын дугуй 🎡</div>
+      <h1 style="font-size:26px;">Энэ арга хэмжээ ямар байх бол?</h1>
+      <div class="inv-wheel-wrap">
+        <div class="inv-wheel-pointer">▼</div>
+        <div class="inv-wheel" id="invWheel1"></div>
+      </div>
+      <button class="inv-btn" type="button" onclick="invSpinWheel('invWheel1','invWheelResult1','invWheelNextBtn1', INV_WHEEL_FORMAL)">🎡 Эргүүл!</button>
+      <div id="invWheelResult1"></div>
+      <button class="inv-btn" id="invWheelNextBtn1" type="button" style="display:none;margin-top:10px;" onclick="invGoTo('inv-s-enc1')">Дараах →</button>
+    </div>`);
+  steps.push(invEncourageChain(["inv-s-enc1", "inv-s-enc2", "inv-s-enc3", "inv-s-enc4", "inv-s-enc5", "inv-s-enc6", "inv-s-enc7", "inv-s-enc8"], encLines, "inv-s-rsvp"));
   steps.push(`
     <div class="inv-card" id="inv-s-rsvp">
       <div class="inv-eyebrow">RSVP</div>
@@ -1531,6 +2024,7 @@ function renderEducationExperience(data) {
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
           onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Оролцохгүй</button>
       </div>
+      ${INV_RSVP_HINT}
     </div>`);
   steps.push(`
     <div class="inv-card" id="inv-s-celebrate">
@@ -1539,12 +2033,16 @@ function renderEducationExperience(data) {
       <p class="inv-sub">Таны оролцоог бүртгэлээ 🎓</p>
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
+  invSetupMemoryGame("invEduMemGrid", "invEduMemNextBtn", ["🎓","📖","✏️","🏆","✅","💡"], "🎓");
+  invSetupClickerGame();
+  invSetupWheel("invWheel1", INV_WHEEL_FORMAL);
 }
 function invCelebrateEducation() { invGoTo("inv-s-celebrate"); submitInviteResponse({ rsvp: "оролцоно" }); }
 
 // ================= СПОРТ (хэрэгсэл, RSVP) =================
 function renderSportExperience(data) {
   const app = document.getElementById("inviteRoot");
+  const encLines = invPickEncourageSet(false, 7);
   const steps = [];
   steps.push(`
     <div class="inv-card active" id="inv-s-intro">
@@ -1562,7 +2060,7 @@ function renderSportExperience(data) {
         📍 ${escapeHtml(data.location || "Тодорхойгүй")}
       </div>
       ${data.location ? mapEmbedHtml(data.location) : ""}
-      <button class="inv-btn" type="button" onclick="invGoTo('${data.gear ? "inv-s-gear" : "inv-s-rsvp"}')">Үргэлжлүүлэх →</button>
+      <button class="inv-btn" type="button" onclick="invGoTo('${data.gear ? "inv-s-gear" : "inv-s-memgame"}')">Үргэлжлүүлэх →</button>
     </div>`);
   if (data.gear) {
     steps.push(`
@@ -1570,9 +2068,50 @@ function renderSportExperience(data) {
       <div class="inv-eyebrow">Юу авч явах вэ 🎒</div>
       <h1 style="font-size:26px;">Бэлтгэл</h1>
       <p class="inv-sub">${escapeHtml(data.gear)}</p>
-      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-rsvp')">Үргэлжлүүлэх →</button>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-memgame')">Үргэлжлүүлэх →</button>
     </div>`);
   }
+  steps.push(`
+    <div class="inv-card" id="inv-s-memgame">
+      <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
+      <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
+      <p class="inv-sub">Ижил emoji-г олж хос болгоорой ✨</p>
+      <div class="inv-mem-grid" id="invSportMemGrid"></div>
+      <button class="inv-btn" id="invSportMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-clicker')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-clicker">
+      <div class="inv-eyebrow">Бонус тоглоом 💪</div>
+      <h1 style="font-size:28px;">5 секундэд хэдэн удаа дарж чадах вэ?</h1>
+      <p class="inv-sub" id="invClickerSub">Товч дээр дараад эхэлье!</p>
+      <div id="invClickerHeart" onclick="invClickerTap()" style="font-size:80px;cursor:pointer;user-select:none;margin:10px 0 16px;transition:transform .1s;">🏆</div>
+      <div style="font-size:20px;font-weight:700;color:var(--inv-rose-deep);margin-bottom:16px;">Оноо: <span id="invClickerScore">0</span></div>
+      <button class="inv-btn" id="invClickerNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-poll1')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-poll1">
+      <div class="inv-eyebrow">Хөгжилтэй асуулт ⚽</div>
+      <h1 style="font-size:26px;">Хэн түрүүлнэ гэж бодож байна?</h1>
+      <div class="inv-options" id="inv-opts-poll1">
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🥇</span> Бид ялна!</div>
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🤝</span> Тэн жин</div>
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">😅</span> Оролдоно доо</div>
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🎉</span> Оролцоо чухал</div>
+      </div>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-wheel">
+      <div class="inv-eyebrow">Азын дугуй 🎡</div>
+      <h1 style="font-size:26px;">Энэ тэмцээн ямар байх бол?</h1>
+      <div class="inv-wheel-wrap">
+        <div class="inv-wheel-pointer">▼</div>
+        <div class="inv-wheel" id="invWheel1"></div>
+      </div>
+      <button class="inv-btn" type="button" onclick="invSpinWheel('invWheel1','invWheelResult1','invWheelNextBtn1', INV_WHEEL_CELEBRATION)">🎡 Эргүүл!</button>
+      <div id="invWheelResult1"></div>
+      <button class="inv-btn" id="invWheelNextBtn1" type="button" style="display:none;margin-top:10px;" onclick="invGoTo('inv-s-enc1')">Дараах →</button>
+    </div>`);
+  steps.push(invEncourageChain(["inv-s-enc1", "inv-s-enc2", "inv-s-enc3", "inv-s-enc4", "inv-s-enc5", "inv-s-enc6", "inv-s-enc7"], encLines, "inv-s-rsvp"));
   steps.push(`
     <div class="inv-card" id="inv-s-rsvp">
       <div class="inv-eyebrow">RSVP</div>
@@ -1582,6 +2121,7 @@ function renderSportExperience(data) {
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
           onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Оролцохгүй</button>
       </div>
+      ${INV_RSVP_HINT}
     </div>`);
   steps.push(`
     <div class="inv-card" id="inv-s-celebrate">
@@ -1590,6 +2130,9 @@ function renderSportExperience(data) {
       <p class="inv-sub">Таны оролцоог бүртгэлээ 💪</p>
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-heartRain"></div><div id="inv-stage">${steps.join("")}</div></div>`;
+  invSetupMemoryGame("invSportMemGrid", "invSportMemNextBtn", ["🏆","⚽","🏀","💪","🎯","🥇"], "🏆");
+  invSetupClickerGame();
+  invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);
 }
 function invCelebrateSport() {
   invGoTo("inv-s-celebrate");
@@ -1600,6 +2143,7 @@ function invCelebrateSport() {
 // ================= СОЁЛ УРЛАГ (хувцасны код, RSVP) =================
 function renderCultureExperience(data) {
   const app = document.getElementById("inviteRoot");
+  const encLines = invPickEncourageSet(false, 7);
   const steps = [];
   steps.push(`
     <div class="inv-card active" id="inv-s-intro">
@@ -1617,7 +2161,7 @@ function renderCultureExperience(data) {
         📍 ${escapeHtml(data.location || "Тодорхойгүй")}
       </div>
       ${data.location ? mapEmbedHtml(data.location) : ""}
-      <button class="inv-btn" type="button" onclick="invGoTo('${data.dressCode ? "inv-s-dress" : "inv-s-rsvp"}')">Үргэлжлүүлэх →</button>
+      <button class="inv-btn" type="button" onclick="invGoTo('${data.dressCode ? "inv-s-dress" : "inv-s-memgame"}')">Үргэлжлүүлэх →</button>
     </div>`);
   if (data.dressCode) {
     steps.push(`
@@ -1625,9 +2169,50 @@ function renderCultureExperience(data) {
       <div class="inv-eyebrow">Хувцасны код 👗</div>
       <h1 style="font-size:26px;">Юу өмсөх вэ?</h1>
       <p class="inv-sub">${escapeHtml(data.dressCode)}</p>
-      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-rsvp')">Үргэлжлүүлэх →</button>
+      <button class="inv-btn" type="button" onclick="invGoTo('inv-s-memgame')">Үргэлжлүүлэх →</button>
     </div>`);
   }
+  steps.push(`
+    <div class="inv-card" id="inv-s-memgame">
+      <div class="inv-eyebrow">Бонус тоглоом 🎮</div>
+      <h1 style="font-size:28px;">Хосуудыг олоорой!</h1>
+      <p class="inv-sub">Ижил emoji-г олж хос болгоорой ✨</p>
+      <div class="inv-mem-grid" id="invCultMemGrid"></div>
+      <button class="inv-btn" id="invCultMemNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-clicker')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-clicker">
+      <div class="inv-eyebrow">Бонус тоглоом 🎭</div>
+      <h1 style="font-size:28px;">5 секундэд хэдэн удаа дарж чадах вэ?</h1>
+      <p class="inv-sub" id="invClickerSub">Товч дээр дараад эхэлье!</p>
+      <div id="invClickerHeart" onclick="invClickerTap()" style="font-size:80px;cursor:pointer;user-select:none;margin:10px 0 16px;transition:transform .1s;">🎭</div>
+      <div style="font-size:20px;font-weight:700;color:var(--inv-rose-deep);margin-bottom:16px;">Оноо: <span id="invClickerScore">0</span></div>
+      <button class="inv-btn" id="invClickerNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-poll1')">Дараах →</button>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-poll1">
+      <div class="inv-eyebrow">Хөгжилтэй асуулт 🎨</div>
+      <h1 style="font-size:26px;">Юуг хамгийн ихээр хүлээж байна вэ?</h1>
+      <div class="inv-options" id="inv-opts-poll1">
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🎬</span> Гол тоглолт</div>
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">🍷</span> Завсарлагааны цай</div>
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">👗</span> Хуванцарлах</div>
+        <div class="inv-opt" onclick="invPollPick('inv-opts-poll1', this, 'inv-s-wheel')"><span class="inv-emoji">💬</span> Дараа нь ярилцах</div>
+      </div>
+    </div>`);
+  steps.push(`
+    <div class="inv-card" id="inv-s-wheel">
+      <div class="inv-eyebrow">Азын дугуй 🎡</div>
+      <h1 style="font-size:26px;">Энэ үзвэр ямар байх бол?</h1>
+      <div class="inv-wheel-wrap">
+        <div class="inv-wheel-pointer">▼</div>
+        <div class="inv-wheel" id="invWheel1"></div>
+      </div>
+      <button class="inv-btn" type="button" onclick="invSpinWheel('invWheel1','invWheelResult1','invWheelNextBtn1', INV_WHEEL_CELEBRATION)">🎡 Эргүүл!</button>
+      <div id="invWheelResult1"></div>
+      <button class="inv-btn" id="invWheelNextBtn1" type="button" style="display:none;margin-top:10px;" onclick="invGoTo('inv-s-enc1')">Дараах →</button>
+    </div>`);
+  steps.push(invEncourageChain(["inv-s-enc1", "inv-s-enc2", "inv-s-enc3", "inv-s-enc4", "inv-s-enc5", "inv-s-enc6", "inv-s-enc7"], encLines, "inv-s-rsvp"));
   steps.push(`
     <div class="inv-card" id="inv-s-rsvp">
       <div class="inv-eyebrow">RSVP</div>
@@ -1637,6 +2222,7 @@ function renderCultureExperience(data) {
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
           onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
+      ${INV_RSVP_HINT}
     </div>`);
   steps.push(`
     <div class="inv-card" id="inv-s-celebrate">
@@ -1645,5 +2231,8 @@ function renderCultureExperience(data) {
       <p class="inv-sub">Таны ирцийг бүртгэлээ 🎭</p>
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
+  invSetupMemoryGame("invCultMemGrid", "invCultMemNextBtn", ["🎭","🎨","🎬","🎻","✨","👏"], "🎭");
+  invSetupClickerGame();
+  invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);
 }
 function invCelebrateCulture() { invGoTo("inv-s-celebrate"); submitInviteResponse({ rsvp: "ирнэ" }); }

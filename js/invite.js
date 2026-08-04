@@ -597,6 +597,7 @@ function renderDateInviteExperience(recipientName) {
         </div>
         <div class="inv-cal-grid" id="invCalGrid"></div>
         <div class="inv-date-label" id="invDateLabel">Огноогоо сонгоно уу 👆</div>
+        <div class="inv-countdown" id="invDateCountdown" style="display:none;"></div>
         <button class="inv-btn" id="invDateNextBtn" type="button" style="display:none;" onclick="invGoTo('inv-s-final')">Дараах →</button>
       </div>
       <div class="inv-card" id="inv-s-final">
@@ -608,7 +609,16 @@ function renderDateInviteExperience(recipientName) {
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
             onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Үгүй</button>
         </div>
+        <button class="inv-btn-text" type="button" onclick="invStartPersuade('inv-s-wish')">бодоод үзье...</button>
         ${INV_RSVP_HINT}
+      </div>
+      <div class="inv-card" id="inv-s-persuade">
+        <div class="inv-persuade-img-wrap"><img id="invPersuadeImg" class="inv-persuade-img" alt="муур"></div>
+        <h1 id="invPersuadeText" style="font-size:22px;"></h1>
+        <button class="inv-btn" id="invPersuadeYesBtn" type="button" onclick="invGoTo('inv-s-wish')">Тийм, хамт явъя ❤️</button>
+        <div style="margin-top:12px;">
+          <button class="inv-btn-text" id="invPersuadeNextBtn" type="button" onclick="invPersuadeNext()">дахиад бодъё...</button>
+        </div>
       </div>
       <div class="inv-card" id="inv-s-wish">
         <div class="inv-eyebrow">Бараг л боллоо 🥰</div>
@@ -965,6 +975,9 @@ function invSelectDate(d) {
   document.getElementById("invDateLabel").textContent =
     d.toLocaleDateString("mn-MN", { year: "numeric", month: "long", day: "numeric" }) + " — тохиролцлоо! 💌";
   document.getElementById("invDateNextBtn").style.display = "inline-block";
+  const cdEl = document.getElementById("invDateCountdown");
+  if (cdEl) cdEl.style.display = "inline-block";
+  invStartLiveCountdown("invDateCountdown", d);
 }
 
 function invDodge() {
@@ -978,6 +991,64 @@ function invDodge() {
   noBtn.style.left = (Math.random() * maxX) + "px";
   noBtn.style.top = (Math.random() * maxY) + "px";
   noBtn.style.transform = "none";
+}
+
+// ---------- "Дараа бодъё" гэж дарахад муур зурагтай ятгах дараалал (bolzoodate.vercel.app-с санаа авсан) ----------
+const INV_CAT_TAGS = ["cute", "kitten", "sleepy", "box", "cute", "kitten"];
+const INV_PERSUADE_STAGES = [
+  "Дахиад нэг бодоод үз дээ 🥹",
+  "Нээрээ надтай явахгүй гэж үү? 😿",
+  "Тийм товч чинь илүү хөөрхөн харагдаж байна шүү 🐱",
+  "За за, ганцхан удаа асуучихъя л даа... тийм үү? 🥺",
+];
+let invPersuadeStage = 0;
+
+// onYes: function биш, зөвхөн invGoTo-д зориулсан алхмын id өгвөл шууд түүн рүү шилжинэ;
+// функц өгвөл (жишээ нь invCelebrateProposal) шууд дуудна.
+function invStartPersuade(onYes) {
+  invPersuadeStage = 0;
+  const yesBtn = document.getElementById("invPersuadeYesBtn");
+  if (yesBtn) yesBtn.onclick = typeof onYes === "function" ? onYes : () => invGoTo(onYes);
+  invShowPersuadeStage();
+  invGoTo("inv-s-persuade");
+}
+
+function invPersuadeNext() {
+  invPersuadeStage = Math.min(invPersuadeStage + 1, INV_PERSUADE_STAGES.length - 1);
+  invShowPersuadeStage();
+}
+
+function invShowPersuadeStage() {
+  const textEl = document.getElementById("invPersuadeText");
+  const imgEl = document.getElementById("invPersuadeImg");
+  const nextBtn = document.getElementById("invPersuadeNextBtn");
+  const yesBtn = document.getElementById("invPersuadeYesBtn");
+  if (textEl) textEl.textContent = INV_PERSUADE_STAGES[invPersuadeStage];
+  if (imgEl) {
+    const tag = INV_CAT_TAGS[invPersuadeStage % INV_CAT_TAGS.length];
+    imgEl.src = `https://cataas.com/cat/${tag}?width=300&height=240&t=${Date.now()}`;
+  }
+  const isLast = invPersuadeStage >= INV_PERSUADE_STAGES.length - 1;
+  if (nextBtn) nextBtn.style.display = isLast ? "none" : "inline-block";
+  if (yesBtn) yesBtn.classList.toggle("inv-btn-pulse", isLast);
+}
+
+// ---------- Сонгосон огноо хүртэлх амьд тоолуур ----------
+let invCountdownTimer = null;
+function invStartLiveCountdown(elId, targetDate) {
+  if (invCountdownTimer) { clearInterval(invCountdownTimer); invCountdownTimer = null; }
+  function update() {
+    const el = document.getElementById(elId);
+    if (!el) { clearInterval(invCountdownTimer); invCountdownTimer = null; return; }
+    const diffMs = targetDate.getTime() - Date.now();
+    if (diffMs <= 0) { el.textContent = "🎉 Өнөөдөр боллоо!"; clearInterval(invCountdownTimer); invCountdownTimer = null; return; }
+    const days = Math.floor(diffMs / 86400000);
+    const hours = Math.floor((diffMs % 86400000) / 3600000);
+    const mins = Math.floor((diffMs % 3600000) / 60000);
+    el.textContent = `⏳ Болзоонд үлдсэн: ${days} өдөр ${hours} цаг ${mins} мин`;
+  }
+  update();
+  invCountdownTimer = setInterval(update, 60000);
 }
 
 function invHeartBurst(total, hearts) {
@@ -1110,7 +1181,16 @@ function renderProposalExperience(recipientName, data) {
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
             onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Үгүй</button>
         </div>
+        <button class="inv-btn-text" type="button" onclick="invStartPersuade(invCelebrateProposal)">бодоод үзье...</button>
         ${INV_RSVP_HINT}
+      </div>
+      <div class="inv-card" id="inv-s-persuade">
+        <div class="inv-persuade-img-wrap"><img id="invPersuadeImg" class="inv-persuade-img" alt="муур"></div>
+        <h1 id="invPersuadeText" style="font-size:22px;"></h1>
+        <button class="inv-btn" id="invPersuadeYesBtn" type="button" onclick="invCelebrateProposal()">Тийм ээ! 💍</button>
+        <div style="margin-top:12px;">
+          <button class="inv-btn-text" id="invPersuadeNextBtn" type="button" onclick="invPersuadeNext()">дахиад бодъё...</button>
+        </div>
       </div>
       <div class="inv-card" id="inv-s-celebrate">
         <div class="inv-eyebrow">Баяр хүргэе 🎉</div>

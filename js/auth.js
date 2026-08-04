@@ -190,6 +190,7 @@ function openProfileModal() {
       <div class="form-group"><label>Танилцуулга</label><textarea id="profileBio" rows="3">${escapeHtml(currentUser.bio||"")}</textarea></div>
       <div id="profileStatus" style="min-height:18px;font-size:13px;margin-bottom:8px;"></div>
       <button class="btn btn-primary" type="button" style="width:100%" onclick="saveProfile()">Хадгалах</button>
+      <button class="btn btn-ghost" type="button" style="width:100%;margin-top:10px;" onclick="openCoupleModal()">💑 Хосын дурсамж</button>
     </div>`;
   document.getElementById("modal").classList.add("show");
 }

@@ -6,6 +6,9 @@ service firebase.storage {
     function isAdmin() { return isSignedIn() && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid)); }
     function isImage() { return request.resource.contentType.matches('image/.*'); }
     function underSize(mb) { return request.resource.size < mb * 1024 * 1024; }
+    function isCoupleMember(coupleId) {
+      return isSignedIn() && firestore.get(/databases/(default)/documents/couples/$(coupleId)).data.members.hasAny([request.auth.uid]);
+    }
 
     // Profile avatars — owner only, 5MB cap
     match /profiles/{uid}/{fileName} {
@@ -23,6 +26,12 @@ service firebase.storage {
     match /movies/{movieId}/{fileName} {
       allow read: if true;
       allow write: if isAdmin() && isImage() && underSize(8);
+    }
+
+    // Couple memory photos — only the 2 linked members, 8MB cap
+    match /couples/{coupleId}/{fileName=**} {
+      allow read: if isCoupleMember(coupleId);
+      allow write: if isCoupleMember(coupleId) && isImage() && underSize(8);
     }
   }
 }

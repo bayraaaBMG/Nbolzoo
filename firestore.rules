@@ -87,6 +87,44 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ---- coupleInvites/{code} : short pairing code, doc id IS the code (like invites, secret-by-id).
+    // Sender creates it pending; the partner (a different signed-in user) accepts it exactly once. ----
+    match /coupleInvites/{code} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.senderUid == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.partnerUid == null;
+      allow update: if isSignedIn()
+        && resource.data.status == 'pending'
+        && resource.data.senderUid != request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'partnerUid'])
+        && request.resource.data.status == 'accepted'
+        && request.resource.data.partnerUid == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.senderUid == request.auth.uid;
+    }
+
+    // ---- couples/{coupleId} : a linked pair + their shared memories subcollection.
+    // members is always exactly the 2 uids; only those 2 may read/write. ----
+    match /couples/{coupleId} {
+      allow read: if isSignedIn() && resource.data.members.hasAny([request.auth.uid]);
+      allow create: if isSignedIn()
+        && request.resource.data.members.size() == 2
+        && request.resource.data.members.hasAny([request.auth.uid]);
+      allow update: if isSignedIn()
+        && resource.data.members.hasAny([request.auth.uid])
+        && request.resource.data.members == resource.data.members;
+      allow delete: if isSignedIn() && resource.data.members.hasAny([request.auth.uid]);
+
+      match /memories/{memoryId} {
+        function coupleMembers() { return get(/databases/$(database)/documents/couples/$(coupleId)).data.members; }
+        allow read: if isSignedIn() && coupleMembers().hasAny([request.auth.uid]);
+        allow create: if isSignedIn() && coupleMembers().hasAny([request.auth.uid]) && request.resource.data.createdBy == request.auth.uid;
+        allow update: if isSignedIn() && coupleMembers().hasAny([request.auth.uid]);
+        allow delete: if isSignedIn() && coupleMembers().hasAny([request.auth.uid]);
+      }
+    }
+
     // ---- invites/{inviteId} : Урилга feature. Sender must be signed in to create;
     // the doc id itself is the shareable secret (recipient never signs in), so anyone
     // holding the link may read it and write a response exactly once. ----

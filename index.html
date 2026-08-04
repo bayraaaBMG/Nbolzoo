@@ -6,14 +6,14 @@
 <title>NBolzoo - Монголын анхны болзооны санааны платформ</title>
 <!-- OG Meta Tags - Social Share -->
 <meta property="og:title" content="NBolzoo - Монголын анхны болзооны санааны платформ">
-<meta property="og:description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, AI зөвлөх, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
+<meta property="og:description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
 <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Gorkhi-Terelj_National_Park.jpg/640px-Gorkhi-Terelj_National_Park.jpg">
 <meta property="og:url" content="https://nbolzoo.vercel.app/index.html">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="NBolzoo - Монголын анхны болзооны санааны платформ">
-<meta name="twitter:description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, AI зөвлөх, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
-<meta name="description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, AI зөвлөх, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
+<meta name="twitter:description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
+<meta name="description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
 <link rel="canonical" href="https://nbolzoo.vercel.app/index.html">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="apple-touch-icon" href="logo.svg">
@@ -43,7 +43,6 @@
       <li><a class="nav-link" data-page="expert" onclick="navigate('expert')">💎 Зөвлөгөө</a></li>
       <li><a class="nav-link" data-page="gifts" onclick="navigate('gifts')">🎁 Бэлэг</a></li>
       <li><a class="nav-link" data-page="community" onclick="navigate('community')">👥 Нийгэмлэг</a></li>
-      <li><a class="nav-link" data-page="ai" onclick="navigate('ai')">🤖 AI зөвлөх</a></li>
       <li><a class="nav-link" data-page="movies" onclick="navigate('movies')">🎬 Кино</a></li>
       <li><a class="nav-link" data-page="saved" onclick="navigate('saved')">❤️ Хадгалсан</a></li>
       <li><a class="nav-link" data-page="urilga" onclick="navigate('urilga')">💌 Урилга</a></li>
@@ -83,7 +82,6 @@
     <a onclick="navigate('expert');closeMobileMenu()">💎 Зөвлөгөө</a>
     <a onclick="navigate('gifts');closeMobileMenu()">🎁 Бэлэг</a>
     <a onclick="navigate('community');closeMobileMenu()">👥 Нийгэмлэг</a>
-    <a onclick="navigate('ai');closeMobileMenu()">🤖 AI зөвлөх</a>
     <a onclick="navigate('movies');closeMobileMenu()">🎬 Кино</a>
     <a onclick="navigate('saved');closeMobileMenu()">❤️ Хадгалсан</a>
     <a onclick="navigate('urilga');closeMobileMenu()">💌 Урилга</a>
@@ -125,15 +123,6 @@
       </div>
       <div class="cards-grid" id="featuredGrid"></div>
 
-      <div class="ai-box">
-        <div class="ai-avatar">🤖</div>
-        <div class="ai-content">
-          <h3>NBolzoo AI зөвлөх танд тусгайлан санал болгож байна</h3>
-          <p>Та өөрийнхөө сонирхол, зан чанар, төсвийг хэлээд бид танд тохирох болзооны төрөл, газар, бүр тохирох хүн санал болгоно.</p>
-          <button type="button" class="ai-btn" onclick="navigate('ai')">AI зөвлөхтэй ярилцах →</button>
-        </div>
-      </div>
-
       <div class="section-title">
         <h2>🌄 Аймагт хамт явах уу?</h2>
         <a onclick="navigate('aimags')">21 аймаг үзэх →</a>
@@ -153,7 +142,7 @@
         <img src="logo.svg" alt="NBolzoo" class="logo-icon" width="42" height="42">
         <span class="logo-text">NBolzoo</span>
       </div>
-      <p>Монголын анхны болзооны санааны платформ. УБ-д 365 санаа + 21 аймагт 189 санаа + AI зөвлөх.</p>
+      <p>Монголын анхны болзооны санааны платформ. УБ-д 365 санаа + 21 аймагт 189 санаа.</p>
     </div>
     <div class="footer-col">
       <h4>Санаанууд</h4>
@@ -165,7 +154,6 @@
     <div class="footer-col">
       <h4>Зөвлөгөө</h4>
       <a onclick="navigate('expert')">💎 Мэргэжилтэн зөвлөгөө</a>
-      <a onclick="navigate('ai')">🤖 AI зөвлөх</a>
       <a onclick="navigate('community')">👥 Нийгэмлэг</a>
       <a onclick="navigate('expert','questions')">247 асуулт</a>
     </div>
@@ -198,6 +186,7 @@
 <script src="js/auth.js"></script>
 <script src="js/notifications.js"></script>
 <script src="js/storage-utils.js"></script>
+<script src="js/couple.js"></script>
 <script src="js/core.js"></script>
 <script src="js/ub.js"></script>
 <script src="js/aimags.js"></script>

@@ -19,17 +19,17 @@ const WK = "https://upload.wikimedia.org/wikipedia/commons/thumb/";
 const US = "https://images.unsplash.com/photo-";
 const IMG = {
   // Mongolia — Wikipedia Commons
-  ub:       WK+"0/03/Jugder_001.jpg/640px-Jugder_001.jpg",
-  khuvsgul: WK+"a/a9/Khuvsgul.jpg/640px-Khuvsgul.jpg",
-  gobi:     WK+"7/79/Gobi_Desert.jpg/640px-Gobi_Desert.jpg",
-  terelj:   WK+"b/b6/Gorkhi-Terelj_National_Park.jpg/640px-Gorkhi-Terelj_National_Park.jpg",
-  bayanzag: WK+"d/d7/Flaming_cliffs_5.jpg/640px-Flaming_cliffs_5.jpg",
-  orkhon:   WK+"6/63/Orchon-mongolei.JPG/640px-Orchon-mongolei.JPG",
-  erdene:   WK+"4/4c/%C5%9Awi%C4%85tynia_Zachodnia_w_klasztorze_Erdene_Dzuu_01.jpg/640px-%C5%9Awi%C4%85tynia_Zachodnia_w_klasztorze_Erdene_Dzuu_01.jpg",
-  altai:    WK+"2/2b/GoraBeluha.jpg/640px-GoraBeluha.jpg",
-  hustai:   WK+"b/b9/Khustain_Nuruu_National_Park.jpg/640px-Khustain_Nuruu_National_Park.jpg",
-  genghis:  WK+"9/93/Genghis_Khan_Equestrian_Statue%2C_photo_by_Vaiz_Ha.jpg/640px-Genghis_Khan_Equestrian_Statue%2C_photo_by_Vaiz_Ha.jpg",
-  steppe:   WK+"5/5e/Mongolian_steppe.jpg/640px-Mongolian_steppe.jpg",
+  ub:       WK+"0/03/Jugder_001.jpg/500px-Jugder_001.jpg",
+  khuvsgul: WK+"a/a9/Khuvsgul.jpg/500px-Khuvsgul.jpg",
+  gobi:     WK+"7/79/Gobi_Desert.jpg/500px-Gobi_Desert.jpg",
+  terelj:   WK+"b/b6/Gorkhi-Terelj_National_Park.jpg/500px-Gorkhi-Terelj_National_Park.jpg",
+  bayanzag: WK+"d/d7/Flaming_cliffs_5.jpg/500px-Flaming_cliffs_5.jpg",
+  orkhon:   WK+"6/63/Orchon-mongolei.JPG/500px-Orchon-mongolei.JPG",
+  erdene:   WK+"4/4c/%C5%9Awi%C4%85tynia_Zachodnia_w_klasztorze_Erdene_Dzuu_01.jpg/500px-%C5%9Awi%C4%85tynia_Zachodnia_w_klasztorze_Erdene_Dzuu_01.jpg",
+  altai:    WK+"2/2b/GoraBeluha.jpg/500px-GoraBeluha.jpg",
+  hustai:   WK+"b/b9/Khustain_Nuruu_National_Park.jpg/500px-Khustain_Nuruu_National_Park.jpg",
+  genghis:  WK+"9/93/Genghis_Khan_Equestrian_Statue%2C_photo_by_Vaiz_Ha.jpg/500px-Genghis_Khan_Equestrian_Statue%2C_photo_by_Vaiz_Ha.jpg",
+  steppe:   WK+"0/0a/Tree_on_the_Mongolian_steppe_%28June_1997%29.jpg/500px-Tree_on_the_Mongolian_steppe_%28June_1997%29.jpg",
   // Activities — Unsplash (free, no attribution required)
   coffee:   US+"1511632765486-a01980e01a18?w=420&h=200&fit=crop&auto=format",
   park:     US+"1441974231531-c6227db76b6e?w=420&h=200&fit=crop&auto=format",
@@ -54,43 +54,34 @@ const IMG = {
   art:      US+"1561214115-f2f134cc4912?w=420&h=200&fit=crop&auto=format",
 };
 
-// Aimag image by name/region
+// Аймаг тус бүрийн өөрийн (Wikipedia-гийн тухайн аймгийн өгүүллийн зурагнаас авсан) жинхэнэ зураг —
+// өмнө нь ганцхан 11 ерөнхий зургийг 21 аймагт давхардуулан ашигладаг байсныг сольсон.
 const aimagImgDB = {
-  "Хөвсгөл":    {u: IMG.khuvsgul,  s: "Wikipedia CC"},
-  "Өмнөговь":   {u: IMG.bayanzag,  s: "Wikipedia CC"},
-  "Өвөрхангай": {u: IMG.orkhon,    s: "Wikipedia CC"},
-  "Төв":         {u: IMG.terelj,    s: "Wikipedia CC"},
-  "Архангай":    {u: IMG.khuvsgul,  s: "Wikipedia CC"},
-  "Баян-Өлгий": {u: IMG.altai,     s: "Wikipedia CC"},
-  "Говь-Алтай": {u: IMG.altai,     s: "Wikipedia CC"},
-  "Баянхонгор":  {u: IMG.gobi,     s: "Wikipedia CC"},
-  "Говьсүмбэр":  {u: IMG.gobi,     s: "Wikipedia CC"},
-  "Дорноговь":   {u: IMG.gobi,     s: "Wikipedia CC"},
-  "Дундговь":    {u: IMG.gobi,     s: "Wikipedia CC"},
-  "Дорнод":      {u: IMG.steppe,   s: "Wikipedia CC"},
-  "Сүхбаатар":   {u: IMG.steppe,   s: "Wikipedia CC"},
-  "Хэнтий":      {u: IMG.hustai,   s: "Wikipedia CC"},
-  "Хангай":      {u: IMG.orkhon,   s: "Wikipedia CC"},
-  "Булган":      {u: IMG.steppe,   s: "Wikipedia CC"},
-  "Орхон":       {u: IMG.ub,       s: "Wikipedia CC"},
-  "Дархан-Уул":  {u: IMG.ub,       s: "Wikipedia CC"},
-  "Завхан":      {u: IMG.altai,    s: "Wikipedia CC"},
-  "Ховд":        {u: IMG.altai,    s: "Wikipedia CC"},
-  "Увс":         {u: IMG.steppe,   s: "Wikipedia CC"},
-  "Сэлэнгэ":     {u: IMG.steppe,   s: "Wikipedia CC"},
-};
-// Fallback by region
-const regionImgDB = {
-  "Хангайн": {u: IMG.orkhon,   s: "Wikipedia CC"},
-  "Баруун":  {u: IMG.altai,    s: "Wikipedia CC"},
-  "Хойд":    {u: IMG.khuvsgul, s: "Wikipedia CC"},
-  "Зүүн":    {u: IMG.steppe,   s: "Wikipedia CC"},
-  "Өмнөд":   {u: IMG.gobi,     s: "Wikipedia CC"},
-  "Төв":     {u: IMG.terelj,   s: "Wikipedia CC"},
+  "Архангай":    {u: WK+"4/4f/A_view_of_Arhangay.jpg/500px-A_view_of_Arhangay.jpg",                                                            s: "Wikipedia CC"},
+  "Баян-Өлгий":  {u: WK+"0/09/Tavan_Bogd_Mountain.jpg/500px-Tavan_Bogd_Mountain.jpg",                                                          s: "Wikipedia CC"},
+  "Баянхонгор":  {u: WK+"3/3e/Nomgon_from_the_west.jpg/500px-Nomgon_from_the_west.jpg",                                                        s: "Wikipedia CC"},
+  "Говьсүмбэр":  {u: WK+"c/cb/At_Choir_Mongolia_%2811532660476%29.jpg/500px-At_Choir_Mongolia_%2811532660476%29.jpg",                          s: "Wikipedia CC"},
+  "Булган":      {u: WK+"5/5b/Amarbayasgalant_monastery_temple_01.JPG/500px-Amarbayasgalant_monastery_temple_01.JPG",                          s: "Wikipedia CC"},
+  "Говь-Алтай":  {u: WK+"3/32/Sutai_Mount%2C_Altai_Mountains._-_panoramio.jpg/500px-Sutai_Mount%2C_Altai_Mountains._-_panoramio.jpg",          s: "Wikipedia CC"},
+  "Дархан-Уул":  {u: WK+"7/79/Darkhan.jpg/500px-Darkhan.jpg",                                                                                  s: "Wikipedia CC"},
+  "Дорноговь":   {u: WK+"1/16/Gobi%2C_krajobraz_pustyni_%2820%29.jpg/500px-Gobi%2C_krajobraz_pustyni_%2820%29.jpg",                            s: "Wikipedia CC"},
+  "Дорнод":      {u: WK+"b/b6/Bars_Hota_Mongolia.jpg/500px-Bars_Hota_Mongolia.jpg",                                                            s: "Wikipedia CC"},
+  "Дундговь":    {u: WK+"9/91/S%C3%BCmKh%C3%B6khBurd.jpg/500px-S%C3%BCmKh%C3%B6khBurd.jpg",                                                    s: "Wikipedia CC"},
+  "Завхан":      {u: WK+"6/69/Har_Nuur.jpg/500px-Har_Nuur.jpg",                                                                                s: "Wikipedia CC"},
+  "Орхон":       {u: WK+"8/8a/Erdenet_02.jpg/500px-Erdenet_02.jpg",                                                                            s: "Wikipedia CC"},
+  "Өвөрхангай":  {u: WK+"e/ec/ErdeneZuuMonasteryMongolia.JPG/500px-ErdeneZuuMonasteryMongolia.JPG",                                            s: "Wikipedia CC"},
+  "Өмнөговь":    {u: WK+"9/90/OmnogoviLandscape.jpg/500px-OmnogoviLandscape.jpg",                                                              s: "Wikipedia CC"},
+  "Сүхбаатар":   {u: WK+"b/b8/Steppe01-Obo.jpg/500px-Steppe01-Obo.jpg",                                                                        s: "Wikipedia CC"},
+  "Сэлэнгэ":     {u: WK+"b/b5/Selenga.jpg/500px-Selenga.jpg",                                                                                  s: "Wikipedia CC"},
+  "Төв":         {u: WK+"3/3c/Zuunmod_%282025%29.jpg/500px-Zuunmod_%282025%29.jpg",                                                            s: "Wikipedia CC"},
+  "Увс":         {u: WK+"3/36/Uvs_n%C3%BAr.JPG/500px-Uvs_n%C3%BAr.JPG",                                                                        s: "Wikipedia CC"},
+  "Ховд":        {u: WK+"d/d9/The_Buyant_River.jpg/500px-The_Buyant_River.jpg",                                                                s: "Wikipedia CC"},
+  "Хөвсгөл":     {u: WK+"c/c8/Burentogtokh.jpg/500px-Burentogtokh.jpg",                                                                        s: "Wikipedia CC"},
+  "Хэнтий":      {u: WK+"5/50/Kherlen_River.jpg/500px-Kherlen_River.jpg",                                                                      s: "Wikipedia CC"},
 };
 
 function getAimagImg(a) {
-  return aimagImgDB[a.name] || regionImgDB[a.region] || {u: IMG.steppe, s: "Wikipedia CC"};
+  return aimagImgDB[a.name] || {u: IMG.steppe, s: "Wikipedia CC"};
 }
 
 // Wonder type image mapping

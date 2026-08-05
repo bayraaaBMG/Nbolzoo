@@ -981,7 +981,10 @@ function invSelectDate(d) {
 }
 
 function invDodge() {
-  const box = document.querySelector("#inv-s-final .inv-final-buttons");
+  // Идэвхтэй карт (inv-s-final эсвэл inv-s-rsvp г.м, төрлөөс хамаарч өөр өөр id-тай) дотроос хайна —
+  // өмнө нь зөвхөн #inv-s-final гэж хатуу бичсэн тул RSVP алхам нь өөр id-тай 9 төрөлд (birthday, work,
+  // family, holiday, party, meeting, education, sport, culture) "Ирэхгүй" товч огт хөдөлдөггүй байсан.
+  const box = document.querySelector(".inv-card.active .inv-final-buttons");
   const noBtn = document.getElementById("inv-noBtn");
   if (!box || !noBtn) return;
   const bw = box.clientWidth, bh = box.clientHeight;

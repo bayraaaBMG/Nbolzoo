@@ -138,6 +138,14 @@ service cloud.firestore {
       allow delete: if isSignedIn() && resource.data.hostUid == request.auth.uid;
     }
 
+    // ---- futureLetters/{id} : "Ирээдүйн хосдоо захиа" — private journaling, owner-only. ----
+    match /futureLetters/{letterId} {
+      allow read: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if false;
+      allow delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
     // ---- invites/{inviteId} : Урилга feature. Sender must be signed in to create;
     // the doc id itself is the shareable secret (recipient never signs in), so anyone
     // holding the link may read it and write a response exactly once. ----

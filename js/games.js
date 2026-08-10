@@ -10,16 +10,19 @@ const GAME_CATALOG = {
   knowme:         { label: "Намайг хэр сайн мэдэх вэ?", emoji: "❤️", mode: "couple", engine: "guess", rounds: 6 },
   compat:         { label: "Бидний нийцэл",              emoji: "🧠", mode: "couple", engine: "match", rounds: 8 },
   wyr:            { label: "Аль нь дээр вэ?",            emoji: "🤔", mode: "couple", engine: "match", rounds: 8 },
+  whosmore:       { label: "Хэн нь илүү?",               emoji: "🧠", mode: "couple", engine: "vote", rounds: 8 },
   truthdare:      { label: "Үнэн үү? Даалгавар уу?",     emoji: "💬", mode: "couple", engine: "cards" },
   memories:       { label: "Бидний дурсамж",             emoji: "🥰", mode: "couple", engine: "cards" },
   lovequestions:  { label: "Хайрын асуултууд",           emoji: "💌", mode: "couple", engine: "cards" },
-  draw:           { label: "Хамт зур",                   emoji: "🎨", mode: "couple", engine: "soon" },
+  questionbox:    { label: "Асуултын хайрцаг",           emoji: "📦", mode: "couple", engine: "cards" },
+  coupleroulette: { label: "Болзооны Roulette",          emoji: "🎲", mode: "couple", engine: "wheel" },
+  draw:           { label: "Хамт зур",                   emoji: "🎨", mode: "couple", engine: "drawrate" },
   whoami:         { label: "Who Am I?",                  emoji: "🎭", mode: "group", engine: "whoami" },
   mostlikely:     { label: "Хэн хамгийн...?",             emoji: "😂", mode: "group", engine: "vote", rounds: 8 },
   quizbattle:     { label: "Quiz Battle",                emoji: "🧠", mode: "group", engine: "quiz", rounds: 8 },
   grouptruthdare: { label: "Truth or Dare",              emoji: "🔥", mode: "group", engine: "cards" },
+  drawguess:      { label: "Draw & Guess",               emoji: "🖌", mode: "group", engine: "pictionary", rounds: 6 },
   werewolf:       { label: "Werewolf / Mafia",           emoji: "🐺", mode: "group", engine: "soon" },
-  drawguess:      { label: "Draw & Guess",               emoji: "🎨", mode: "group", engine: "soon" },
   songguess:      { label: "Дуу таах",                   emoji: "🎵", mode: "group", engine: "soon" },
 };
 
@@ -30,6 +33,8 @@ const SOLO_GAMES = {
   roulette:    { label: "Болзооны санаа Roulette",  emoji: "🎯" },
   guess:       { label: "Таах тоглоом",             emoji: "❓" },
   challenge:   { label: "Random Challenge",         emoji: "🎲" },
+  question:    { label: "Random Question",          emoji: "🔮" },
+  letter:      { label: "Ирээдүйн хосдоо захиа",    emoji: "💌" },
 };
 
 // ---------- АСУУЛТ/ПРОМПТ САНГУУД ----------
@@ -58,14 +63,16 @@ const Q_COMPAT = [
 ];
 
 const Q_WYR = [
-  "Насан туршдаа зөвхөн нэг хоол идэх үү, эсвэл насан туршдаа хаана ч аялж чадахгүй байх уу?",
-  "Баян боловч цөөхөн найзтай байх уу, эсвэл ядуу боловч олон найзтай байх уу?",
-  "Мянган жил ганцаараа амьдрах уу, эсвэл маш аз жаргалтай 80 жил хамт амьдрах уу?",
-  "Хайртай хүнийхээ бодлыг уншиж чадах уу, эсвэл ирээдүйгээ мэдэх үү?",
-  "Хотод амьдрах уу, эсвэл хөдөө амьдрах уу?",
-  "Ёслолгүй жижигхэн хурим хийх үү, эсвэл жаахан боловч төгс ёслолтой хурим хийх үү?",
-  "Долоо хоногт нэг удаа романтик орой хийх үү, эсвэл сард нэг удаа онцгой аялал хийх үү?",
-  "Хамт нэг компанид ажиллах уу, эсвэл өөр өөр салбарт ажиллах уу?",
+  { q: "Алийг сонгох вэ?", opts: ["Далайн эрэг 🏖️", "Уул 🏔️"] },
+  { q: "Алийг сонгох вэ?", opts: ["Кино 🎬", "Ресторан 🍽️"] },
+  { q: "Алийг сонгох вэ?", opts: ["Өглөө ☀️", "Орой 🌙"] },
+  { q: "Алийг сонгох вэ?", opts: ["Кофе ☕", "Цай 🍵"] },
+  { q: "Алийг сонгох вэ?", opts: ["Ном 📖", "Кино 🎬"] },
+  { q: "Алийг сонгох вэ?", opts: ["Хот 🏙️", "Хөдөө 🌾"] },
+  { q: "Алийг сонгох вэ?", opts: ["Зун ☀️", "Өвөл ❄️"] },
+  { q: "Алийг сонгох вэ?", opts: ["Аялал ✈️", "Гэртээ амрах 🏠"] },
+  { q: "Алийг сонгох вэ?", opts: ["Инээдтэй кино 😂", "Айдас кино 👻"] },
+  { q: "Алийг сонгох вэ?", opts: ["Шөнийн хүн 🌙", "Өглөөний хүн ☀️"] },
 ];
 
 const CARDS_TRUTHDARE = [
@@ -195,6 +202,74 @@ const UB_IDEA_WHEEL = [
   { emoji: "🎳", label: "Боулинг" },
 ];
 
+// ---------- ХЭН НЬ ИЛҮҮ? (couple vote engine) ----------
+const PROMPTS_WHOSMORE = [
+  "Хэн нь түрүүлж уучлалт гуйдаг вэ?", "Хэн нь илүү романтик вэ?", "Хэн нь илүү атаархуу вэ?",
+  "Хэн нь илүү тэвчээртэй вэ?", "Хэн нь илүү санаачлагатай вэ?", "Хэн нь илүү зохион байгуулалттай вэ?",
+  "Хэн нь илүү сэтгэл хөдлөлөө нуудаг вэ?", "Хэн нь илүү өглөөнд эрч хүчтэй вэ?",
+];
+
+// ---------- АСУУЛТЫН ХАЙРЦАГ (сэдвээр ангилсан "cards" сан) ----------
+const QUESTIONBOX_CATEGORIES = {
+  fun:         { label: "Хөгжилтэй", emoji: "😄", items: [
+    "Чи бага байхдаа юу болмоор байсан бэ?", "Хамгийн инээдтэй дурсамж чинь юу вэ?",
+    "Чи ямар superpower авмаар байна?", "Чиний хамгийн хачин зуршил юу вэ?",
+    "Хамгийн сүүлд юунд их инээсэн бэ?",
+  ]},
+  interesting: { label: "Сонирхолтой", emoji: "💡", items: [
+    "Чи амьдралдаа хамгийн их сурсан зүйл юу вэ?", "Чамайг гайхшруулсан хамгийн сүүлийн зүйл юу вэ?",
+    "Чи ямар ур чадвар сурмаар байна?", "Чи ямар улс орон зочилмоор байна вэ, яагаад?",
+    "Чиний дуртай ном/кино юу вэ, яагаад дуртай вэ?",
+  ]},
+  deep:        { label: "Гүнзгий", emoji: "🌊", items: [
+    "Чи юунаас хамгийн их айдаг вэ?", "Аз жаргал гэж чиний хувьд юу гэсэн үг вэ?",
+    "Чи амьдралдаа юуг хамгийн их эрхэмлэдэг вэ?", "Чи хэн байхыг хүсдэг вэ, яагаад?",
+    "Хамгийн хэцүү сургамж чинь юу байсан бэ?",
+  ]},
+  romantic:    { label: "Романтик", emoji: "💕", items: CARDS_LOVEQ,
+  },
+};
+
+// ---------- БОЛЗООНЫ ROULETTE (couple room, шууд микро-даалгавар) ----------
+const COUPLE_ROULETTE_DARES = [
+  { emoji: "📵", label: "10 минут утсаа хаяад ярилц" },
+  { emoji: "😘", label: "Хамт байгаа хүнээ үнс" },
+  { emoji: "🎵", label: "Хамт дуртай дуугаа сонс" },
+  { emoji: "🤗", label: "1 минут чимээгүй тэврэлд" },
+  { emoji: "📸", label: "Хамт хөгжилтэй зураг ав" },
+  { emoji: "💃", label: "Хамт 30 секунд бүжигл" },
+  { emoji: "✍️", label: "Бие биедээ мессеж бич (гар утсаа биш, цаасан дээр)" },
+  { emoji: "😂", label: "Инээдтэй дуураймал үзүүл" },
+  { emoji: "🍫", label: "Бие биенээ амттан хооллуул" },
+  { emoji: "🌟", label: "Хайртай хүнийхээ нэг гайхалтай чанарыг хэл" },
+];
+
+// ---------- ХАМТ ЗУР (couple drawrate) ----------
+const DRAW_TOPICS = [
+  "Манай хайр", "Хамгийн сайхан болзоо", "Ирээдүйн гэр", "Хамтдаа аялах газар",
+  "Манай гэрийн тэжээвэр амьтан", "Хамгийн дуртай хоол", "Хамтдаа хийсэн адал явдал", "Хайрын бэлэг",
+];
+
+// ---------- DRAW & GUESS (group pictionary) ----------
+const PICTIONARY_WORDS = [
+  "зүрх", "хайр", "хурим", "цэцэг", "нар", "уул", "загас", "гэр", "морь", "од",
+  "хос", "бөгж", "тэнгис", "цас", "муур", "нохой", "мод", "нар", "сар", "далавч",
+];
+
+// ---------- ГАНЦААРЧИЛСАН: RANDOM QUESTION ----------
+const SOLO_RANDOM_QUESTIONS = [
+  "Чи хэнтэй хамгийн их цаг өнгөрөөхийг хүсдэг вэ, яагаад?",
+  "Аз жаргалтай байхын тулд чамд юу хамгийн их хэрэгтэй вэ?",
+  "Чи 5 жилийн дараа хаана байхыг хүсдэг вэ?",
+  "Хайр гэдэг чиний хувьд яаж мэдрэгддэг вэ?",
+  "Чи өөрийнхөө ямар чанарт хамгийн их бахархдаг вэ?",
+  "Чи хамгийн сүүлд хэнд талархсан бэ, юуны төлөө?",
+  "Чиний хамгийн том мөрөөдөл юу вэ?",
+  "Чи болзоо/харилцаанаас юу хамгийн их хайдаг вэ?",
+  "Чиний амьдралыг өөрчилсөн нэг мөч байна уу?",
+  "Чи өнөөдөр өөртөө ямар нэг сайхан зүйл хийсэн үү?",
+];
+
 // ---------- ТЭЖ ХЭРЭГЛЭГДЭХ ХЭЛБЭР ----------
 let currentRoom = null;      // { id, ...room data } — сүүлд ирсэн snapshot
 let roomUnsub = null;
@@ -245,8 +320,85 @@ function renderGamesHome() {
         <h3>Олуулаа тоглох</h3>
         <p>4-10 найзаа room код хуваалцаад хамт тоглоцгоо.</p>
       </div>
+    </div>
+
+    <div class="game-featured-card game-anim-in" onclick="renderCoupleChallenge()">
+      <div class="game-featured-emoji">💕</div>
+      <div>
+        <h3>7 хоногийн Couple Challenge</h3>
+        <p>Өдөр бүр нэг жижиг challenge — streak цуглуулж, хамтдаа дурсамж бүтээгээрэй.</p>
+      </div>
+      <span class="game-featured-arrow">→</span>
     </div>`;
 }
+
+// ================= 7 ХОНОГИЙН COUPLE CHALLENGE =================
+async function renderCoupleChallenge() {
+  if (typeof currentUser === "undefined" || !currentUser) {
+    showToast("⚠️ Эхлээд нэвтэрнэ үү");
+    if (typeof openAuth === "function") openAuth("login");
+    return;
+  }
+  gameRoot().innerHTML = `<div style="text-align:center;padding:60px 0;color:var(--text-light);">Ачааллаж байна...</div>`;
+  await loadCoupleData();
+  if (!currentCouple) {
+    gameRoot().innerHTML = `
+      <a class="back-btn" onclick="renderGamesHome()">← Буцах</a>
+      <div class="game-round-card game-anim-in" style="text-align:center;">
+        <div style="font-size:44px;">💕</div>
+        <h2>7 хоногийн Couple Challenge</h2>
+        <p class="game-round-sub">Энэ feature-г ашиглахын тулд эхлээд хосоо холбох хэрэгтэй. Профайл цэснээс "💑 Хосын дурсамж" хэсэгт ороод кодоор холбогдоорой.</p>
+        <button class="btn btn-primary" type="button" style="width:100%;margin-top:10px;" onclick="openProfileModal()">Профайл руу очих</button>
+      </div>`;
+    return;
+  }
+  renderChallengeBoard();
+}
+
+function renderChallengeBoard() {
+  const state = getChallengeState() || {};
+  const hasStarted = !!state.startedAt;
+  const completedDays = state.completedDays || {};
+  const doneCount = Object.keys(completedDays).length;
+  const allDone = doneCount >= 7;
+  const nextDay = CHALLENGE_DAYS.find(d => !completedDays[d.day]);
+
+  gameRoot().innerHTML = `
+    <a class="back-btn" onclick="renderGamesHome()">← Буцах</a>
+    <h2 style="margin:10px 0 4px;">💕 7 хоногийн Couple Challenge</h2>
+    <p style="color:var(--text-light);margin-bottom:16px;">Өдөр бүр нэг жижиг challenge хийж, хамтдаа дурсамж бүтээгээрэй.</p>
+    ${!hasStarted ? `
+      <div class="game-round-card game-anim-in" style="text-align:center;">
+        <button class="btn btn-primary" type="button" style="width:100%" onclick="handleStartChallenge()">🚀 Challenge эхлүүлэх</button>
+      </div>` : `
+      <div class="game-challenge-progress">
+        <div class="game-challenge-streak">🔥 ${doneCount} / 7 өдөр</div>
+        <div class="game-challenge-bar"><div class="game-challenge-bar-fill" style="width:${(doneCount / 7) * 100}%;"></div></div>
+      </div>
+      <div class="game-challenge-days">
+        ${CHALLENGE_DAYS.map(d => `
+          <div class="game-challenge-day ${completedDays[d.day] ? "is-done" : ""}">
+            <div class="game-challenge-day-num">${d.day}</div>
+            <div class="game-challenge-day-emoji">${d.emoji}</div>
+            <div class="game-challenge-day-title">${escapeHtml(d.title)}</div>
+            ${completedDays[d.day]
+              ? '<div class="game-challenge-check">✅</div>'
+              : (nextDay && d.day === nextDay.day ? `<button class="btn btn-primary" type="button" style="width:100%;margin-top:6px;font-size:12px;padding:8px;" onclick="handleMarkDay(${d.day})">Дуусгасан ✓</button>` : "")}
+          </div>`).join("")}
+      </div>
+      ${allDone ? `
+        <div class="game-round-card game-anim-in game-challenge-badge" style="text-align:center;margin-top:16px;">
+          <div style="font-size:52px;">🏆</div>
+          <h2>Challenge Champion!</h2>
+          <p class="game-round-sub">7 хоногийн challenge-г амжилттай дуусгалаа 🎉</p>
+          <button class="btn btn-ghost" type="button" style="width:100%;margin-top:10px;" onclick="handleResetChallenge()">🔄 Дахин эхлүүлэх</button>
+        </div>` : ""}
+    `}`;
+}
+
+async function handleStartChallenge() { await startCoupleChallenge(); renderChallengeBoard(); showToast("🚀 Challenge эхэллээ!"); }
+async function handleMarkDay(day) { await markChallengeDay(day); renderChallengeBoard(); showToast("✅ Challenge дууслаа!"); }
+async function handleResetChallenge() { await resetCoupleChallenge(); renderChallengeBoard(); }
 
 // ================= ROOM ҮҮСГЭХ / НЭГДЭХ =================
 function renderRoomSetup(mode) {
@@ -440,8 +592,18 @@ async function handleStartGame(gameType) {
     updates.players = newPlayers;
     updates.phase = "playing";
   } else if (g.engine === "cards") {
-    updates.roundData = { cardIndex: 0 };
+    updates.roundData = gameType === "questionbox" ? { category: null, cardIndex: 0 } : { cardIndex: 0 };
     updates.phase = "playing";
+  } else if (g.engine === "wheel") {
+    updates.roundData = { resultIdx: null, spinCount: 0 };
+    updates.phase = "playing";
+  } else if (g.engine === "drawrate") {
+    updates.roundData = { topic: DRAW_TOPICS[Math.floor(Math.random() * DRAW_TOPICS.length)], drawings: {}, ratings: {} };
+    updates.phase = "drawing";
+  } else if (g.engine === "pictionary") {
+    updates.totalRounds = g.rounds || 6;
+    updates.roundData = buildPictionaryRound(0);
+    updates.phase = "drawing";
   } else {
     updates.totalRounds = g.rounds || 8;
     updates.answers = {};
@@ -464,10 +626,14 @@ function buildRoundData(gameType, roundIdx) {
     return { q: bank.q, opts: bank.opts };
   }
   if (gameType === "wyr") {
-    return { q: Q_WYR[roundIdx % Q_WYR.length] };
+    const bankWyr = Q_WYR[roundIdx % Q_WYR.length];
+    return { q: bankWyr.q, opts: bankWyr.opts };
   }
   if (gameType === "mostlikely") {
     return { q: PROMPTS_MOSTLIKELY[roundIdx % PROMPTS_MOSTLIKELY.length] };
+  }
+  if (gameType === "whosmore") {
+    return { q: PROMPTS_WHOSMORE[roundIdx % PROMPTS_WHOSMORE.length] };
   }
   if (gameType === "quizbattle") {
     const bank = Q_QUIZBATTLE[roundIdx % Q_QUIZBATTLE.length];
@@ -482,6 +648,9 @@ function renderGamePlay() {
   if (!g) return renderLobby();
   if (g.engine === "cards") return renderCardsEngine(g);
   if (g.engine === "whoami") return renderWhoAmIEngine();
+  if (g.engine === "wheel") return renderWheelRoomEngine(g);
+  if (g.engine === "drawrate") return renderDrawRateEngine(g);
+  if (g.engine === "pictionary") return renderPictionaryEngine(g);
   return renderRoundEngine(g);
 }
 
@@ -514,9 +683,9 @@ function renderRoundEngine(g) {
         <div class="game-opt ${myAnswer === "B" ? "picked" : ""}" onclick="submitRoundAnswer('B')">Сонголт Б</div>`;
     }
   } else if (g.engine === "vote") {
-    questionHtml = `<h2>${escapeHtml(rd.q)}</h2><p class="game-round-sub">Өөрөөсөө бусад хэнийг сонгох вэ?</p>`;
-    optionsHtml = Object.keys(currentRoom.players).filter(uid => uid !== currentUser.uid).map(uid => `
-      <div class="game-opt ${myAnswer === uid ? "picked" : ""}" onclick="submitRoundAnswer('${uid}')">${escapeHtml(playerName(uid))}</div>`).join("");
+    questionHtml = `<h2>${escapeHtml(rd.q)}</h2><p class="game-round-sub">Хэнийг сонгох вэ?</p>`;
+    optionsHtml = Object.keys(currentRoom.players).map(uid => `
+      <div class="game-opt ${myAnswer === uid ? "picked" : ""}" onclick="submitRoundAnswer('${uid}')">${escapeHtml(uid === currentUser.uid ? "Би" : playerName(uid))}</div>`).join("");
   } else if (g.engine === "quiz") {
     questionHtml = `<h2>${escapeHtml(rd.q)}</h2>`;
     optionsHtml = (rd.opts || []).map((opt, i) => `
@@ -575,10 +744,10 @@ function renderRevealBlock(g, rd) {
 async function submitRoundAnswer(value) {
   if (!currentRoom || currentRoom.phase !== "answering") return;
   try {
-    await db.collection("gameRooms").doc(currentRoom.id).update({
-      [`answers.${currentUser.uid}`]: value,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
+    const updates = { [`answers.${currentUser.uid}`]: value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+    const g = GAME_CATALOG[currentRoom.gameType];
+    if (g && g.engine === "quiz") updates[`answerTimes.${currentUser.uid}`] = Date.now();
+    await db.collection("gameRooms").doc(currentRoom.id).update(updates);
   } catch (e) { console.warn("submitRoundAnswer error:", e); }
 }
 
@@ -607,12 +776,19 @@ async function hostRevealRound() {
       if (newPlayers[votedUid]) newPlayers[votedUid] = { ...newPlayers[votedUid], score: (newPlayers[votedUid].score || 0) + 1 };
     });
   } else if (g.engine === "quiz") {
-    Object.keys(currentRoom.players).forEach(uid => {
-      if (answers[uid] === rd.correct) newPlayers[uid] = { ...newPlayers[uid], score: (newPlayers[uid].score || 0) + 10 };
+    const times = currentRoom.answerTimes || {};
+    const correctUids = Object.keys(currentRoom.players)
+      .filter(uid => answers[uid] === rd.correct)
+      .sort((a, b) => (times[a] || Infinity) - (times[b] || Infinity));
+    correctUids.forEach((uid, i) => {
+      const bonus = i === 0 ? 15 : i === 1 ? 12 : 10; // хурдны шагнал: хамгийн түрүүнд зөв хариулсанд илүү оноо
+      newPlayers[uid] = { ...newPlayers[uid], score: (newPlayers[uid].score || 0) + bonus };
     });
   }
 
-  await db.collection("gameRooms").doc(currentRoom.id).update({ players: newPlayers, phase: "reveal", updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  await db.collection("gameRooms").doc(currentRoom.id).update({
+    players: newPlayers, phase: "reveal", answerTimes: {}, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
 }
 
 async function hostNextRound() {
@@ -628,22 +804,26 @@ async function hostNextRound() {
   });
 }
 
-// ---- Карт-суурьтай төрлүүд: truthdare / memories / lovequestions / grouptruthdare (scoring-гүй) ----
-function cardsBankFor(gameType) {
+// ---- Карт-суурьтай төрлүүд: truthdare / memories / lovequestions / grouptruthdare / questionbox (scoring-гүй) ----
+function cardsBankFor(gameType, category) {
   if (gameType === "truthdare" || gameType === "grouptruthdare") return CARDS_TRUTHDARE;
   if (gameType === "memories") return CARDS_MEMORIES;
   if (gameType === "lovequestions") return CARDS_LOVEQ;
+  if (gameType === "questionbox") return (QUESTIONBOX_CATEGORIES[category] || {}).items || [];
   return CARDS_LOVEQ;
 }
 
 function renderCardsEngine(g) {
-  const bank = cardsBankFor(currentRoom.gameType);
-  const idx = (currentRoom.roundData && currentRoom.roundData.cardIndex) || 0;
+  const rd = currentRoom.roundData || {};
+  if (currentRoom.gameType === "questionbox" && !rd.category) return renderQuestionboxCategoryPicker();
+
+  const bank = cardsBankFor(currentRoom.gameType, rd.category);
+  const idx = rd.cardIndex || 0;
   const card = bank[idx % bank.length];
   const isTruthDare = typeof card === "object";
   gameRoot().innerHTML = `
     <a class="back-btn" onclick="leaveRoom()">← Room-оос гарах</a>
-    <div class="game-round-card game-cards-card">
+    <div class="game-round-card game-cards-card game-anim-in">
       <div class="game-eyebrow">${g.emoji} ${escapeHtml(g.label)}</div>
       ${isTruthDare ? `<div class="game-card-type">${card.type === "truth" ? "🗣 ҮНЭН" : "🔥 ДААЛГАВАР"}</div>` : ""}
       <h2>${escapeHtml(isTruthDare ? card.text : card)}</h2>
@@ -652,14 +832,88 @@ function renderCardsEngine(g) {
     </div>`;
 }
 
+function renderQuestionboxCategoryPicker() {
+  gameRoot().innerHTML = `
+    <a class="back-btn" onclick="leaveRoom()">← Room-оос гарах</a>
+    <div class="game-round-card game-anim-in" style="text-align:center;">
+      <div class="game-eyebrow">📦 Асуултын хайрцаг</div>
+      <h2>Ямар төрлийн асуулт сонирхож байна вэ?</h2>
+      <div class="game-opts">
+        ${Object.entries(QUESTIONBOX_CATEGORIES).map(([key, cat]) => `
+          <div class="game-opt" onclick="pickQuestionboxCategory('${key}')">${cat.emoji} ${escapeHtml(cat.label)}</div>`).join("")}
+      </div>
+    </div>`;
+}
+
+async function pickQuestionboxCategory(category) {
+  if (!currentRoom) return;
+  await db.collection("gameRooms").doc(currentRoom.id).update({
+    roundData: { category, cardIndex: 0 }, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
 async function advanceCard() {
   if (!currentRoom) return;
-  const idx = ((currentRoom.roundData && currentRoom.roundData.cardIndex) || 0) + 1;
-  await db.collection("gameRooms").doc(currentRoom.id).update({ roundData: { cardIndex: idx }, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  const rd = currentRoom.roundData || {};
+  const idx = (rd.cardIndex || 0) + 1;
+  await db.collection("gameRooms").doc(currentRoom.id).update({
+    roundData: { ...rd, cardIndex: idx }, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
 }
 async function finishCardsGame() {
   if (!currentRoom) return;
   await db.collection("gameRooms").doc(currentRoom.id).update({ status: "finished", phase: "finished", updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+}
+
+// ---- Болзооны Roulette (couple room, шууд синк хийсэн дугуй) ----
+function renderWheelRoomEngine(g) {
+  const rd = currentRoom.roundData || {};
+  const hasResult = rd.resultIdx !== null && rd.resultIdx !== undefined;
+  gameRoot().innerHTML = `
+    <a class="back-btn" onclick="leaveRoom()">← Room-оос гарах</a>
+    <div class="game-round-card game-anim-in" style="text-align:center;">
+      <div class="game-eyebrow">${g.emoji} ${escapeHtml(g.label)}</div>
+      <h2>Дугуйгаа эргүүлээд шууд даалгавраа аваарай!</h2>
+      <div class="game-wheel-wrap">
+        <div class="game-wheel-pointer">▼</div>
+        <div class="game-wheel" id="roomWheel"></div>
+      </div>
+      ${hasResult
+        ? `<div class="game-wheel-result-text game-anim-pop">${COUPLE_ROULETTE_DARES[rd.resultIdx].emoji} ${escapeHtml(COUPLE_ROULETTE_DARES[rd.resultIdx].label)}</div>
+           <button class="btn btn-primary" type="button" style="width:100%;margin-top:12px;" onclick="spinRoomWheel()">🎡 Дахин эргүүлэх</button>`
+        : `<button class="btn btn-primary" type="button" style="width:100%;margin-top:12px;" onclick="spinRoomWheel()">🎡 Эргүүл!</button>`}
+      <button class="btn btn-ghost" type="button" style="width:100%;margin-top:10px;" onclick="finishCardsGame()">Дуусгах 🎉</button>
+    </div>`;
+  gameSetupWheel("roomWheel", COUPLE_ROULETTE_DARES);
+  if (hasResult) {
+    const n = COUPLE_ROULETTE_DARES.length, segAngle = 360 / n;
+    const targetCenter = rd.resultIdx * segAngle + segAngle / 2;
+    const el = document.getElementById("roomWheel");
+    if (el) { el.style.transition = "none"; el.style.transform = `rotate(${360 - targetCenter}deg)`; }
+  }
+}
+
+async function spinRoomWheel() {
+  if (!currentRoom) return;
+  const el = document.getElementById("roomWheel");
+  if (el && el.dataset.spinning === "1") return;
+  const n = COUPLE_ROULETTE_DARES.length;
+  const idx = Math.floor(Math.random() * n);
+  if (el) {
+    el.dataset.spinning = "1";
+    const segAngle = 360 / n;
+    const targetCenter = idx * segAngle + segAngle / 2;
+    const finalRotation = 5 * 360 + (360 - targetCenter);
+    el.style.transition = "transform 3s cubic-bezier(.17,.67,.16,1)";
+    el.style.transform = `rotate(${finalRotation}deg)`;
+  }
+  setTimeout(async () => {
+    const spinCount = ((currentRoom.roundData || {}).spinCount || 0) + 1;
+    await db.collection("gameRooms").doc(currentRoom.id).update({
+      roundData: { resultIdx: idx, spinCount },
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  }, el ? 3100 : 0);
 }
 
 // ---- Who Am I? (нууц дүр, honor-system таах) ----
@@ -692,10 +946,296 @@ async function markWhoAmIGuessed() {
   });
 }
 
+// ---- Хамтын зурах самбар (canvas) — Хамт зур / Draw & Guess хоёул ашиглана ----
+function waitingScreen(text) {
+  return `<a class="back-btn" onclick="leaveRoom()">← Room-оос гарах</a>
+  <div class="game-round-card game-anim-in" style="text-align:center;">
+    <div class="game-spinner"></div>
+    <p class="game-round-sub" style="margin-top:14px;">${escapeHtml(text)}</p>
+  </div>`;
+}
+
+function drawToolbarHtml(canvasId) {
+  const colors = ["#1B263B", "#E8536E", "#0077B6", "#2E9E5B", "#E3A857"];
+  return `
+    <div class="game-draw-toolbar">
+      ${colors.map(c => `<span class="game-draw-color" style="background:${c}" onclick="gameSetCanvasColor('${canvasId}','${c}')"></span>`).join("")}
+      <button type="button" class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="gameClearCanvas('${canvasId}')">🧹 Цэвэрлэх</button>
+    </div>`;
+}
+
+function gameSetupCanvas(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.lineWidth = 4; ctx.strokeStyle = "#1B263B";
+  let drawing = false, last = null;
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const pt = e.touches ? e.touches[0] : e;
+    return { x: (pt.clientX - rect.left) * (canvas.width / rect.width), y: (pt.clientY - rect.top) * (canvas.height / rect.height) };
+  }
+  function start(e) { drawing = true; last = getPos(e); e.preventDefault(); }
+  function move(e) {
+    if (!drawing) return;
+    const p = getPos(e);
+    ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+    last = p; e.preventDefault();
+  }
+  function end() { drawing = false; }
+  canvas.addEventListener("mousedown", start);
+  canvas.addEventListener("mousemove", move);
+  canvas.addEventListener("mouseup", end);
+  canvas.addEventListener("mouseleave", end);
+  canvas.addEventListener("touchstart", start, { passive: false });
+  canvas.addEventListener("touchmove", move, { passive: false });
+  canvas.addEventListener("touchend", end);
+}
+function gameSetCanvasColor(canvasId, color) {
+  const canvas = document.getElementById(canvasId);
+  if (canvas) canvas.getContext("2d").strokeStyle = color;
+}
+function gameClearCanvas(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+function gameCanvasToBlob(canvasId) {
+  return new Promise(resolve => {
+    const canvas = document.getElementById(canvasId);
+    canvas.toBlob(blob => resolve(blob), "image/jpeg", 0.7);
+  });
+}
+
+// ---- Хамт зур (couple drawrate: хоёул зурна, дараа нь бие биенээ үнэлнэ) ----
+function renderDrawRateEngine(g) {
+  const rd = currentRoom.roundData || {};
+  const myUid = currentUser.uid;
+  const uids = Object.keys(currentRoom.players);
+  const partnerUid = uids.find(u => u !== myUid);
+  const drawings = rd.drawings || {};
+  const ratings = rd.ratings || {};
+
+  if (!drawings[myUid]) {
+    gameRoot().innerHTML = `
+      <a class="back-btn" onclick="leaveRoom()">← Room-оос гарах</a>
+      <div class="game-round-card game-anim-in" style="text-align:center;">
+        <div class="game-eyebrow">${g.emoji} Хамт зур</div>
+        <h2>Сэдэв: ${escapeHtml(rd.topic)}</h2>
+        <canvas id="drawCanvas" width="300" height="240" class="game-draw-canvas"></canvas>
+        ${drawToolbarHtml("drawCanvas")}
+        <button class="btn btn-primary" type="button" style="width:100%;margin-top:14px;" id="drawSubmitBtn" onclick="submitDrawing()">✅ Илгээх</button>
+      </div>`;
+    gameSetupCanvas("drawCanvas");
+    return;
+  }
+  if (Object.keys(drawings).length < uids.length) { gameRoot().innerHTML = waitingScreen("Хосынхоо зургийг хүлээж байна... ⏳"); return; }
+
+  if (!ratings[partnerUid]) {
+    gameRoot().innerHTML = `
+      <a class="back-btn" onclick="leaveRoom()">← Room-оос гарах</a>
+      <div class="game-round-card game-anim-in" style="text-align:center;">
+        <div class="game-eyebrow">${escapeHtml(playerName(partnerUid))}-ийн зураг</div>
+        <h2>Сэдэв: ${escapeHtml(rd.topic)}</h2>
+        <img src="${escapeHtml(drawings[partnerUid])}" class="game-draw-preview" alt="зураг">
+        <p class="game-round-sub">Оноо өг (1-5) ⭐</p>
+        <div class="game-star-row">${[1, 2, 3, 4, 5].map(n => `<span class="game-star" onclick="rateDrawing(${n})">⭐</span>`).join("")}</div>
+      </div>`;
+    return;
+  }
+  if (Object.keys(ratings).length < uids.length) { gameRoot().innerHTML = waitingScreen("Хосын үнэлгээг хүлээж байна... ⏳"); return; }
+
+  gameRoot().innerHTML = `
+    <a class="back-btn" onclick="leaveRoom()">← Room-оос гарах</a>
+    <div class="game-round-card game-anim-in" style="text-align:center;">
+      <div class="game-eyebrow">🎨 Сэдэв: ${escapeHtml(rd.topic)}</div>
+      <div class="game-draw-reveal-grid">
+        ${uids.map(uid => `
+          <div>
+            <img src="${escapeHtml(drawings[uid])}" class="game-draw-preview" alt="зураг">
+            <div style="margin-top:6px;font-weight:600;">${escapeHtml(playerName(uid))}</div>
+            <div>${"⭐".repeat(ratings[uid] || 0)}</div>
+          </div>`).join("")}
+      </div>
+      <button class="btn btn-ghost" type="button" style="width:100%;margin-top:16px;" onclick="finishCardsGame()">Дуусгах 🎉</button>
+    </div>`;
+  if (isHost()) applyDrawRateScores();
+}
+
+async function submitDrawing() {
+  const btn = document.getElementById("drawSubmitBtn");
+  if (btn) { btn.disabled = true; btn.textContent = "Илгээж байна..."; }
+  try {
+    const blob = await gameCanvasToBlob("drawCanvas");
+    const path = `gameRooms/${currentRoom.id}/drawings/${currentUser.uid}_${Date.now()}.jpg`;
+    const url = await uploadBlobToStorage(path, blob);
+    await db.collection("gameRooms").doc(currentRoom.id).update({
+      [`roundData.drawings.${currentUser.uid}`]: url, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  } catch (e) {
+    showToast("⚠️ Зураг илгээхэд алдаа гарлаа: " + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = "✅ Илгээх"; }
+  }
+}
+
+async function rateDrawing(stars) {
+  if (!currentRoom) return;
+  const uids = Object.keys(currentRoom.players);
+  const partnerUid = uids.find(u => u !== currentUser.uid);
+  await db.collection("gameRooms").doc(currentRoom.id).update({
+    [`roundData.ratings.${partnerUid}`]: stars, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
+async function applyDrawRateScores() {
+  const rd = currentRoom.roundData || {};
+  if (rd.scored) return;
+  const ratings = rd.ratings || {};
+  const newPlayers = { ...currentRoom.players };
+  Object.entries(ratings).forEach(([uid, stars]) => {
+    if (newPlayers[uid]) newPlayers[uid] = { ...newPlayers[uid], score: (newPlayers[uid].score || 0) + stars };
+  });
+  await db.collection("gameRooms").doc(currentRoom.id).update({
+    players: newPlayers, "roundData.scored": true, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
+// ---- Draw & Guess (group pictionary: нэг хүн зурна, бусад нь таана) ----
+function buildPictionaryRound(roundIdx) {
+  const uids = Object.keys(currentRoom.players);
+  const drawerUid = uids[roundIdx % uids.length];
+  const word = PICTIONARY_WORDS[Math.floor(Math.random() * PICTIONARY_WORDS.length)];
+  return { drawerUid, word, drawingURL: null, correctGuessers: [] };
+}
+
+function renderPictionaryEngine(g) {
+  const rd = currentRoom.roundData || {};
+  const amDrawer = rd.drawerUid === currentUser.uid;
+  const scoreRows = Object.entries(currentRoom.players).sort((a, b) => (b[1].score || 0) - (a[1].score || 0))
+    .map(([uid, p]) => `<div class="game-score-row"><span>${escapeHtml(p.name)}</span><b>${p.score || 0}</b></div>`).join("");
+
+  if (!rd.drawingURL) {
+    if (amDrawer) {
+      gameRoot().innerHTML = `
+        <a class="back-btn" onclick="leaveRoom()">← Room-оос гарах</a>
+        <div class="game-round-progress">Үг ${currentRoom.round + 1} / ${currentRoom.totalRounds}</div>
+        <div class="game-round-card game-anim-in" style="text-align:center;">
+          <div class="game-eyebrow">🖌 Чи зурагч!</div>
+          <h2>Чиний зурах үг: <b>${escapeHtml(rd.word)}</b></h2>
+          <canvas id="drawCanvas" width="300" height="240" class="game-draw-canvas"></canvas>
+          ${drawToolbarHtml("drawCanvas")}
+          <button class="btn btn-primary" type="button" style="width:100%;margin-top:14px;" id="drawSubmitBtn" onclick="submitPictionaryDrawing()">✅ Дуусгаад харуулах</button>
+        </div>`;
+      gameSetupCanvas("drawCanvas");
+    } else {
+      gameRoot().innerHTML = waitingScreen(`${escapeHtml(playerName(rd.drawerUid))} зурж байна... 🎨`);
+    }
+    return;
+  }
+
+  const myGuessedCorrectly = (rd.correctGuessers || []).includes(currentUser.uid);
+  const guessListHtml = (rd.correctGuessers || []).map((uid, i) => `<div class="game-reveal-row">${i + 1}. ${escapeHtml(playerName(uid))} ✅</div>`).join("");
+
+  gameRoot().innerHTML = `
+    <a class="back-btn" onclick="leaveRoom()">← Room-оос гарах</a>
+    <div class="game-round-progress">Үг ${currentRoom.round + 1} / ${currentRoom.totalRounds}</div>
+    <div class="game-round-card game-anim-in" style="text-align:center;">
+      <div class="game-eyebrow">🖌 ${escapeHtml(playerName(rd.drawerUid))} зурж байна</div>
+      <img src="${escapeHtml(rd.drawingURL)}" class="game-draw-preview" alt="зураг">
+      ${amDrawer
+        ? `<p class="game-round-sub">Нууц үг: <b>${escapeHtml(rd.word)}</b></p>`
+        : (myGuessedCorrectly
+          ? `<div class="game-reveal-box">✅ Чи зөв тааллаа!</div>`
+          : `<input type="text" id="pictGuessInput" placeholder="Юу вэ?" style="width:100%;padding:12px;border:2px solid var(--border);border-radius:10px;margin:10px 0;">
+             <button class="btn btn-primary" type="button" style="width:100%;" onclick="submitPictionaryGuess()">Таах</button>
+             <div id="pictGuessStatus" style="margin-top:8px;font-weight:600;"></div>`)}
+      ${guessListHtml ? `<div class="game-reveal-box" style="margin-top:14px;">${guessListHtml}</div>` : ""}
+    </div>
+    ${isHost() ? `<button class="btn btn-primary" type="button" style="width:100%;margin-top:16px;" onclick="hostNextPictionaryRound()">${currentRoom.round + 1 >= currentRoom.totalRounds ? "Дүгнэлт харах →" : "Дараагийн үг →"}</button>` : ""}
+    <h4 style="margin:24px 0 8px;">🏆 Оноо</h4>
+    <div class="game-score-list">${scoreRows}</div>`;
+}
+
+async function submitPictionaryDrawing() {
+  const btn = document.getElementById("drawSubmitBtn");
+  if (btn) { btn.disabled = true; btn.textContent = "Илгээж байна..."; }
+  try {
+    const blob = await gameCanvasToBlob("drawCanvas");
+    const path = `gameRooms/${currentRoom.id}/drawings/${currentUser.uid}_${Date.now()}.jpg`;
+    const url = await uploadBlobToStorage(path, blob);
+    await db.collection("gameRooms").doc(currentRoom.id).update({
+      "roundData.drawingURL": url, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  } catch (e) {
+    showToast("⚠️ Алдаа: " + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = "✅ Дуусгаад харуулах"; }
+  }
+}
+
+async function submitPictionaryGuess() {
+  const input = document.getElementById("pictGuessInput");
+  const val = (input?.value || "").trim().toLowerCase();
+  const statusEl = document.getElementById("pictGuessStatus");
+  if (!currentRoom || !val) return;
+  const roomRef = db.collection("gameRooms").doc(currentRoom.id);
+  try {
+    const wasCorrect = await db.runTransaction(async (tx) => {
+      const snap = await tx.get(roomRef);
+      const room = snap.data();
+      const rd = room.roundData || {};
+      if (val !== (rd.word || "").toLowerCase()) return false;
+      const correctGuessers = [...(rd.correctGuessers || [])];
+      if (correctGuessers.includes(currentUser.uid)) return true;
+      correctGuessers.push(currentUser.uid);
+      const points = correctGuessers.length === 1 ? 15 : correctGuessers.length === 2 ? 10 : 5;
+      const newPlayers = { ...room.players };
+      newPlayers[currentUser.uid] = { ...newPlayers[currentUser.uid], score: (newPlayers[currentUser.uid].score || 0) + points };
+      if (correctGuessers.length === 1 && newPlayers[rd.drawerUid]) {
+        newPlayers[rd.drawerUid] = { ...newPlayers[rd.drawerUid], score: (newPlayers[rd.drawerUid].score || 0) + 5 };
+      }
+      tx.update(roomRef, { "roundData.correctGuessers": correctGuessers, players: newPlayers, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      return true;
+    });
+    if (!wasCorrect && statusEl) { statusEl.textContent = "❌ Буруу байна, дахин оролдоорой"; statusEl.style.color = "var(--accent)"; }
+  } catch (e) { console.warn("submitPictionaryGuess error:", e); }
+}
+
+async function hostNextPictionaryRound() {
+  if (!isHost() || !currentRoom) return;
+  const nextRound = currentRoom.round + 1;
+  if (nextRound >= currentRoom.totalRounds) {
+    await db.collection("gameRooms").doc(currentRoom.id).update({ status: "finished", phase: "finished", updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    return;
+  }
+  await db.collection("gameRooms").doc(currentRoom.id).update({
+    round: nextRound, roundData: buildPictionaryRound(nextRound), updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
 // ================= ДҮГНЭЛТ / ЯЛАГЧ =================
+const GAME_NON_SCORED_ENGINES = ["cards", "wheel"];
+
 function renderResults() {
   const g = GAME_CATALOG[currentRoom.gameType] || {};
   const players = Object.entries(currentRoom.players || {});
+
+  if (GAME_NON_SCORED_ENGINES.includes(g.engine)) {
+    gameRoot().innerHTML = `
+      <a class="back-btn" onclick="leaveRoom()">← Room-оос гарах</a>
+      <div class="game-round-card game-anim-in" style="text-align:center;">
+        <div style="font-size:52px;margin-bottom:6px;">💕</div>
+        <h2>Сайхан цаг өнгөрөөлөө!</h2>
+        <p class="game-round-sub">Бие биенээ илүү таньж, ярилцаж чадсанд баярлалаа.</p>
+        ${isHost() ? `<button class="btn btn-primary" type="button" style="width:100%;margin-top:20px;" onclick="playAgain()">🔄 Өөр тоглоом сонгох</button>` : ""}
+        <button class="btn btn-ghost" type="button" style="width:100%;margin-top:10px;" onclick="leaveRoom()">Room-оос гарах</button>
+      </div>`;
+    return;
+  }
+
   let ranked;
   if (g.engine === "whoami") {
     ranked = players.slice().sort((a, b) => {
@@ -708,12 +1248,12 @@ function renderResults() {
   const medals = ["🥇", "🥈", "🥉"];
   gameRoot().innerHTML = `
     <a class="back-btn" onclick="leaveRoom()">← Room-оос гарах</a>
-    <div class="game-round-card" style="text-align:center;">
-      <div style="font-size:52px;margin-bottom:6px;">🏆</div>
+    <div class="game-round-card game-anim-in" style="text-align:center;">
+      <div class="game-trophy-anim">🏆</div>
       <h2>Тоглоом дууслаа!</h2>
       <div class="game-leaderboard">
         ${ranked.map(([uid, p], i) => `
-          <div class="game-leaderboard-row ${i === 0 ? "is-winner" : ""}">
+          <div class="game-leaderboard-row ${i === 0 ? "is-winner" : ""}" style="animation-delay:${i * 0.08}s">
             <span>${medals[i] || (i + 1) + "."}</span>
             <span>${escapeHtml(p.name)}</span>
             <b>${g.engine === "whoami" ? (p.guessedAt ? "✅ Тааллаа" : "❌ Таагаагүй") : (p.score || 0) + " оноо"}</b>
@@ -756,6 +1296,8 @@ function startSoloGame(id) {
   if (id === "roulette") return renderSoloRoulette();
   if (id === "guess") return renderSoloGuess();
   if (id === "challenge") return renderSoloChallenge();
+  if (id === "question") return renderSoloRandomQuestion();
+  if (id === "letter") return renderSoloLetter();
 }
 
 // ---- Memory ----
@@ -960,4 +1502,87 @@ function renderSoloChallenge() {
       <h2>${escapeHtml(challenge)}</h2>
       <button class="btn btn-primary" type="button" style="width:100%;margin-top:16px;" onclick="renderSoloChallenge()">🔄 Дараагийн challenge</button>
     </div>`;
+}
+
+// ---- Random Question (өөртөө эргэцүүлэх, тоглоом хамтрагч хэрэггүй) ----
+function renderSoloRandomQuestion() {
+  const q = SOLO_RANDOM_QUESTIONS[Math.floor(Math.random() * SOLO_RANDOM_QUESTIONS.length)];
+  gameRoot().innerHTML = `
+    <a class="back-btn" onclick="renderSoloHome()">← Буцах</a>
+    <h2 style="margin:10px 0 16px;">🔮 Random Question</h2>
+    <div class="game-round-card game-anim-in" style="text-align:center;">
+      <div style="font-size:44px;">🔮</div>
+      <h2>${escapeHtml(q)}</h2>
+      <button class="btn btn-primary" type="button" style="width:100%;margin-top:16px;" onclick="renderSoloRandomQuestion()">🔄 Дараагийн асуулт</button>
+    </div>`;
+}
+
+// ---- Ирээдүйн хосдоо захиа (хувийн, Firestore-д хадгалагдана) ----
+function renderSoloLetter() {
+  gameRoot().innerHTML = `
+    <a class="back-btn" onclick="renderSoloHome()">← Буцах</a>
+    <h2 style="margin:10px 0 4px;">💌 Ирээдүйн хосдоо захиа</h2>
+    <p style="color:var(--text-light);margin-bottom:16px;">Ирээдүйн хосдоо (эсвэл өөртөө) юу хэлмээр байгаагаа бичээрэй. Хадгалснаар дараа дахин уншиж болно.</p>
+    <div class="game-round-card game-anim-in">
+      <textarea id="letterInput" rows="8" style="width:100%;padding:12px;border:2px solid var(--border);border-radius:10px;font-family:inherit;font-size:14px;resize:vertical;" placeholder="Хайрт минь..."></textarea>
+      <div id="letterStatus" style="min-height:18px;font-size:13px;margin-top:8px;"></div>
+      <button class="btn btn-primary" type="button" style="width:100%;margin-top:10px;" onclick="saveSoloLetter()">💾 Хадгалах</button>
+      <button class="btn btn-ghost" type="button" style="width:100%;margin-top:10px;" onclick="renderMyLetters()">📖 Миний хадгалсан захидлууд</button>
+    </div>`;
+}
+
+async function saveSoloLetter() {
+  const input = document.getElementById("letterInput");
+  const statusEl = document.getElementById("letterStatus");
+  const text = (input?.value || "").trim();
+  if (!text) { if (statusEl) statusEl.textContent = "⚠️ Юм бичнэ үү"; return; }
+  if (typeof currentUser === "undefined" || !currentUser) {
+    if (typeof openAuth === "function") openAuth("login");
+    return;
+  }
+  if (statusEl) statusEl.textContent = "Хадгалж байна...";
+  try {
+    await db.collection("futureLetters").add({
+      ownerUid: currentUser.uid, text, createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    if (statusEl) statusEl.textContent = "✅ Хадгаллаа!";
+    showToast("💌 Захиа хадгалагдлаа");
+    input.value = "";
+  } catch (e) {
+    if (statusEl) statusEl.textContent = "⚠️ Алдаа: " + e.message;
+  }
+}
+
+async function renderMyLetters() {
+  if (typeof currentUser === "undefined" || !currentUser) { if (typeof openAuth === "function") openAuth("login"); return; }
+  gameRoot().innerHTML = `
+    <a class="back-btn" onclick="renderSoloLetter()">← Буцах</a>
+    <h2 style="margin:10px 0 16px;">📖 Миний захидлууд</h2>
+    <div id="lettersList" style="color:var(--text-light);">Ачааллаж байна...</div>`;
+  try {
+    const snap = await db.collection("futureLetters").where("ownerUid", "==", currentUser.uid).orderBy("createdAt", "desc").limit(30).get();
+    const list = document.getElementById("lettersList");
+    if (!list) return;
+    if (snap.empty) { list.innerHTML = `<div class="game-round-card" style="text-align:center;color:var(--text-light);">Захидал хараахан алга байна.</div>`; return; }
+    list.innerHTML = snap.docs.map(doc => {
+      const d = doc.data();
+      const when = d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toLocaleDateString("mn-MN") : "";
+      return `
+      <div class="game-round-card game-anim-in" style="margin-bottom:12px;text-align:left;">
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:6px;">${escapeHtml(when)}</div>
+        <p style="white-space:pre-line;">${escapeHtml(d.text)}</p>
+        <button class="btn btn-ghost" type="button" style="margin-top:8px;font-size:12px;padding:6px 12px;" onclick="deleteSoloLetter('${doc.id}')">🗑 Устгах</button>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    const list = document.getElementById("lettersList");
+    if (list) list.innerHTML = `⚠️ Ачаалахад алдаа гарлаа: ${escapeHtml(e.message)}`;
+  }
+}
+
+async function deleteSoloLetter(id) {
+  try {
+    await db.collection("futureLetters").doc(id).delete();
+    renderMyLetters();
+  } catch (e) { showToast("⚠️ Устгахад алдаа гарлаа"); }
 }

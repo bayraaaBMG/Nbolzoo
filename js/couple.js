@@ -327,3 +327,44 @@ async function handleAcceptCode() {
     statusEl.textContent = "⚠️ " + e.message;
   }
 }
+
+// ===== 7 ХОНОГИЙН COUPLE CHALLENGE (couples/{coupleId}.challenge талбарт хадгална) =====
+const CHALLENGE_DAYS = [
+  { day: 1, emoji: "💛", title: "Бие биедээ 3 сайхан зүйл хэл" },
+  { day: 2, emoji: "📸", title: "Хамтдаа зураг ав" },
+  { day: 3, emoji: "📵", title: "30 минут утасгүй ярилц" },
+  { day: 4, emoji: "🎁", title: "Жижигхэн бэлэг өг" },
+  { day: 5, emoji: "🥰", title: "Анхны дурсамжаа ярилц" },
+  { day: 6, emoji: "🍳", title: "Хамт хоол хий" },
+  { day: 7, emoji: "🔮", title: "Ирээдүйн мөрөөдлөө ярилц" },
+];
+
+function getChallengeState() {
+  if (!currentCouple) return null;
+  return currentCouple.challenge || { startedAt: null, completedDays: {}, streak: 0 };
+}
+
+async function startCoupleChallenge() {
+  if (!currentCouple || !db) return;
+  const challenge = { startedAt: firebase.firestore.Timestamp.now(), completedDays: {}, streak: 0 };
+  await db.collection("couples").doc(currentCouple.id).update({ challenge });
+  currentCouple = { ...currentCouple, challenge };
+}
+
+async function markChallengeDay(day) {
+  if (!currentCouple || !db) return;
+  const state = getChallengeState() || {};
+  const completedDays = { ...(state.completedDays || {}) };
+  if (completedDays[day]) return;
+  completedDays[day] = true;
+  const challenge = { ...state, completedDays, streak: Object.keys(completedDays).length };
+  await db.collection("couples").doc(currentCouple.id).update({ challenge });
+  currentCouple = { ...currentCouple, challenge };
+}
+
+async function resetCoupleChallenge() {
+  if (!currentCouple || !db) return;
+  const challenge = { startedAt: firebase.firestore.Timestamp.now(), completedDays: {}, streak: 0 };
+  await db.collection("couples").doc(currentCouple.id).update({ challenge });
+  currentCouple = { ...currentCouple, challenge };
+}

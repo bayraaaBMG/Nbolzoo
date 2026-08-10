@@ -33,5 +33,13 @@ service firebase.storage {
       allow read: if isCoupleMember(coupleId);
       allow write: if isCoupleMember(coupleId) && isImage() && underSize(8);
     }
+
+    // Game room drawings (Хамт зур / Draw & Guess) — any signed-in user, 5MB cap.
+    // Same reasoning as gameRooms/{} in firestore.rules: the room code is the shared
+    // secret, so this is casual party-game content, not sensitive.
+    match /gameRooms/{code}/{fileName=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isImage() && underSize(5);
+    }
   }
 }

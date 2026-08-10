@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NBolzoo - Монголын анхны болзооны санааны платформ</title>
+<title>Тоглоом - NBolzoo</title>
 <!-- OG Meta Tags - Social Share -->
-<meta property="og:title" content="NBolzoo - Монголын анхны болзооны санааны платформ">
-<meta property="og:description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
+<meta property="og:title" content="Тоглоом - NBolzoo">
+<meta property="og:description" content="Хосоороо, ганцаараа, олуулаа тоглох болзооны тоглоомууд. Room үүсгээд найзуудаа урь.">
 <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Gorkhi-Terelj_National_Park.jpg/640px-Gorkhi-Terelj_National_Park.jpg">
-<meta property="og:url" content="https://nbolzoo.vercel.app/index.html">
+<meta property="og:url" content="https://nbolzoo.vercel.app/games.html">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="NBolzoo - Монголын анхны болзооны санааны платформ">
-<meta name="twitter:description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
-<meta name="description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
-<link rel="canonical" href="https://nbolzoo.vercel.app/index.html">
+<meta name="twitter:title" content="Тоглоом - NBolzoo">
+<meta name="twitter:description" content="Хосоороо, ганцаараа, олуулаа тоглох болзооны тоглоомууд. Room үүсгээд найзуудаа урь.">
+<meta name="description" content="Хосоороо, ганцаараа, олуулаа тоглох болзооны тоглоомууд. Room үүсгээд найзуудаа урь.">
+<link rel="canonical" href="https://nbolzoo.vercel.app/games.html">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="apple-touch-icon" href="logo.svg">
 <link rel="stylesheet" href="css/style.css">
@@ -37,7 +37,7 @@
       </div>
     </div>
     <ul class="nav-menu">
-      <li><a class="nav-link active" data-page="home" onclick="navigate('home')">🏠 Нүүр</a></li>
+      <li><a class="nav-link" data-page="home" onclick="navigate('home')">🏠 Нүүр</a></li>
       <li><a class="nav-link" data-page="ub" onclick="navigate('ub')">🏙 УБ 365</a></li>
       <li><a class="nav-link" data-page="aimags" onclick="navigate('aimags')">🌄 21 аймаг</a></li>
       <li><a class="nav-link" data-page="expert" onclick="navigate('expert')">💎 Зөвлөгөө</a></li>
@@ -46,8 +46,8 @@
       <li><a class="nav-link" data-page="movies" onclick="navigate('movies')">🎬 Кино</a></li>
       <li><a class="nav-link" data-page="saved" onclick="navigate('saved')">❤️ Хадгалсан</a></li>
       <li><a class="nav-link" data-page="urilga" onclick="navigate('urilga')">💌 Урилга</a></li>
-      <li><a class="nav-link" data-page="games" onclick="navigate('games')">🎮 Тоглоом</a></li>
-<li><a class="nav-link" id="navAdminLink" data-page="admin" onclick="navigate('admin')" style="display:none;">⚙️ Админ</a></li>
+      <li><a class="nav-link active" data-page="games" onclick="navigate('games')">🎮 Тоглоом</a></li>
+      <li><a class="nav-link" id="navAdminLink" data-page="admin" onclick="navigate('admin')" style="display:none;">⚙️ Админ</a></li>
     </ul>
     <div class="nav-actions">
       <div id="navAuthButtons">
@@ -97,42 +97,9 @@
 
 
 <main>
-  <div id="page-home" class="page active">
-    <section class="hero">
-      <div class="hero-content">
-        <h1>Өнөөдөр хамт хаашаа явах вэ? 💕</h1>
-        <p>Монголын анхны болзооны санааны платформ — УБ-д 365 санаа + 21 аймагт 189 санаа</p>
-        <div class="search-box">
-          <input type="text" placeholder="Жишээ: Зайсан, кафе, төсөв 50,000₮" id="searchInput" onkeypress="if(event.key==='Enter')performSearch()"/>
-          <button class="btn btn-accent" onclick="performSearch()" type="button">Хайх</button>
-        </div>
-        <div style="margin-top: 14px;">
-          <button class="btn btn-random" onclick="openRandomIdea()" type="button">🎲 Санамсаргүй санаа авах</button>
-        </div>
-        <div class="hero-stats">
-          <div class="hero-stat"><span class="hero-stat-num">554</span><span class="hero-stat-label">болзооны санаа</span></div>
-          <div class="hero-stat"><span class="hero-stat-num">365</span><span class="hero-stat-label">УБ-д жилийн өдөр</span></div>
-          <div class="hero-stat"><span class="hero-stat-num">21</span><span class="hero-stat-label">аймаг</span></div>
-          <div class="hero-stat"><span class="hero-stat-num">189</span><span class="hero-stat-label">аймгийн санаа</span></div>
-        </div>
-      </div>
-    </section>
-
-    <div class="container">
-      <div class="section-title">
-        <h2>🔥 Өнөөдрийн шилдэг санаанууд</h2>
-        <a onclick="navigate('ub')">Бүгдийг харах →</a>
-      </div>
-      <div class="cards-grid" id="featuredGrid"></div>
-
-      <div class="section-title">
-        <h2>🌄 Аймагт хамт явах уу?</h2>
-        <a onclick="navigate('aimags')">21 аймаг үзэх →</a>
-      </div>
-      <div class="aimag-grid" id="featuredAimags"></div>
-    </div>
+  <div id="page-games" class="page active">
+    <div class="container" id="gamesRoot"></div>
   </div>
-
 </main>
 
 <button type="button" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Дээш буцах">↑</button>
@@ -190,14 +157,10 @@
 <script src="js/storage-utils.js"></script>
 <script src="js/couple.js"></script>
 <script src="js/core.js"></script>
-<script src="js/ub.js"></script>
-<script src="js/aimags.js"></script>
-<script src="js/home.js"></script>
+<script src="js/games.js"></script>
 <script src="js/main.js"></script>
 <script>
-renderFeatured();
-renderFeaturedAimags();
-updateHeroStats();
+initGamesPage();
 </script>
 
 </body>

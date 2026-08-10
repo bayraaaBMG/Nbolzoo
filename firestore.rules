@@ -125,6 +125,19 @@ service cloud.firestore {
       }
     }
 
+    // ---- gameRooms/{code} : realtime multiplayer game rooms. Doc id IS the 6-char room
+    // code (same secret-by-id pattern as invites/coupleInvites) — knowing the code is what
+    // lets a friend join. Kept permissive on update (any signed-in player, not just those
+    // already listed) since state changes are frequent/varied across many game types and
+    // this is casual party-game data, not sensitive — matches how invites/{} is already
+    // world-readable. ----
+    match /gameRooms/{code} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.hostUid == request.auth.uid;
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn() && resource.data.hostUid == request.auth.uid;
+    }
+
     // ---- invites/{inviteId} : Урилга feature. Sender must be signed in to create;
     // the doc id itself is the shareable secret (recipient never signs in), so anyone
     // holding the link may read it and write a response exactly once. ----

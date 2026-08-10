@@ -340,7 +340,20 @@ async function renderCoupleChallenge() {
     return;
   }
   gameRoot().innerHTML = `<div style="text-align:center;padding:60px 0;color:var(--text-light);">Ачааллаж байна...</div>`;
-  await loadCoupleData();
+  try {
+    await loadCoupleData();
+  } catch (e) {
+    console.warn("renderCoupleChallenge loadCoupleData error:", e);
+    gameRoot().innerHTML = `
+      <a class="back-btn" onclick="renderGamesHome()">← Буцах</a>
+      <div class="game-round-card game-anim-in" style="text-align:center;">
+        <div style="font-size:44px;">⚠️</div>
+        <h2>Ачаалахад алдаа гарлаа</h2>
+        <p class="game-round-sub">${escapeHtml(e.message || "Дахин оролдоно уу")}</p>
+        <button class="btn btn-primary" type="button" style="width:100%;margin-top:10px;" onclick="renderCoupleChallenge()">🔄 Дахин оролдох</button>
+      </div>`;
+    return;
+  }
   if (!currentCouple) {
     gameRoot().innerHTML = `
       <a class="back-btn" onclick="renderGamesHome()">← Буцах</a>
@@ -396,9 +409,18 @@ function renderChallengeBoard() {
     `}`;
 }
 
-async function handleStartChallenge() { await startCoupleChallenge(); renderChallengeBoard(); showToast("🚀 Challenge эхэллээ!"); }
-async function handleMarkDay(day) { await markChallengeDay(day); renderChallengeBoard(); showToast("✅ Challenge дууслаа!"); }
-async function handleResetChallenge() { await resetCoupleChallenge(); renderChallengeBoard(); }
+async function handleStartChallenge() {
+  try { await startCoupleChallenge(); renderChallengeBoard(); showToast("🚀 Challenge эхэллээ!"); }
+  catch (e) { console.warn("handleStartChallenge error:", e); showToast("⚠️ Алдаа гарлаа: " + (e.message || "")); }
+}
+async function handleMarkDay(day) {
+  try { await markChallengeDay(day); renderChallengeBoard(); showToast("✅ Challenge дууслаа!"); }
+  catch (e) { console.warn("handleMarkDay error:", e); showToast("⚠️ Алдаа гарлаа: " + (e.message || "")); }
+}
+async function handleResetChallenge() {
+  try { await resetCoupleChallenge(); renderChallengeBoard(); }
+  catch (e) { console.warn("handleResetChallenge error:", e); showToast("⚠️ Алдаа гарлаа: " + (e.message || "")); }
+}
 
 // ================= ROOM ҮҮСГЭХ / НЭГДЭХ =================
 function renderRoomSetup(mode) {

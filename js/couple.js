@@ -213,9 +213,19 @@ async function openCoupleModal() {
   if (!db) return showToast("⚠️ Firebase холбогдоогүй байна");
   document.getElementById("modalContent").innerHTML = `<div class="modal-body" style="text-align:center;padding:40px 24px;">Ачааллаж байна...</div>`;
   document.getElementById("modal").classList.add("show");
-  await loadCoupleData();
-  if (currentCouple) await loadCoupleMemories();
-  renderCoupleModal();
+  try {
+    await loadCoupleData();
+    if (currentCouple) await loadCoupleMemories();
+    renderCoupleModal();
+  } catch (e) {
+    console.warn("openCoupleModal error:", e);
+    document.getElementById("modalContent").innerHTML = `
+      <div class="modal-body" style="text-align:center;padding:40px 24px;">
+        <div style="font-size:36px;margin-bottom:10px;">⚠️</div>
+        <p style="margin-bottom:14px;">Ачаалахад алдаа гарлаа: ${escapeHtml(e.message || "")}</p>
+        <button class="btn btn-primary" type="button" onclick="openCoupleModal()">🔄 Дахин оролдох</button>
+      </div>`;
+  }
 }
 
 function renderCoupleModal() {

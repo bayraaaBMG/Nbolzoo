@@ -35,7 +35,7 @@ const IMG = {
   park:     US+"1441974231531-c6227db76b6e?w=420&h=200&fit=crop&auto=format",
   museum:   US+"1554907984-15263bfd63bd?w=420&h=200&fit=crop&auto=format",
   cinema:   US+"1489599849927-2ee91cede3ba?w=420&h=200&fit=crop&auto=format",
-  skating:  US+"1461897689869-c3e07dab7d48?w=420&h=200&fit=crop&auto=format",
+  skating:  WK+"9/91/Skating%2C_man%2C_woman%2C_ice-skating_rink%2C_winter%2C_smile%2C_free_time_Fortepan_14348.jpg/500px-Skating%2C_man%2C_woman%2C_ice-skating_rink%2C_winter%2C_smile%2C_free_time_Fortepan_14348.jpg",
   spa:      US+"1544161515-4ab6ce6db874?w=420&h=200&fit=crop&auto=format",
   hiking:   US+"1551632811-561732d1e306?w=420&h=200&fit=crop&auto=format",
   dinner:   US+"1414235077428-338989a2e8c0?w=420&h=200&fit=crop&auto=format",
@@ -52,6 +52,96 @@ const IMG = {
   boardgame:US+"1611996575749-79a3a250f948?w=420&h=200&fit=crop&auto=format",
   archery:  US+"1508193638397-1c4234db14d8?w=420&h=200&fit=crop&auto=format",
   art:      US+"1561214115-f2f134cc4912?w=420&h=200&fit=crop&auto=format",
+  // 365 санааны тусгай, яг тохирсон зурагнууд — Wikimedia Commons (нийтийн эзэмшлийн/CC зөвшөөрөлтэй)
+  koreanbbq: WK+"6/63/Korean_BBQ_Seoul.jpg/500px-Korean_BBQ_Seoul.jpg",
+  ramen: WK+"c/c3/Shoyu_Ramen%EF%BC%88Tokyo_Ramen%EF%BC%89_-_01.jpg/500px-Shoyu_Ramen%EF%BC%88Tokyo_Ramen%EF%BC%89_-_01.jpg",
+  pho: WK+"5/52/Bowl_of_Meatball_pho.jpg/500px-Bowl_of_Meatball_pho.jpg",
+  kebab: WK+"5/5b/Lula_kebab_2.jpg/500px-Lula_kebab_2.jpg",
+  pizza: WK+"5/57/Neapolitan_pizza_at_Trappica_(48701940197).jpg/500px-Neapolitan_pizza_at_Trappica_(48701940197).jpg",
+  dimsum: WK+"8/81/Chinese_DimSum_(9023590541).jpg/500px-Chinese_DimSum_(9023590541).jpg",
+  steak: WK+"2/2b/Beef_fillet_steak_with_mushrooms.jpg/500px-Beef_fillet_steak_with_mushrooms.jpg",
+  seafood: WK+"a/ae/Plateau_van_zeevruchten.jpg/500px-Plateau_van_zeevruchten.jpg",
+  khachapuri: WK+"0/08/Old_Tbilisi%2C_Georgian_khachapuri%2C_Georgia.jpg/500px-Old_Tbilisi%2C_Georgian_khachapuri%2C_Georgia.jpg",
+  burrito: WK+"6/60/Burrito.JPG/500px-Burrito.JPG",
+  tomyum: WK+"e/e8/Tom_yam_kung_maenam.jpg/500px-Tom_yam_kung_maenam.jpg",
+  buuz: WK+"a/a2/Buuz.jpg/500px-Buuz.jpg",
+  croissant: WK+"2/2a/Croissant-Petr_Kratochvil.jpg/500px-Croissant-Petr_Kratochvil.jpg",
+  cheesecake: WK+"e/ea/Baked_cheesecake_with_raspberries_and_blueberries.jpg/500px-Baked_cheesecake_with_raspberries_and_blueberries.jpg",
+  waffle: WK+"5/5b/Waffles_with_Strawberries.jpg/500px-Waffles_with_Strawberries.jpg",
+  macaron: WK+"1/11/VanillaMacaron.jpg/500px-VanillaMacaron.jpg",
+  bubbletea: WK+"a/a2/Bubble_Tea.png/500px-Bubble_Tea.png",
+  churro: WK+"c/c6/Chocolate_con_churros_(27343655726).jpg/500px-Chocolate_con_churros_(27343655726).jpg",
+  doughnut: WK+"a/a5/Glazed-Donut.jpg/500px-Glazed-Donut.jpg",
+  icecream: WK+"2/2e/Ice_cream_with_whipped_cream%2C_chocolate_syrup%2C_and_a_wafer_(cropped).jpg/500px-Ice_cream_with_whipped_cream%2C_chocolate_syrup%2C_and_a_wafer_(cropped).jpg",
+  crepe: WK+"0/09/Crepes_dsc07085.jpg/500px-Crepes_dsc07085.jpg",
+  hotpot: WK+"9/91/Hot_Pot.jpg/500px-Hot_Pot.jpg",
+  honey: WK+"c/cc/Runny_hunny.jpg/500px-Runny_hunny.jpg",
+  escaperoom: WK+"b/b1/Tulleys_Farm_Outfitter_Escape_Room.jpg/500px-Tulleys_Farm_Outfitter_Escape_Room.jpg",
+  trampoline: WK+"c/cc/Hometrampoline.jpg/500px-Hometrampoline.jpg",
+  gokart: WK+"a/a9/Kosmic_TS28.JPG/500px-Kosmic_TS28.JPG",
+  paintball: WK+"2/2e/NAdo-JTF3.jpg/500px-NAdo-JTF3.jpg",
+  darts: WK+"f/fb/Darts_in_a_dartboard.jpg/500px-Darts_in_a_dartboard.jpg",
+  tabletennis: WK+"5/58/Mondial_Ping_-_Men's_Singles_-_Round_4_-_Kenta_Matsudaira-Vladimir_Samsonov_-_57.jpg/500px-Mondial_Ping_-_Men's_Singles_-_Round_4_-_Kenta_Matsudaira-Vladimir_Samsonov_-_57.jpg",
+  lasertag: WK+"b/bb/Fort_Bliss_laser_tag_120705-A-WO769-016_(cropped).jpg/500px-Fort_Bliss_laser_tag_120705-A-WO769-016_(cropped).jpg",
+  climbing: WK+"a/a7/Grimpeurs_Voiron_2b.jpg/500px-Grimpeurs_Voiron_2b.jpg",
+  archery2: WK+"3/3e/Archery_competition.jpg/500px-Archery_competition.jpg",
+  equestrian: WK+"f/fa/Horse_riding_in_coca_cola_arena_-_melbourne_show_2005.jpg/500px-Horse_riding_in_coca_cola_arena_-_melbourne_show_2005.jpg",
+  boxing: WK+"6/6b/US_Navy_030327-N-9693M-002_Lt._Cmdr._Philip_Creider%2C_left%2C_shows_Aviation_Machinist_Mate_3rd_Class_Gaspar_Vazquez_how_to_work_a_speed_bag.jpg/500px-US_Navy_030327-N-9693M-002_Lt._Cmdr._Philip_Creider%2C_left%2C_shows_Aviation_Machinist_Mate_3rd_Class_Gaspar_Vazquez_how_to_work_a_speed_bag.jpg",
+  skateboard2: WK+"c/c0/BackSmithGrind.jpg/500px-BackSmithGrind.jpg",
+  icehockey: WK+"3/39/Pittsburgh_Penguins%2C_Washington_Capitals%2C_Bryan_Rust_(33744033514).jpg/500px-Pittsburgh_Penguins%2C_Washington_Capitals%2C_Bryan_Rust_(33744033514).jpg",
+  basketball: WK+"0/06/Steph_Curry_(51915116957).jpg/500px-Steph_Curry_(51915116957).jpg",
+  badminton2: WK+"f/fd/Olympics_2012_Mixed_Doubles_Final.jpg/500px-Olympics_2012_Mixed_Doubles_Final.jpg",
+  tennis2: WK+"9/94/2013_Australian_Open_-_Guillaume_Rufin.jpg/500px-2013_Australian_Open_-_Guillaume_Rufin.jpg",
+  football: WK+"4/42/Football_in_Bloomington%2C_Indiana%2C_1995.jpg/500px-Football_in_Bloomington%2C_Indiana%2C_1995.jpg",
+  volleyball: WK+"b/b0/Brasil_vence_a_Fran%C3%A7a_no_v%C3%B4lei_masculino_1037987-15.08.2016_ffz-6369.jpg/500px-Brasil_vence_a_Fran%C3%A7a_no_v%C3%B4lei_masculino_1037987-15.08.2016_ffz-6369.jpg",
+  armwrestling: WK+"c/cb/Armwrestle.jpg/500px-Armwrestle.jpg",
+  foosball: WK+"c/c8/Baby_foot_artlibre_jnl.jpg/500px-Baby_foot_artlibre_jnl.jpg",
+  minigolf: WK+"e/e3/Minigolf.jpg/500px-Minigolf.jpg",
+  golfsim: WK+"4/45/New_Sports_Simulator_(6917965).jpg/500px-New_Sports_Simulator_(6917965).jpg",
+  calligraphy: WK+"3/3c/Letter_by_Ouyang_Xiu.jpg/500px-Letter_by_Ouyang_Xiu.jpg",
+  chocolate: WK+"1/11/Three_Bars_(1).jpg/500px-Three_Bars_(1).jpg",
+  candle: WK+"a/aa/LA2_Skultuna_kontorsljusstake.jpg/500px-LA2_Skultuna_kontorsljusstake.jpg",
+  soap: WK+"9/9b/Handmade_soap_cropped_and_simplified.jpg/500px-Handmade_soap_cropped_and_simplified.jpg",
+  tattoo: WK+"e/e6/Anchor_tattoo_and_sketch.jpg/500px-Anchor_tattoo_and_sketch.jpg",
+  sculpture: WK+"d/d4/Dying_gaul.jpg/500px-Dying_gaul.jpg",
+  weaving: WK+"5/5e/Warp_and_weft_2.jpg/500px-Warp_and_weft_2.jpg",
+  origami: WK+"1/10/Cranes_made_by_Origami_paper.jpg/500px-Cranes_made_by_Origami_paper.jpg",
+  improv: WK+"2/22/69-04-culture-comedy-improv-AngelicaSchwartz2_1000_667_90.jpg/500px-69-04-culture-comedy-improv-AngelicaSchwartz2_1000_667_90.jpg",
+  darkroom: WK+"f/f8/UCHSPhotoDarkRoom9.10.09ByLuigiNovi1.jpg/500px-UCHSPhotoDarkRoom9.10.09ByLuigiNovi1.jpg",
+  speakeasy: WK+"0/00/21Club.JPG/500px-21Club.JPG",
+  nightclub: WK+"3/32/Wikipedia_space_ibiza(03).jpg/500px-Wikipedia_space_ibiza(03).jpg",
+  whisky: WK+"a/a2/Whiskyhogmanay2010.jpg/500px-Whiskyhogmanay2010.jpg",
+  karaoke: WK+"a/a0/%E5%8D%A1%E6%8B%89OK.jpg/500px-%E5%8D%A1%E6%8B%89OK.jpg",
+  winebar: WK+"0/0a/HK_SOHO_60310_18.jpg/500px-HK_SOHO_60310_18.jpg",
+  cocktail: WK+"8/80/15-09-26-RalfR-WLC-0084.jpg/500px-15-09-26-RalfR-WLC-0084.jpg",
+  beergarden: WK+"a/a8/Hofbraeukeller_5906.JPG/500px-Hofbraeukeller_5906.JPG",
+  dinosaur: WK+"c/c5/Sinosauropteryxfossil.jpg/500px-Sinosauropteryxfossil.jpg",
+  circus: WK+"8/8c/Barnum_%26_Bailey_clowns_and_geese2.jpg/500px-Barnum_%26_Bailey_clowns_and_geese2.jpg",
+  ballet: WK+"3/3a/Edgar_Degas_-_La_Classe_de_danse.jpg/500px-Edgar_Degas_-_La_Classe_de_danse.jpg",
+  puppetry: WK+"c/ca/Swanage_Punch_%26_Judy.JPG/500px-Swanage_Punch_%26_Judy.JPG",
+  standup: WK+"2/2e/Jesus_is_coming.._Look_Busy_(George_Carlin).jpg/500px-Jesus_is_coming.._Look_Busy_(George_Carlin).jpg",
+  fashionshow: WK+"1/1e/Diane_von_F%C3%BCrstenberg_Spring-Summer_2014_06.jpg/500px-Diane_von_F%C3%BCrstenberg_Spring-Summer_2014_06.jpg",
+  naadam: WK+"d/d9/Naadam_Festival_2024_Opening_Ceremony.jpg/500px-Naadam_Festival_2024_Opening_Ceremony.jpg",
+  vinyl: WK+"e/ee/Vinilos_distintos_tama%C3%B1os.jpg/500px-Vinilos_distintos_tama%C3%B1os.jpg",
+  kayak: WK+"4/43/Woman_kayaking_on_a_turquoise_lake_(51125937521).jpg/500px-Woman_kayaking_on_a_turquoise_lake_(51125937521).jpg",
+  sup: WK+"4/43/J%C3%A9r%C3%A9my-Massi%C3%A8re_stand-up-paddle_biscarrosse-2.JPG/500px-J%C3%A9r%C3%A9my-Massi%C3%A8re_stand-up-paddle_biscarrosse-2.JPG",
+  fishing: WK+"d/d7/Mete_(fiske)_-_Ystad-2018.jpg/500px-Mete_(fiske)_-_Ystad-2018.jpg",
+  fountain: WK+"f/f5/Fountains_Collage.jpg/500px-Fountains_Collage.jpg",
+  balloon: WK+"8/8a/2006_Ojiya_balloon_festival_011.jpg/500px-2006_Ojiya_balloon_festival_011.jpg",
+  astronomy: WK+"2/22/Astronomy_Amateur_3_V2.jpg/500px-Astronomy_Amateur_3_V2.jpg",
+  camping: WK+"7/73/Tent_camping_along_the_Sulayr_trail_in_La_Taha%2C_Sierra_Nevada_National_Park_(DSCF5147).jpg/500px-Tent_camping_along_the_Sulayr_trail_in_La_Taha%2C_Sierra_Nevada_National_Park_(DSCF5147).jpg",
+  deptstore: WK+"c/cd/Bon_March%C3%A9%2C_Paris_-_interior_view.JPG/500px-Bon_March%C3%A9%2C_Paris_-_interior_view.JPG",
+  vintageclothes: WK+"0/00/Vintage_shops%2C_Dublin.jpg/500px-Vintage_shops%2C_Dublin.jpg",
+  fleamarket: WK+"1/12/Puces_de_Montsoreau.jpg/500px-Puces_de_Montsoreau.jpg",
+  farmersmarket: WK+"e/ea/Farmers_and_Artisans_Market_at_Farmington_-_Michigan.jpg/500px-Farmers_and_Artisans_Market_at_Farmington_-_Michigan.jpg",
+  xmasmarket: WK+"8/8d/Christkindlesmarkt_nuernberg.jpg/500px-Christkindlesmarkt_nuernberg.jpg",
+  icesculpture: WK+"c/cb/Ice_sculpture_in_Quebec_city_downtown.jpg/500px-Ice_sculpture_in_Quebec_city_downtown.jpg",
+  fireworks: WK+"4/4e/New_Year's_Eve_on_Sydney_Harbour.jpg/500px-New_Year's_Eve_on_Sydney_Harbour.jpg",
+  sukhbaatarsq: WK+"c/c9/Chinggis_Square.jpg/500px-Chinggis_Square.jpg",
+  tuulriver: WK+"e/ea/Tuul_River_Mongolia.JPG/500px-Tuul_River_Mongolia.JPG",
+  blueskytower: WK+"d/d0/Felh%C5%91karcol%C3%B3_a_f%C5%91t%C3%A9ren_(Skyscraper_on_the_central_square)_-_panoramio.jpg/500px-Felh%C5%91karcol%C3%B3_a_f%C5%91t%C3%A9ren_(Skyscraper_on_the_central_square)_-_panoramio.jpg",
+  zanabazarmuseum: WK+"d/dc/The_Fine_Arts_Zanabazar_Museum.jpg/500px-The_Fine_Arts_Zanabazar_Museum.jpg",
+  bogdkhanuul: WK+"e/e0/Bogd_Khan_Uul_Mount_view_from_Ulan_Bator%2C_Mongolia.JPG/500px-Bogd_Khan_Uul_Mount_view_from_Ulan_Bator%2C_Mongolia.JPG",
 };
 
 // Аймаг тус бүрийн өөрийн (Wikipedia-гийн тухайн аймгийн өгүүллийн зурагнаас авсан) жинхэнэ зураг —
@@ -104,7 +194,6 @@ const wonderTypeImgDB = {
   nature:    {u: IMG.terelj,   s: "Wikipedia CC"},
 };
 
-// UB idea title keyword → image
 // category → нэрлэсэн түлхүүр үг олдоогүй үед ашиглах агуулгын хувьд тохирсон нөөц зураг
 // (365 санааны аль нь ч зурагтай алдуулгүй харагдана)
 const CATEGORY_FALLBACK_IMG = {
@@ -124,57 +213,185 @@ const CATEGORY_FALLBACK_IMG = {
   "ном":       {u: IMG.bookshop, s: "Unsplash"},
 };
 
-// idea.title-аас тохирох зургийг оноох. Аль ч түлхүүр үг тохирохгүй бол category-гоор
+// idea.title-д тохирох ЯГ зургийг оноох дараалсан дүрмүүд — ХАМГИЙН ТОДОРХОЙ нь эхэнд.
+// Массив бүр [key1, key2, ...] орсон бол эхний тохирсон мөрийг ашиглана.
+// [triggers, IMG түлхүүр, эх сурвалж]
+const IDEA_IMG_RULES = [
+  // --- Монголын тодорхой газрууд (ерөнхий UB зургаас илүү оновчтой) ---
+  [["сүхбаатарын хөшөө", "сүхбаатарын талбай"], "sukhbaatarsq", "Wikipedia CC"],
+  [["туулын хөндий", "туулын эрэг", "туул голоор", "туул голын", "sup бордтой туул", "каякаар голын", "тэнгисийн голоор", "загас барих аялал голын", "голын эрэгт лаа", "голын эрэг дагуу пикник", "аварга гүүрэн доогуурх"], "tuulriver", "Wikipedia CC"],
+  [["blue sky tower"], "blueskytower", "Wikipedia CC"],
+  [["занабазарын дүрслэх"], "zanabazarmuseum", "Wikipedia CC"],
+  [["манзуширын хийд"], "erdene", "Wikipedia CC"],
+  [["богд уулын ар тал", "богд ууланд тахил", "богд уулын түвдийн", "богд уулаар аялах", "богдын хаалганаас"], "bogdkhanuul", "Wikipedia CC"],
+
+  // --- Хоол/амт төрлүүд (ерөнхий "ресторан" зургаас илүү оновчтой) ---
+  [["солонгос барбекю"], "koreanbbq", "Unsplash"],
+  [["рамен"], "ramen", "Wikipedia CC"],
+  [["фо газарт", "вьетнам фо"], "pho", "Wikipedia CC"],
+  [["кебаб"], "kebab", "Wikipedia CC"],
+  [["пицца"], "pizza", "Wikipedia CC"],
+  [["dim sum"], "dimsum", "Wikipedia CC"],
+  [["стейк газарт"], "steak", "Wikipedia CC"],
+  [["далайн хоолны"], "seafood", "Wikipedia CC"],
+  [["хачапури", "georgian ресторан"], "khachapuri", "Wikipedia CC"],
+  [["буррито"], "burrito", "Wikipedia CC"],
+  [["тайландын том яамны", "том ям"], "tomyum", "Wikipedia CC"],
+  [["бууз идэх", "буузны тэмцээн"], "buuz", "Wikipedia CC"],
+  [["café du monde", "croissant"], "croissant", "Wikipedia CC"],
+  [["cheesecake"], "cheesecake", "Wikipedia CC"],
+  [["waffle"], "waffle", "Wikipedia CC"],
+  [["macaron"], "macaron", "Wikipedia CC"],
+  [["bubble tea"], "bubbletea", "Wikipedia CC"],
+  [["churros"], "churro", "Wikipedia CC"],
+  [["донат газарт", "24 цагийн donut"], "doughnut", "Wikipedia CC"],
+  [["айсны газарт", "гар хийцийн зайрмаг"], "icecream", "Wikipedia CC"],
+  [["крепийн газарт"], "crepe", "Wikipedia CC"],
+  [["the bull hot pot"], "hotpot", "Wikipedia CC"],
+  [["зөгийн бал"], "honey", "Unsplash"],
+
+  // --- Тоглоом/идэвхтэй үйл ажиллагаа (тодорхой төрөл) ---
+  [["escape room"], "escaperoom", "Wikipedia CC"],
+  [["трамплин парк"], "trampoline", "Wikipedia CC"],
+  [["картинг"], "gokart", "Wikipedia CC"],
+  [["пейнтболын"], "paintball", "Wikipedia CC"],
+  [["дартсны бар"], "darts", "Wikipedia CC"],
+  [["ширээний теннисний"], "tabletennis", "Wikipedia CC"],
+  [["лазер таг"], "lasertag", "Wikipedia CC"],
+  [["хиймэл авиралтын", "уулын явган аялалын клубт"], "climbing", "Wikipedia CC"],
+  [["сур харваа", "archery"], "archery2", "Wikipedia CC"],
+  [["морь унах клубт"], "equestrian", "Wikipedia CC"],
+  [["бокс клубт"], "boxing", "Wikipedia CC"],
+  [["skateboard паркт"], "skateboard2", "Wikipedia CC"],
+  [["хоккейн тоглолт"], "icehockey", "Wikipedia CC"],
+  [["сагсан бөмбөгийн тоглолт"], "basketball", "Wikipedia CC"],
+  [["бадминтоны клубт", "бадьмингтон"], "badminton2", "Wikipedia CC"],
+  [["теннисний клубт"], "tennis2", "Wikipedia CC"],
+  [["хөл бөмбөгийн талбайд", "хагас марафоны"], "football", "Wikipedia CC"],
+  [["волейболын нээлттэй"], "volleyball", "Wikipedia CC"],
+  [["гар барианы клубт"], "armwrestling", "Wikipedia CC"],
+  [["хөлбөмбөгийн симулятортой"], "foosball", "Wikipedia CC"],
+  [["мини-гольфын"], "minigolf", "Wikipedia CC"],
+  [["индор голфын"], "golfsim", "Wikipedia CC"],
+
+  // --- Гар урлал/сургалт ---
+  [["каллиграфийн"], "calligraphy", "Wikipedia CC"],
+  [["chocolate making"], "chocolate", "Wikipedia CC"],
+  [["лаа хийх сургалт"], "candle", "Wikipedia CC"],
+  [["шампунь", "сабон хийх"], "soap", "Wikipedia CC"],
+  [["татуировкатай студид"], "tattoo", "Wikipedia CC"],
+  [["скульптур хийх"], "sculpture", "Wikipedia CC"],
+  [["нэхмэлийн хичээлд"], "weaving", "Wikipedia CC"],
+  [["оригами", "ромбо"], "origami", "Wikipedia CC"],
+  [["импровизацийн театрын"], "improv", "Wikipedia CC"],
+  [["хар цагаан лаборатори"], "darkroom", "Wikipedia CC"],
+
+  // --- Шөнийн амьдрал ---
+  [["speakeasy"], "speakeasy", "Wikipedia CC"],
+  [["dj тоглолттой клубт"], "nightclub", "Wikipedia CC"],
+  [["whisky bar"], "whisky", "Wikipedia CC"],
+  [["караокед", "караокений", "mongolyrics"], "karaoke", "Wikipedia CC"],
+  [["wine bar"], "winebar", "Wikipedia CC"],
+  [["cocktail making", "rooftop bar-т коктейл"], "cocktail", "Wikipedia CC"],
+  [["beer garden"], "beergarden", "Wikipedia CC"],
+
+  // --- Музей/соёл ---
+  [["үлэг гүрвэлийн"], "dinosaur", "Wikipedia CC"],
+  [["үндэсний циркийн"], "circus", "Wikipedia CC"],
+  [["удэт-д балетын"], "ballet", "Wikipedia CC"],
+  [["хүүхэлдэйн театрт"], "puppetry", "Wikipedia CC"],
+  [["стэндап шоу"], "standup", "Wikipedia CC"],
+  [["fashion show"], "fashionshow", "Wikipedia CC"],
+  [["наадамын бөх"], "naadam", "Wikipedia CC"],
+  [["виниль дэлгүүрт"], "vinyl", "Wikipedia CC"],
+
+  // --- Гадаа/ус ---
+  [["каякаар"], "kayak", "Wikipedia CC"],
+  [["sup бордтой"], "sup", "Wikipedia CC"],
+  [["мөсөн дээр загас барих"], "fishing", "Wikipedia CC"],
+  [["усан оргилуурын"], "fountain", "Wikipedia CC"],
+  [["агаарын бөмбөлгөн нисэлт", "бөмбөлөг илгээх"], "balloon", "Wikipedia CC"],
+  [["одон орон ажиглах", "од харах"], "astronomy", "Wikipedia CC"],
+  [["майхан барьж хонох"], "camping", "Wikipedia CC"],
+
+  // --- Нэмэлт тодруулга: латин үсэгтэй нэр/цөөн дутуу тохирсон title-үүд ---
+  [["кофе", "матча", "цайны газарт", "caffe bene"], "coffee", "Unsplash"],
+  [["opera", "mongolian theatre"], "theater", "Wikipedia CC"],
+  [["симфони", "танго бүжгийн", "live music бар", "салса бүжгийн", "silent disco"], "music", "Unsplash"],
+  [["уран зохиолын", "талархлын дэвтэр"], "bookshop", "Unsplash"],
+  [["билльярд"], "boardgame", "Unsplash"],
+  [["нүүрний арчилгаа", "флоат спа", "уламжлалт зочид буудлын спа", "медитацийн төвд", "усан бассейнд"], "spa", "Unsplash"],
+  [["sky resort"], "skating", "Unsplash"],
+  [["слэклайн", "дасгал хийх спорт заалны", "гимнастикийн клубт"], "fitness", "Unsplash"],
+  [["гар урлалын зах", "загварын шоу-руумд", "гудамжны урлагийг", "үндэсний костюмтой"], "art", "Unsplash"],
+  [["терраса бар"], "bar", "Unsplash"],
+  [["зурах + дарс"], "art", "Unsplash"],
+  [["керамик урлалын"], "pottery", "Unsplash"],
+  [["гурил боловсруулах", "гэртээ орой хоол хийж"], "cooking", "Unsplash"],
+  [["соёолжны урлалын"], "park", "Unsplash"],
+  [["оддын зураг"], "astronomy", "Wikipedia CC"],
+  [["зочид буудлын өрөөнд өглөөний хоол"], "croissant", "Wikipedia CC"],
+  [["central tower"], "blueskytower", "Wikipedia CC"],
+  [["нэг жилийн ойгоо тэмдэглэх"], "dinner", "Unsplash"],
+  [["хүнсний машины наадамд", "олон нийтийн зах зээлээр", "зах зээлээр алхах", "зах зээлд", "улирлын жимс түүх"], "farmersmarket", "Wikipedia CC"],
+  [["цэцгийн наадамд", "хиймэл шувуу хөөрүүлэх"], "park", "Wikipedia CC"],
+  [["шинэ жилийн галт"], "fireworks", "Wikipedia CC"],
+  [["mcs плазагийн"], "deptstore", "Wikipedia CC"],
+  [["гастробарт", "route 22"], "bar", "Unsplash"],
+  [["пастийн газарт"], "pizza", "Wikipedia CC"],
+  [["бургер газарт"], "dinner", "Unsplash"],
+  [["гриль газарт"], "steak", "Wikipedia CC"],
+  [["салатны газарт"], "dinner", "Unsplash"],
+  [["амттангийн газарт", "печенийн газарт"], "cheesecake", "Wikipedia CC"],
+  [["brunch", "buffet"], "croissant", "Wikipedia CC"],
+  [["cat cafe"], "coffee", "Unsplash"],
+  [["night market"], "farmersmarket", "Wikipedia CC"],
+  [["rosewood kitchen"], "pizza", "Wikipedia CC"],
+
+  // --- Худалдаа ---
+  [["улсын их дэлгүүрт", "ikea-маягийн"], "deptstore", "Wikipedia CC"],
+  [["vintage clothing"], "vintageclothes", "Wikipedia CC"],
+  [["наран тууль зах"], "fleamarket", "Wikipedia CC"],
+  [["органик зах"], "farmersmarket", "Wikipedia CC"],
+
+  // --- Улирлын баяр ---
+  [["christmas market"], "xmasmarket", "Wikipedia CC"],
+  [["мөсөн баримлын"], "icesculpture", "Wikipedia CC"],
+  [["шинэ жилийн галт цэцэг"], "fireworks", "Wikipedia CC"],
+
+  // --- Ерөнхий ангиллууд (өмнөх тодорхой дүрмүүдэд тохирохгүй бол) ---
+  [["зайсан", "хотын", "хүннү мол", "хотхон", "энхтайваны гүүр", "сүхбаатар", "талбай"], "ub", "Wikipedia CC"],
+  [["музей", "heritage", "чойжин", "монгол cos", "галерей", "gallery"], "museum", "Unsplash"],
+  [["гандан", "хийд", "залбир", "шүтээн", "хөшөө", "будда", "сүм", "тахил", "овоо"], "erdene", "Wikipedia CC"],
+  [["богд уул", "уулд алх", "уулын", "аялал", "хайк", "даваа", "толгод"], "hiking", "Unsplash"],
+  [["art", "үзэсгэлэн", "экспо"], "art", "Unsplash"],
+  [["кино", "theatre", "кинотеатр", "шангри"], "cinema", "Unsplash"],
+  [["кофешоп", "кафе", "café", "tom n", "stupa cafe", "coffee"], "coffee", "Unsplash"],
+  [["internom", "ном", "библиотек"], "bookshop", "Unsplash"],
+  [["жүжиг", "опера", "театр", "цирк"], "theater", "Unsplash"],
+  [["ресторан", "хархорум 14", "цаатан", "гуанз", "кари"], "dinner", "Unsplash"],
+  [["skybar", "sky bar", "шөнийн", "bar-т", " bar"], "bar", "Unsplash"],
+  [["карао", "хөгжим", "дуу ", "jazz", "концерт"], "music", "Unsplash"],
+  [["боулинг"], "bowling", "Unsplash"],
+  [["ice", "гулгуур", "зимний"], "skating", "Unsplash"],
+  [["spa", "массаж", "тайвшрал", "саун"], "spa", "Unsplash"],
+  [["парк", "зугаал", "алхалт", "цэцэрлэг", "хүрээлэн", "ногоон бүс", "эрэг", "гүүр"], "park", "Unsplash"],
+  [["савлуур", "шавар"], "pottery", "Unsplash"],
+  [["ёг", "yoga"], "yoga", "Unsplash"],
+  [["мастер класс", "хоол хийх", "жигнэ"], "cooking", "Unsplash"],
+  [["фитнес", "бэлтгэл", "гүйлт", "бокс", "cross-fit"], "fitness", "Unsplash"],
+  [["board game", "тоглоом", "тоглох", "vr "], "boardgame", "Unsplash"],
+  [["хос", "байгаль", "гэрэл зураг"], "couple", "Unsplash"],
+];
+
+// idea.title-аас тохирох зургийг оноох. Аль ч дүрэм тохирохгүй бол category-гоор
 // нөөц зураг сонгоно (category заавал биш) — ингэснээр 365 идея бүр зурагтай харагдана.
 function getIdeaImg(title, category) {
   const t = title.toLowerCase();
-  if(t.includes("зайсан") || t.includes("хотын") || t.includes("skybar") || t.includes("sky") || t.includes("хүннү мол") || t.includes("хотхон") || t.includes("сүхбаатар") || t.includes("талбай") || t.includes("энхтайваны гүүр"))
-    return {u: IMG.ub,       s: "Wikipedia CC"};
-  if(t.includes("музей") || t.includes("heritage") || t.includes("чойжин") || t.includes("монгол cos") || t.includes("галерей") || t.includes("gallery"))
-    return {u: IMG.museum,   s: "Unsplash"};
-  if(t.includes("гандан") || t.includes("хийд") || t.includes("залбир") || t.includes("шүтээн") || t.includes("хөшөө") || t.includes("будда") || t.includes("сүм") || t.includes("тахил") || t.includes("овоо"))
-    return {u: IMG.erdene,   s: "Wikipedia CC"};
-  if(t.includes("богд уул") || t.includes("уулд алх") || t.includes("уулын") || t.includes("аялал") || t.includes("хайк") || t.includes("даваа") || t.includes("толгод"))
-    return {u: IMG.hiking,   s: "Unsplash"};
-  if(t.includes("art") || t.includes("үзэсгэлэн") || t.includes("экспо"))
-    return {u: IMG.art,      s: "Unsplash"};
-  if(t.includes("кино") || t.includes("theatre") || t.includes("кинотеатр") || t.includes("шангри"))
-    return {u: IMG.cinema,   s: "Unsplash"};
-  if(t.includes("кофешоп") || t.includes("кафе") || t.includes("café") || t.includes("tom n") || t.includes("stupa cafe") || t.includes("coffee"))
-    return {u: IMG.coffee,   s: "Unsplash"};
-  if(t.includes("internom") || t.includes("ном") || t.includes("библиотек"))
-    return {u: IMG.bookshop, s: "Unsplash"};
-  if(t.includes("жүжиг") || t.includes("опера") || t.includes("театр") || t.includes("цирк"))
-    return {u: IMG.theater,  s: "Unsplash"};
-  if(t.includes("ресторан") || t.includes("хархорум 14") || t.includes("цаатан") || t.includes("гуанз") || t.includes("буррито") || t.includes("рамен") || t.includes("пицца") || t.includes("стейк") || t.includes("кари") || t.includes("хачапури"))
-    return {u: IMG.dinner,   s: "Unsplash"};
-  if(t.includes("skybar") || t.includes("sky bar") || t.includes("шөнийн") || t.includes("bar-т") || t.includes(" bar"))
-    return {u: IMG.bar,      s: "Unsplash"};
-  if(t.includes("карао") || t.includes("mongolyrics") || t.includes("хөгжим") || t.includes("дуу ") || t.includes("jazz") || t.includes("концерт"))
-    return {u: IMG.music,    s: "Unsplash"};
-  if(t.includes("боулинг"))
-    return {u: IMG.bowling,  s: "Unsplash"};
-  if(t.includes("ice") || t.includes("гулгуур") || t.includes("зимний"))
-    return {u: IMG.skating,  s: "Unsplash"};
-  if(t.includes("spa") || t.includes("массаж") || t.includes("тайвшрал") || t.includes("саун"))
-    return {u: IMG.spa,      s: "Unsplash"};
-  if(t.includes("парк") || t.includes("зугаал") || t.includes("алхалт") || t.includes("цэцэрлэг") || t.includes("хүрээлэн") || t.includes("ногоон бүс") || t.includes("эрэг") || t.includes("гүүр"))
-    return {u: IMG.park,     s: "Unsplash"};
-  if(t.includes("савлуур") || t.includes("шавар"))
-    return {u: IMG.pottery,  s: "Unsplash"};
-  if(t.includes("ёг") || t.includes("yoga"))
-    return {u: IMG.yoga,     s: "Unsplash"};
-  if(t.includes("мастер класс") || t.includes("хоол хийх") || t.includes("жигнэ"))
-    return {u: IMG.cooking,  s: "Unsplash"};
-  if(t.includes("фитнес") || t.includes("бэлтгэл") || t.includes("гүйлт") || t.includes("бокс") || t.includes("cross-fit"))
-    return {u: IMG.fitness,  s: "Unsplash"};
-  if(t.includes("сур харваа") || t.includes("archery"))
-    return {u: IMG.archery,  s: "Unsplash"};
-  if(t.includes("board game") || t.includes("тоглоом") || t.includes("тоглох") || t.includes("escape room") || t.includes("vr ") || t.includes("трамплин") || t.includes("картинг"))
-    return {u: IMG.boardgame,s: "Unsplash"};
-  if(t.includes("хос") || t.includes("байгаль") || t.includes("гэрэл зураг"))
-    return {u: IMG.couple,   s: "Unsplash"};
-  if(category && CATEGORY_FALLBACK_IMG[category]) return CATEGORY_FALLBACK_IMG[category];
+  for (const [triggers, imgKey, src] of IDEA_IMG_RULES) {
+    if (triggers.some(k => t.includes(k))) return {u: IMG[imgKey], s: src};
+  }
+  if (category && CATEGORY_FALLBACK_IMG[category]) return CATEGORY_FALLBACK_IMG[category];
   return {u: IMG.couple, s: "Unsplash"};
 }
 
@@ -213,6 +430,14 @@ function navigate(page, param) {
   location.href = file + "?" + key + "=" + encodeURIComponent(param);
 }
 
+// Зураг ачаалахад алдаа гарвал (эвдэрсэн URL, сервер унтарсан г.м) нэг удаа ерөнхий
+// нөөц зураг руу автоматаар шилжинэ; тэр ч бас ачаалахгүй бол зургийг арилгана.
+function imgFallback(el) {
+  if (el.dataset.fallbackDone) { el.remove(); return; }
+  el.dataset.fallbackDone = "1";
+  el.src = IMG.couple;
+}
+
 function renderCard(idea) {
   const isLiked = userLikes.has(idea.id);
   const imgInfo = getIdeaImg(idea.title, idea.category);
@@ -220,7 +445,7 @@ function renderCard(idea) {
     ? '<div class="card-badge gold" style="z-index:3">⭐ Шинэ жил</div>'
     : (idea.likes > 1500 ? '<div class="card-badge" style="z-index:3">🔥 Hot</div>' : '');
   const imageContent = imgInfo
-    ? `<img src="${imgInfo.u}" loading="lazy" alt="${idea.title}" class="card-bg-img" onerror="this.remove()">
+    ? `<img src="${imgInfo.u}" loading="lazy" alt="${idea.title}" class="card-bg-img" onerror="imgFallback(this)">
        <div class="card-img-overlay"></div>
        <span class="card-emoji-over">${idea.emoji}</span>
        <span class="card-img-credit">${imgInfo.s==="Wikipedia CC"?"© Wikipedia CC":"Unsplash"}</span>`
@@ -254,7 +479,7 @@ function openIdeaModal(id) {
   const isLiked = userLikes.has(idea.id);
   const imgHtml = imgInfo
     ? `<div class="modal-image" style="background:${getColor(idea.id)};position:relative;overflow:hidden;padding:0;">
-        <img src="${imgInfo.u}" loading="lazy" alt="${idea.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">
+        <img src="${imgInfo.u}" loading="lazy" alt="${idea.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="imgFallback(this)">
         <div style="position:absolute;inset:0;background:rgba(0,0,0,0.2);"></div>
         <span style="position:relative;z-index:1;font-size:56px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));">${idea.emoji}</span>
         <span class="card-img-credit" style="z-index:2;">${imgInfo.s==="Wikipedia CC"?"© Wikipedia CC":"Unsplash"}</span>

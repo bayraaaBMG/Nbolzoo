@@ -91,18 +91,21 @@ const CARDS_TRUTHDARE = [
   { type: "dare", text: "Нүдээ аниад 10 секунд намайг тэвэр" },
 ];
 
+// Улсын кодоор жинхэнэ туг зурагтай (flagcdn.com) харуулна — Unicode flag emoji нь Windows
+// дээр (macOS/iOS-с ялгаатай) огт харагддаггүй тул зөвхөн код хадгалж, imgTag-аар зурна.
 const FLAG_BANK = [
-  { flag: "🇲🇳", name: "Монгол" }, { flag: "🇰🇷", name: "Өмнөд Солонгос" }, { flag: "🇯🇵", name: "Япон" },
-  { flag: "🇨🇳", name: "Хятад" }, { flag: "🇷🇺", name: "Орос" }, { flag: "🇺🇸", name: "АНУ" },
-  { flag: "🇫🇷", name: "Франц" }, { flag: "🇩🇪", name: "Герман" }, { flag: "🇮🇹", name: "Итали" },
-  { flag: "🇪🇸", name: "Испани" }, { flag: "🇬🇧", name: "Их Британи" }, { flag: "🇹🇷", name: "Турк" },
-  { flag: "🇧🇷", name: "Бразил" }, { flag: "🇨🇦", name: "Канад" }, { flag: "🇦🇺", name: "Австрали" },
-  { flag: "🇮🇳", name: "Энэтхэг" }, { flag: "🇹🇭", name: "Тайланд" }, { flag: "🇻🇳", name: "Вьетнам" },
-  { flag: "🇲🇽", name: "Мексик" }, { flag: "🇬🇷", name: "Грек" }, { flag: "🇳🇱", name: "Нидерланд" },
-  { flag: "🇸🇪", name: "Швед" }, { flag: "🇨🇭", name: "Швейцарь" }, { flag: "🇦🇪", name: "ХАЭ" },
-  { flag: "🇪🇬", name: "Египет" }, { flag: "🇿🇦", name: "Өмнөд Африк" }, { flag: "🇸🇬", name: "Сингапур" },
-  { flag: "🇵🇹", name: "Португал" }, { flag: "🇦🇷", name: "Аргентин" }, { flag: "🇰🇿", name: "Казахстан" },
+  { code: "mn", name: "Монгол" }, { code: "kr", name: "Өмнөд Солонгос" }, { code: "jp", name: "Япон" },
+  { code: "cn", name: "Хятад" }, { code: "ru", name: "Орос" }, { code: "us", name: "АНУ" },
+  { code: "fr", name: "Франц" }, { code: "de", name: "Герман" }, { code: "it", name: "Итали" },
+  { code: "es", name: "Испани" }, { code: "gb", name: "Их Британи" }, { code: "tr", name: "Турк" },
+  { code: "br", name: "Бразил" }, { code: "ca", name: "Канад" }, { code: "au", name: "Австрали" },
+  { code: "in", name: "Энэтхэг" }, { code: "th", name: "Тайланд" }, { code: "vn", name: "Вьетнам" },
+  { code: "mx", name: "Мексик" }, { code: "gr", name: "Грек" }, { code: "nl", name: "Нидерланд" },
+  { code: "se", name: "Швед" }, { code: "ch", name: "Швейцарь" }, { code: "ae", name: "ХАЭ" },
+  { code: "eg", name: "Египет" }, { code: "za", name: "Өмнөд Африк" }, { code: "sg", name: "Сингапур" },
+  { code: "pt", name: "Португал" }, { code: "ar", name: "Аргентин" }, { code: "kz", name: "Казахстан" },
 ];
+function flagImgUrl(code) { return `https://flagcdn.com/w320/${code}.png`; }
 
 const CARDS_MEMORIES = [
   "Бидний анхны уулзалт ямар байсан бэ?",
@@ -1641,8 +1644,8 @@ function renderSoloFlagGuessQuestion() {
   gameRoot().innerHTML = `
     <a class="back-btn" onclick="renderSoloHome()">← Буцах</a>
     <div class="game-round-progress">Асуулт ${idx + 1} / ${order.length} · Оноо: ${soloState.score}</div>
-    <div class="game-round-card" style="text-align:center;">
-      <div style="font-size:64px;margin-bottom:6px;">${correct.flag}</div>
+    <div class="game-round-card game-anim-in" style="text-align:center;">
+      <img class="game-flag-img game-anim-pop" src="${flagImgUrl(correct.code)}" alt="flag" onerror="this.style.display='none'">
       <h2>Энэ аль улсын туг вэ?</h2>
       <div class="game-opts" id="soloFlagOpts">
         ${opts.map(o => `<div class="game-opt" onclick="answerSoloFlag('${escapeHtml(o.name).replace(/'/g,"\\'")}')">${escapeHtml(o.name)}</div>`).join("")}
@@ -1655,8 +1658,8 @@ function answerSoloFlag(name) {
   const isCorrect = name === correct.name;
   document.querySelectorAll("#soloFlagOpts .game-opt").forEach(el => {
     el.style.pointerEvents = "none";
-    if (el.textContent === correct.name) el.classList.add("correct");
-    else if (el.textContent === name) el.classList.add("wrong");
+    if (el.textContent === correct.name) el.classList.add("correct", "game-anim-pop");
+    else if (el.textContent === name) el.classList.add("wrong", "game-anim-shake");
   });
   if (isCorrect) soloState.score++;
   setTimeout(() => {
@@ -1664,8 +1667,8 @@ function answerSoloFlag(name) {
     if (soloState.idx >= order.length) {
       gameRoot().innerHTML = `
         <a class="back-btn" onclick="renderSoloHome()">← Буцах</a>
-        <div class="game-round-card" style="text-align:center;">
-          <div style="font-size:52px;">🌍</div>
+        <div class="game-round-card game-anim-pop" style="text-align:center;">
+          <div class="game-trophy-anim">🌍</div>
           <h2>Дуусгалаа!</h2>
           <p class="game-round-sub">Таны оноо: <b>${soloState.score} / ${order.length}</b></p>
           <button class="btn btn-primary" type="button" style="width:100%;margin-top:14px;" onclick="renderSoloFlagGuess()">🔄 Дахин тоглох</button>
@@ -1681,12 +1684,12 @@ function renderSoloReaction() {
   soloState = { phase: "idle", best: soloState && soloState.best };
   renderReactionScreen("Хурдаа шалгаарай!", "Дарахад бэлэн болмогц дэлгэц ногоон болно. Хэт эрт бүү дар!", "btn-primary", "startReactionRound()");
 }
-function renderReactionScreen(title, sub, btnClass, onclick, bg) {
+function renderReactionScreen(title, sub, btnClass, onclick, bg, pulse) {
   gameRoot().innerHTML = `
     <a class="back-btn" onclick="clearTimeout(reactionTimeoutId);renderSoloHome()">← Буцах</a>
     <h2 style="margin:10px 0 4px;">⚡ Хурдны шалгалт</h2>
     ${soloState.best ? `<p style="color:var(--text-light);margin-bottom:10px;">🏆 Хамгийн сайн: <b>${soloState.best} ms</b></p>` : ""}
-    <div class="game-reaction-box" style="${bg ? `background:${bg};` : ""}" onclick="${onclick || ""}">
+    <div class="game-reaction-box game-anim-pop${pulse ? " game-reaction-flash" : ""}" style="${bg ? `background:${bg};` : ""}" onclick="${onclick || ""}">
       <div class="game-reaction-title">${escapeHtml(title)}</div>
       <p class="game-reaction-sub">${escapeHtml(sub)}</p>
     </div>`;
@@ -1699,7 +1702,7 @@ function startReactionRound() {
     if (soloState.phase !== "waiting") return;
     soloState.phase = "ready";
     soloState.readyAt = Date.now();
-    renderReactionScreen("ОДОО ДАР!", "", "btn-primary", "clickReaction()", "#2ecc71");
+    renderReactionScreen("ОДОО ДАР!", "", "btn-primary", "clickReaction()", "#2ecc71", true);
   }, delay);
 }
 function earlyClickReaction() {
@@ -1736,6 +1739,7 @@ function add2048Tile() {
   if (!empty.length) return;
   const [r, c] = empty[Math.floor(Math.random() * empty.length)];
   soloState.grid[r][c] = Math.random() < 0.9 ? 2 : 4;
+  soloState.newTile = r * 4 + c;
 }
 function slideMergeRow(row) {
   let vals = row.filter(v => v);
@@ -1790,7 +1794,7 @@ function render2048() {
     <h2 style="margin:10px 0 4px;">🔢 2048</h2>
     <p style="color:var(--text-light);margin-bottom:10px;">Оноо: <b>${soloState.score}</b>${soloState.won ? " · 🎉 2048-д хүрлээ!" : ""}</p>
     <div class="game-2048-grid">
-      ${g.map(row => row.map(v => `<div class="game-2048-cell" data-val="${v}">${v || ""}</div>`).join("")).join("")}
+      ${g.map((row, r) => row.map((v, c) => `<div class="game-2048-cell${(r*4+c)===soloState.newTile ? " game-anim-pop" : ""}" data-val="${v}">${v || ""}</div>`).join("")).join("")}
     </div>
     <div class="game-2048-controls">
       <div></div><button class="btn btn-ghost" type="button" onclick="move2048('up')">↑</button><div></div>

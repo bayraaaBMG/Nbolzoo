@@ -141,9 +141,9 @@ function selectTMDBResult(idx) {
 }
 
 // ===== CINEMA / MOVIES =====
-const GL = {romantic:"💕 Романтик", comedy:"😄 Инээдмийн", action:"💥 Адал явдалт", drama:"🎭 Драм", animation:"🎨 Анимэшн", mongolian:"🇲🇳 Монгол"};
+const GL = {romantic:"💕 Романтик", comedy:"😄 Инээдмийн", action:"💥 Адал явдалт", drama:"🎭 Драм", animation:"🎨 Анимэшн", mongolian:"🎬 Монгол"};
 const POSTER_BG = {romantic:"linear-gradient(135deg,#3d1a3a,#6b2060)", comedy:"linear-gradient(135deg,#3d2a00,#7a5200)", action:"linear-gradient(135deg,#0a1a3a,#1a3a6a)", drama:"linear-gradient(135deg,#1a0a2a,#3a1a4a)", animation:"linear-gradient(135deg,#0a2a3a,#1a4a6a)", mongolian:"linear-gradient(135deg,#0a2a0a,#1a4a1a)"};
-const LANG_LABEL = {dubbed:"🎙 Монгол хадмал", mongolian:"🇲🇳 Монгол хэлээр", original:"🌐 Эх хэлээр"};
+const LANG_LABEL = {dubbed:"🎙 Монгол хадмал", mongolian:"🎙 Монгол хэлээр", original:"🌐 Эх хэлээр"};
 
 function allMovies() { return [...movies, ...firebaseMovies]; }
 

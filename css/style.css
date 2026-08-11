@@ -1552,6 +1552,13 @@ body {
 }
 .game-reaction-title{ font-size:26px;font-weight:800;margin-bottom:8px; }
 .game-reaction-sub{ color:var(--text-light);font-size:14px; }
+.game-reaction-flash{ animation:game-pop-in .35s ease, game-reaction-glow 1s ease infinite; }
+@keyframes game-reaction-glow{ 0%,100%{ box-shadow:0 0 0 0 rgba(46,204,113,.5); } 50%{ box-shadow:0 0 0 14px rgba(46,204,113,0); } }
+
+.game-flag-img{
+  width:160px;max-width:70%;border-radius:8px;border:2px solid var(--border);
+  box-shadow:0 4px 14px rgba(0,0,0,.12);margin:0 auto 14px;display:block;
+}
 
 /* ---- 2048 ---- */
 .game-2048-grid{
@@ -1636,12 +1643,17 @@ body {
 .game-anim-in{ animation:game-fade-slide-in .35s ease; }
 @keyframes game-fade-slide-in{ from{ opacity:0;transform:translateY(10px); } to{ opacity:1;transform:translateY(0); } }
 .game-anim-pop{ animation:game-pop-in .35s ease; }
+.game-anim-shake{ animation:game-shake .4s ease; }
+@keyframes game-shake{
+  10%,90%{ transform:translateX(-2px); } 20%,80%{ transform:translateX(4px); }
+  30%,50%,70%{ transform:translateX(-8px); } 40%,60%{ transform:translateX(8px); }
+}
 .game-leaderboard-row{ animation:game-fade-slide-in .35s ease both; }
 .game-mode-card, .game-catalog-card, .game-opt, .game-player-chip{ animation:game-fade-slide-in .3s ease; }
 .game-opt:active{ transform:scale(.97); }
 .btn:active{ transform:scale(.97); }
 @media (prefers-reduced-motion: reduce){
-  .game-anim-in, .game-anim-pop, .game-leaderboard-row, .game-mode-card, .game-catalog-card, .game-opt, .game-player-chip,
+  .game-anim-in, .game-anim-pop, .game-anim-shake, .game-reaction-flash, .game-leaderboard-row, .game-mode-card, .game-catalog-card, .game-opt, .game-player-chip,
   .game-trophy-anim, .game-challenge-badge{ animation:none !important; }
   .game-spinner{ animation-duration:1.4s; }
 }

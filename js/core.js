@@ -30,6 +30,13 @@ const IMG = {
   hustai:   WK+"b/b9/Khustain_Nuruu_National_Park.jpg/500px-Khustain_Nuruu_National_Park.jpg",
   genghis:  WK+"9/93/Genghis_Khan_Equestrian_Statue%2C_photo_by_Vaiz_Ha.jpg/500px-Genghis_Khan_Equestrian_Statue%2C_photo_by_Vaiz_Ha.jpg",
   steppe:   WK+"0/0a/Tree_on_the_Mongolian_steppe_%28June_1997%29.jpg/500px-Tree_on_the_Mongolian_steppe_%28June_1997%29.jpg",
+  // Улаанбаатар — тодорхой газрын бодит зураг (өмнөх "erdene"/"ub" зэрэг буруу/ерөнхий
+  // орлуулгыг засах зорилготой, доор IDEA_IMG_RULES-д ашиглана)
+  zaisanphoto:      WK+"2/23/Zaisan_Memorial_in_Ulaanbaatar%2C_Mongolia.jpg/500px-Zaisan_Memorial_in_Ulaanbaatar%2C_Mongolia.jpg",
+  gandanphoto:      WK+"f/ff/Gandantegchinlen_Monastery_%282024%29.jpg/500px-Gandantegchinlen_Monastery_%282024%29.jpg",
+  dashchoilinphoto: WK+"1/19/Dashchoilin_Monastery.jpg/500px-Dashchoilin_Monastery.jpg",
+  manzushirphoto:   WK+"d/d9/Manzushir_Monastery.jpg/500px-Manzushir_Monastery.jpg",
+  choijinphoto:     WK+"a/ac/UB-Csojdzsin00.jpg/500px-UB-Csojdzsin00.jpg",
   // Activities — Unsplash (free, no attribution required)
   coffee:   US+"1511632765486-a01980e01a18?w=420&h=200&fit=crop&auto=format",
   park:     US+"1441974231531-c6227db76b6e?w=420&h=200&fit=crop&auto=format",
@@ -222,8 +229,12 @@ const IDEA_IMG_RULES = [
   [["туулын хөндий", "туулын эрэг", "туул голоор", "туул голын", "sup бордтой туул", "каякаар голын", "тэнгисийн голоор", "загас барих аялал голын", "голын эрэгт лаа", "голын эрэг дагуу пикник", "аварга гүүрэн доогуурх"], "tuulriver", "Wikipedia CC"],
   [["blue sky tower"], "blueskytower", "Wikipedia CC"],
   [["занабазарын дүрслэх"], "zanabazarmuseum", "Wikipedia CC"],
-  [["манзуширын хийд"], "erdene", "Wikipedia CC"],
+  [["манзуширын хийд"], "manzushirphoto", "Wikipedia CC"],
   [["богд уулын ар тал", "богд ууланд тахил", "богд уулын түвдийн", "богд уулаар аялах", "богдын хаалганаас"], "bogdkhanuul", "Wikipedia CC"],
+  [["зайсан"], "zaisanphoto", "Wikipedia CC"],
+  [["мижид жанрайсэг", "гандан хийдэд залбирах"], "gandanphoto", "Wikipedia CC"],
+  [["дашчойлин хийдэд"], "dashchoilinphoto", "Wikipedia CC"],
+  [["чойжин ламын музейд", "чойжин ламын музей"], "choijinphoto", "Wikipedia CC"],
 
   // --- Хоол/амт төрлүүд (ерөнхий "ресторан" зургаас илүү оновчтой) ---
   [["солонгос барбекю"], "koreanbbq", "Unsplash"],
@@ -360,9 +371,19 @@ const IDEA_IMG_RULES = [
   [["шинэ жилийн галт цэцэг"], "fireworks", "Wikipedia CC"],
 
   // --- Ерөнхий ангиллууд (өмнөх тодорхой дүрмүүдэд тохирохгүй бол) ---
-  [["зайсан", "хотын", "хүннү мол", "хотхон", "энхтайваны гүүр", "сүхбаатар", "талбай"], "ub", "Wikipedia CC"],
+  // "хотын", "талбай" зэрэг хэт өргөн trigger-үүдийг эндээс хассан: тэдгээр нь хөл бөмбөгийн
+  // талбай, музейн нэр дэх "хотын" гэх мэт огт өөр санааг музей/спорт зэрэг зөв ангиллаас нь
+  // "хулгайлж" Жугдэрийн зурагт буруу оноодог байсан тул зөвхөн жинхэнэ давхцлын эрсдэлгүй,
+  // өөр тодорхой зураг олдоогүй хоёр trigger үлдээв ("хотхон", "энхтайваны гүүр").
+  [["хотхон", "энхтайваны гүүр"], "ub", "Wikipedia CC"],
   [["музей", "heritage", "чойжин", "монгол cos", "галерей", "gallery"], "museum", "Unsplash"],
-  [["гандан", "хийд", "залбир", "шүтээн", "хөшөө", "будда", "сүм", "тахил", "овоо"], "erdene", "Wikipedia CC"],
+  // Тодорхой нэргүй/ховор хийд, сүм, овоо, шүтээн (Дамбадаржаа, Сэргэлэн, Сум-Ард, Оточ
+  // Манрамба, Гэсэр сүм, Хятадын шүтээн, Бурхан багшийн цэцэрлэг, Тахилтын даваа г.м) —
+  // эдгээрт зориулсан бодит Wikipedia зураг олдоогүй тул "erdene" (Хархорин дахь Эрдэнэ
+  // зуу хийд — өөр, 400км зайд орших ТОДОРХОЙ ондоо газар!) гэсэн буруу тодорхой мэдэгдэл
+  // өгөхийн оронд Гандантэгчэнлин хийдийн бодит зургийг ерөнхий "УБ-ын Буддын хийд" төлөөлөл
+  // болгон ашиглана — үнэн ч хамгийн тохирох, худал тодорхой мэдэгдэл биш.
+  [["гандан", "хийд", "залбир", "шүтээн", "хөшөө", "будда", "сүм", "тахил", "овоо"], "gandanphoto", "Wikipedia CC"],
   [["богд уул", "уулд алх", "уулын", "аялал", "хайк", "даваа", "толгод"], "hiking", "Unsplash"],
   [["art", "үзэсгэлэн", "экспо"], "art", "Unsplash"],
   [["кино", "theatre", "кинотеатр", "шангри"], "cinema", "Unsplash"],
@@ -374,12 +395,13 @@ const IDEA_IMG_RULES = [
   [["карао", "хөгжим", "дуу ", "jazz", "концерт"], "music", "Unsplash"],
   [["боулинг"], "bowling", "Unsplash"],
   [["ice", "гулгуур", "зимний"], "skating", "Unsplash"],
-  [["spa", "массаж", "тайвшрал", "саун"], "spa", "Unsplash"],
+  [["spa", "массаж", "тайвшрал", "саун", "wellness"], "spa", "Unsplash"],
   [["парк", "зугаал", "алхалт", "цэцэрлэг", "хүрээлэн", "ногоон бүс", "эрэг", "гүүр"], "park", "Unsplash"],
   [["савлуур", "шавар"], "pottery", "Unsplash"],
-  [["ёг", "yoga"], "yoga", "Unsplash"],
+  [["ёг", "yoga", "йог"], "yoga", "Unsplash"],
   [["мастер класс", "хоол хийх", "жигнэ"], "cooking", "Unsplash"],
   [["фитнес", "бэлтгэл", "гүйлт", "бокс", "cross-fit"], "fitness", "Unsplash"],
+  [["усан спорт", "усан мотоцикл"], "kayak", "Wikipedia CC"],
   [["board game", "тоглоом", "тоглох", "vr "], "boardgame", "Unsplash"],
   [["хос", "байгаль", "гэрэл зураг"], "couple", "Unsplash"],
 ];

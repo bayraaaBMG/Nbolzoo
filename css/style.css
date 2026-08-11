@@ -743,6 +743,15 @@ body {
 .feeling-box h4 { color: var(--accent); margin-bottom: 8px; font-size: 14px; }
 .feeling-box p { font-size: 13px; line-height: 1.7; color: var(--text); }
 
+.items-box {
+  background: #f7f7fb; border-left: 4px solid var(--primary, #6c63ff); padding: 16px;
+  border-radius: 8px; margin-bottom: 18px;
+}
+.items-box h4 { margin-bottom: 10px; font-size: 14px; }
+.items-box ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px 12px; }
+.items-box li { font-size: 13px; line-height: 1.5; color: var(--text); padding-left: 18px; position: relative; }
+.items-box li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+
 .auth-form { padding: 24px; }
 .auth-form h2 { margin-bottom: 6px; text-align: center; }
 .auth-form > p { text-align: center; color: var(--text-light); margin-bottom: 20px; font-size: 14px; }

@@ -395,6 +395,309 @@ function getIdeaImg(title, category) {
   return {u: IMG.couple, s: "Unsplash"};
 }
 
+// idea-ийн байршил (location badge + Google Maps query) -аа title/desc/feeling дэх бодит
+// газрын нэр, venue, эсвэл title-д шууд бичигдсэн дүүргээс тодорхойлно — index%9 гэх мэт
+// санамсаргүй эргэлтээс ОГТ хамаарахгүй тул badge, map хоёр үргэлж зөрөхгүй нийцнэ.
+// mapQuery === null бол зураг зураг (map) огт харуулахгүй — ямар ч бодит газар тодорхойгүй
+// (гэрийн болзоо, хувийн үйл явдал гэх мэт) идэяд зохиомол байршил зохиохгүй.
+const HOME_TRIGGERS = [
+  [["гэртээ"], "Гэртээ"],
+  [["гэрт лаа", "гэрт романтик", "гэрийн террас", "гэрийн тавилга", "гэрийн буузны", "гэр цэвэрлэ"], "Гэртээ"],
+  [["орон сууцны дээвэр"], "Гэрийнхээ дээвэр дээр"],
+  [["цонхны дэргэд"], "Гэртээ"],
+  [["100 шалтгааны хайрцаг", "тусгай гэгээтэй гайхшруулах", "time capsule", "гэрэл зургийн хайрцаган дотор", "bucket list", "гэр бүлийн зургийн цомгоо", "марафон", "оддын зураг бэлэглэх", "drone-оор хамт видео", "хосын гар хээ", "хосын дуртай хөгжмийн жагсаалт", "хосын ирээдүйн зорилго", "хосын зан чанарын тест", "талархлын дэвтэр", "хосын нэрэмжит одон"], "Тэдэнд тохиромжтой хаана ч"],
+  [["анхны танилцсан газраа"], "Тэдний онцгой дурсамжит газар"],
+  [["шинэ хот, дүүрэг судлах", "нар мандахыг хамт харах", "хур борооны дараа", "цасан хүн барих", "хиймэл шувуу хөөрүүлэх", "тэнгэрт хийсэх бөмбөлөг"], "Аль ч тохиромжтой газар"],
+  [["гэрийн эргэн тойрны"], "Хорооллын дундаа"],
+  [["цагаан сарын зочлолт"], "Гэртээ / төрөл төрөгсдийн гэрт"],
+  [["хотын гэрэлтсэн шөнийн харагдац"], "Өндөр цэгээс хотын харагдац"],
+];
+
+const LOCATION_RULES = [
+// ---- TIER A: well-known real UB landmarks / geography (exact, high confidence) ----
+[["зайсан"], "УБ · Зайсан толгой", "Zaisan Memorial, Ulaanbaatar"],
+[["сүхбаатарын талбай", "сүхбаатарын хөшөө"], "УБ · Сүхбаатарын талбай", "Sukhbaatar Square (Chinggis Square), Ulaanbaatar"],
+[["явуухулан"], "УБ · Б.Явуухулангийн парк", "B. Yavuukhulan Park, Ulaanbaatar"],
+[["найрамдал парк", "найрамдалын парк", "найрамдал паркт", "найрамдал паркийн", "зөгийн бал музей"], "УБ · Найрамдал парк", "Nairamdal Park (National Amusement Park), Ulaanbaatar"],
+[["ботаникийн цэцэрлэг"], "УБ · Үндэсний ботаникийн цэцэрлэг", "National Botanical Garden, Ulaanbaatar"],
+[["манзуширын хийд", "манзушир"], "УБ · Богд уул, Манзуширын хийдийн балгас", "Manzushir Monastery ruins, Bogd Khan Mountain, Ulaanbaatar"],
+[["түвдийн даваа"], "УБ · Богд уул, Түвдийн даваа", "Tuvdiin Davaa, Bogd Khan Mountain, Ulaanbaatar"],
+[["хандгайтын ам", "хандгайт"], "УБ · Богд уул, Хандгайтын ам", "Khandgait Valley, Bogd Khan Mountain, Ulaanbaatar"],
+[["богдын хаалганаас", "богдын хаалга", "тэрэлжийн зам"], "УБ · Богдын хаалга (Тэрэлж чиглэл)", "Bogd Khaalga, Terelj road, Ulaanbaatar"],
+[["богд уулын ар тал", "богд уул", "богд ууланд тахил"], "УБ · Богд уулын дархан цаазат газар", "Bogd Khan Mountain, Ulaanbaatar"],
+[["тэрэлж"], "Тэрэлжийн байгалийн цогцолборт", "Gorkhi-Terelj National Park"],
+[["туулын хөндий", "туул гол", "туулын эрэг", "аварга гүүр"], "УБ · Туул голын эрэг", "Tuul River, Ulaanbaatar"],
+[["чингисийн хүрээлэнгийн ногоон бүс"], "УБ · Чингисийн хүрээлэнгийн ногоон бүс", "Chinggis Khaan area green zone, Ulaanbaatar"],
+[["хүннү мол"], "УБ · Хүннү Молл орчим", "Khunnu Mall, Ulaanbaatar"],
+[["улиастайн давaa", "улиастайн даваа"], "УБ · Улиастайн даваа", "Uliastai Davaa, Ulaanbaatar"],
+[["хужирбулан"], "Хужирбулан (хотын ойролцоо)", "Khujirbulan, Ulaanbaatar"],
+[["сансрын хүрээлэн"], "УБ · Сансрын хүрээлэнгийн орчим", "Geophysics Research Institute area, Ulaanbaatar"],
+[["тахилтын даваа"], "УБ · Тахилтын даваа", "Takhiltyn Davaa, Ulaanbaatar"],
+[["20-р хоро"], "УБ · 20-р хороолол", "20th khoroolol, Ulaanbaatar"],
+[["найман овоо"], "УБ · Найман овоо", "Naiman Ovoo, Ulaanbaatar"],
+[["энхтайваны гүүр"], "УБ · Энхтайваны гүүр", "Enkhtaivan Bridge, Ulaanbaatar"],
+[["мижид жанрайсэг", "гандан"], "УБ · Гандантэгчэнлин хийд", "Gandantegchinlen Monastery, Ulaanbaatar"],
+[["дашчойлин"], "УБ · Дашчойлин хийд", "Dashchoilin Monastery, Ulaanbaatar"],
+[["дамбадаржаа"], "УБ · Дамбадаржаа хийд", "Dambadarjaa Monastery, Ulaanbaatar"],
+[["сум-ард"], "Багахангай · Сум-Ард хийд", "Sum Ard Monastery, Bagakhangai, Ulaanbaatar"],
+[["оточ манрамб"], "УБ · Оточ Манрамбын хийд", "Otoch Manramba Monastery, Ulaanbaatar"],
+[["төв шүтээний сүм"], "УБ · Төв шүтээний сүм", "Central Buddhist Temple, Ulaanbaatar"],
+[["далай эжийн хийд"], "УБ · Далай эжийн хийд", "Dalai Eej Monastery, Ulaanbaatar"],
+[["сэргэлэн хийд"], "УБ · Сэргэлэн хийд", "Sergelen Monastery, Ulaanbaatar"],
+[["богдын өвлийн ордон"], "УБ · Богдын өвлийн ордон музей", "Bogd Khaan Winter Palace Museum, Ulaanbaatar"],
+[["чойжин ламын музей"], "УБ · Чойжин Ламын музей", "Choijin Lama Temple Museum, Ulaanbaatar"],
+[["чингисийн музей"], "УБ · Чингис хааны үндэсний музей", "Chinggis Khaan National Museum, Ulaanbaatar"],
+[["чингисийн талбайн музей", "засгийн ордны музей"], "УБ · Засгийн газрын ордон", "Government Palace, Sukhbaatar Square, Ulaanbaatar"],
+[["бурхан багшийн цэцэрлэг"], "УБ · Бурхан Багшийн цэцэрлэг", "Buddha Park, Ulaanbaatar"],
+[["хятадын тахилын шүтээн"], "УБ · Хятад ястны шүтээний өргөө", "Chinese temple, Ulaanbaatar"],
+[["анхны шашны музей"], "УБ · Шашны түүхийн музей", "Museum of Religion, Ulaanbaatar"],
+[["1921 оны хувьсгалын музей"], "УБ · 1921 оны хувьсгалын музей", "1921 Revolution Museum, Ulaanbaatar"],
+[["улаанбаатар хотын түүхийн музей", "улаанбаатар хотын музей"], "УБ · Улаанбаатар хотын музей", "Ulaanbaatar City Museum, Ulaanbaatar"],
+[["хэлмэгдэгсдийн музей"], "УБ · Улс төрийн хэлмэгдэгсдийн музей", "Museum of Victims of Political Persecution, Ulaanbaatar"],
+[["байгалийн түүхийн музей", "үлэг гүрвэл"], "УБ · Байгалийн түүхийн музей", "Mongolian Natural History Museum, Ulaanbaatar"],
+[["үндэсний түүхийн музей"], "УБ · Монголын үндэсний түүхийн музей", "National Museum of Mongolia, Ulaanbaatar"],
+[["занабазар"], "УБ · Занабазарын дүрслэх урлагийн музей", "Zanabazar Museum of Fine Arts, Ulaanbaatar"],
+[["976 art gallery"], "УБ · 976 Art Gallery", "976 Art Gallery, Ulaanbaatar"],
+[["улаан-од галерей"], "УБ · Улаан-Од галерей", "Red Ger Art Gallery, Ulaanbaatar"],
+[["ардын урлалын музей"], "УБ · Ардын урлалын музей", "Mongolian Arts and Crafts Museum, Ulaanbaatar"],
+[["монгол костюм музей"], "УБ · Монгол костюм музей", "Mongolian Costume Museum, Ulaanbaatar"],
+[["философийн музей"], "УБ · Философийн музей", "Philosophy Museum, Ulaanbaatar"],
+[["шуудангийн музей"], "УБ · Шуудангийн музей", "Postal Museum, Ulaanbaatar"],
+[["мөнгөний музей", "зоос музей"], "УБ · Мөнгөний музей", "Money Museum, Ulaanbaatar"],
+[["face gallery"], "УБ · Face Gallery", "Face Gallery, Ulaanbaatar"],
+[["мон-тайп"], "УБ · Мон-Тайп үсгийн музей", "Mongolian script museum, Ulaanbaatar"],
+[["ботаникийн музей"], "УБ · Ботаникийн музей", "Botanical Museum, Ulaanbaatar"],
+[["play gallery"], "УБ · Play Gallery", "Play Gallery, Ulaanbaatar"],
+[["онгоцны музей"], "УБ · Онгоцны музей", "Aviation Museum, Ulaanbaatar"],
+[["жуковын өргөн чөлөө"], "УБ · Жуковын өргөн чөлөө", "Zhukov Avenue, Ulaanbaatar"],
+[["энхтайваны өргөн чөлөө", "энхтайван"], "УБ · Энхтайваны өргөн чөлөө", "Enkhtaivan Avenue, Ulaanbaatar"],
+[["гэсэр сүм"], "УБ · Гэсэр сүм", "Geser Temple, Ulaanbaatar"],
+[["mcs плаза"], "УБ · MCS Плаза", "MCS Plaza, Ulaanbaatar"],
+[["толгойт"], "УБ · Толгойт", "Tolgoit, Ulaanbaatar"],
+[["яармаг"], "УБ · Яармаг", "Yarmag, Ulaanbaatar"],
+[["их сургуулийн гудамж"], "УБ · Их сургуулийн гудамж", "National University street, Ulaanbaatar"],
+[["нисэхийн гудамж"], "УБ · Нисэхийн гудамж", "Niseh street, Ulaanbaatar"],
+[["урт цагаан"], "УБ · Урт цагааны гудамж", "Urtcagaan street, Ulaanbaatar"],
+[["blue sky tower"], "УБ · Blue Sky Tower", "Blue Sky Tower, Ulaanbaatar"],
+[["central tower"], "УБ · Central Tower", "Central Tower, Ulaanbaatar"],
+[["sky resort", "snowboard"], "УБ · Sky Resort (Богд уулын хормой)", "Sky Resort, Ulaanbaatar"],
+[["зимний парк", "ice skating"], "УБ · Зимний парк", "Zimniy Park ice rink, Ulaanbaatar"],
+[["шонхор кампус"], "УБ · Шонхор кампусын парк", "Shonkhor campus park, Ulaanbaatar"],
+[["эв нэгдлийн хүрээлэн"], "УБ · Эв нэгдлийн хүрээлэнгийн парк", "Ev Negdel park, Ulaanbaatar"],
+[["үндэсний номын сан", "номын сангийн уншлагын"], "УБ · Монголын үндэсний номын сан", "National Library of Mongolia, Ulaanbaatar"],
+[["нүүрсний уурхайн музей"], "Налайх · Нүүрсний уурхайн музей", "Nalaikh coal mine museum, Ulaanbaatar"],
+[["100 айл"], "УБ · 100 айлын парк", "100 ail park, Ulaanbaatar"],
+[["наадамын бөх", "бөхийн барилдаан"], "УБ · Төв цэнгэлдэх хүрээлэн", "National Sports Stadium, Ulaanbaatar"],
+
+// ---- TIER A2: generic river references (Tuul is UB's defining river) ----
+[["голын эрэг", "гол дагуу", "голын дагуу", "гол дээр", "каяк", "sup борд", "тэнгисийн эрэг", "тэнгисийн зам", "тэнгисийн гол"], "УБ · Туул голын эрэг", "Tuul River, Ulaanbaatar"],
+
+// ---- TIER B: district literally named in the title (extracted verbatim — always accurate).
+// Titles use the genitive form "X дүүргийн" (e.g. "Хан-Уул дүүргийн"), so triggers match that
+// inflected stem, not the bare nominative "дүүрэг" which never actually appears in the text. ----
+[["баянгол дүүргийн"], "УБ · Баянгол дүүрэг", "Bayangol district, Ulaanbaatar"],
+[["багахангай дүүргийн"], "УБ · Багахангай дүүрэг", "Bagakhangai district, Ulaanbaatar"],
+[["баянзүрх дүүргийн"], "УБ · Баянзүрх дүүрэг", "Bayanzurkh district, Ulaanbaatar"],
+[["налайх дүүргийн"], "УБ · Налайх дүүрэг", "Nalaikh district, Ulaanbaatar"],
+[["багануур дүүргийн"], "УБ · Багануур дүүрэг", "Baganuur district, Ulaanbaatar"],
+[["сонгинохайрхан дүүргийн"], "УБ · Сонгинохайрхан дүүрэг", "Songinokhairkhan district, Ulaanbaatar"],
+[["хан-уул дүүргийн"], "УБ · Хан-Уул дүүрэг", "Khan-Uul district, Ulaanbaatar"],
+[["сүхбаатар дүүргийн"], "УБ · Сүхбаатар дүүрэг", "Sukhbaatar district, Ulaanbaatar"],
+[["чингэлтэй дүүргийн"], "УБ · Чингэлтэй дүүрэг", "Chingeltei district, Ulaanbaatar"],
+[["13-р хоро"], "УБ · 13-р хороолол", "13th khoroolol, Ulaanbaatar"],
+
+// ---- TIER C: real named venues (use the venue's own name — Google resolves the address,
+// so no district needs to be guessed) ----
+[["café camino", "camino"], "УБ · Café Camino", "Cafe Camino, Ulaanbaatar"],
+[["caffe bene"], "УБ · Caffe Bene", "Caffe Bene, Ulaanbaatar"],
+[["tom n toms"], "УБ · Tom N Toms Coffee", "Tom N Toms Coffee, Ulaanbaatar"],
+[["internom"], "УБ · Internom номын дэлгүүр", "Internom bookstore, Ulaanbaatar"],
+[["café du monde"], "УБ · Café du Monde маягийн кафе", "French cafe, Ulaanbaatar"],
+[["хархорум 14"], "УБ · Хархорум 14", "Kharkhorum 14 restaurant, Ulaanbaatar"],
+[["skybar mongolia", "skybar"], "УБ · Skybar Mongolia", "Skybar Mongolia, Ulaanbaatar"],
+[["цаатан ресторан"], "УБ · Цаатан ресторан", "Tsaatan restaurant, Ulaanbaatar"],
+[["mongolyrics"], "УБ · Mongolyrics ресторан", "Mongolyrics restaurant, Ulaanbaatar"],
+[["arig anya"], "УБ · Arig Anya ресторан", "Arig Anya restaurant, Ulaanbaatar"],
+[["the bull hot pot"], "УБ · The Bull Hot Pot", "The Bull Hot Pot, Ulaanbaatar"],
+[["modern nomads"], "УБ · Modern Nomads", "Modern Nomads restaurant, Ulaanbaatar"],
+[["veranda"], "УБ · Veranda ресторан", "Veranda restaurant, Ulaanbaatar"],
+[["rosewood kitchen"], "УБ · Rosewood Kitchen + Enoteca", "Rosewood Kitchen Enoteca, Ulaanbaatar"],
+[["route 22"], "УБ · Route 22 гастробар", "Route 22 gastrobar, Ulaanbaatar"],
+[["fat cat jazz club", "fat cat"], "УБ · Fat Cat Jazz Club", "Fat Cat Jazz Club, Ulaanbaatar"],
+[["upaint studio", "upaint"], "УБ · Upaint Studio", "Upaint Studio, Ulaanbaatar"],
+[["shangri-la"], "УБ · Shangri-La Centre", "Shangri-La Centre, Ulaanbaatar"],
+[["mongolian theatre"], "УБ · Монголын Үндэсний театр", "Mongolian National Theatre, Ulaanbaatar"],
+[["mongolian opera", "удэт"], "УБ · Улсын дуурь бүжгийн эрдмийн театр", "State Opera and Ballet Theatre, Ulaanbaatar"],
+[["үндэсний циркийн"], "УБ · Улсын цирк", "Mongolian State Circus, Ulaanbaatar"],
+[["хүүхэлдэйн театр"], "УБ · Хүүхэлдэйн театр", "Puppet Theatre, Ulaanbaatar"],
+[["симфони найрал хөгжим", "филармони"], "УБ · Улсын филармони", "Mongolian State Philharmonic, Ulaanbaatar"],
+[["soyol wellness"], "УБ · Soyol Wellness Center", "Soyol Wellness Center, Ulaanbaatar"],
+[["park bowling"], "УБ · Park Bowling", "Park Bowling, Ulaanbaatar"],
+
+// ---- TIER D: broad category words -> honest category search (not a fabricated address,
+// a live Google Maps search for that kind of place near Ulaanbaatar) ----
+[["кафе", "coffee", "кофе", "матча", "espresso", "cafe"], "УБ · Кафе", "Cafe, Ulaanbaatar"],
+[["ресторан", "гуанз", "restaurant", "hot pot", "барбекю", "стейк", "рамен", "фо ", "кебаб", "пицца", "dim sum", "далайн хоол", "буррито", "хачапури", "паст", "бургер", "гриль", "салат", "бууз", "кари", "halal", "тайландын том яамны", "дегустаци", "нэг жилийн ойгоо тэмдэглэх"], "УБ · Ресторан", "Restaurant, Ulaanbaatar"],
+[["амттан", "торт", "зайрмаг", "brunch", "waffle", "cheesecake", "печени", "bubble tea", "креп", "macaron", "донат", "churros", "honey house"], "УБ · Амттангийн газар", "Dessert cafe, Ulaanbaatar"],
+[["кино театр", "кино клуб", "кино наадам"], "УБ · Кино театр", "Cinema, Ulaanbaatar"],
+[["боулинг"], "УБ · Боулингийн төв", "Bowling, Ulaanbaatar"],
+[["escape room"], "УБ · Escape room", "Escape room, Ulaanbaatar"],
+[["vr тоглоом"], "УБ · VR тоглоомын төв", "VR gaming center, Ulaanbaatar"],
+[["трамплин"], "УБ · Трамплин парк", "Trampoline park, Ulaanbaatar"],
+[["картинг"], "УБ · Картингийн зам", "Karting track, Ulaanbaatar"],
+[["билльярд"], "УБ · Билльярдын клуб", "Billiards club, Ulaanbaatar"],
+[["дартс"], "УБ · Дартсны бар", "Darts bar, Ulaanbaatar"],
+[["ширээний теннис"], "УБ · Ширээний теннисний клуб", "Table tennis club, Ulaanbaatar"],
+[["лазер таг"], "УБ · Лазер таг", "Laser tag, Ulaanbaatar"],
+[["пейнтбол"], "УБ · Пейнтболын талбай", "Paintball field, Ulaanbaatar"],
+[["аркад тоглоом"], "УБ · Аркад тоглоомын төв", "Arcade, Ulaanbaatar"],
+[["cat cafe"], "УБ · Cat Cafe", "Cat cafe, Ulaanbaatar"],
+[["board game", "куб-тоглоом", "тоглоомын өрөөнд", "карт тоглох"], "УБ · Board game кафе", "Board game cafe, Ulaanbaatar"],
+[["trivia"], "УБ · Trivia шөнийн бар", "Trivia night bar, Ulaanbaatar"],
+[["speed dating"], "УБ · Speed dating venue", "Speed dating event venue, Ulaanbaatar"],
+[["индор голфын симулятор", "гольф симулятор"], "УБ · Гольф симулятор", "Golf simulator, Ulaanbaatar"],
+[["мини-гольф"], "УБ · Мини-гольфын талбай", "Mini golf, Ulaanbaatar"],
+[["spa", "спа", "массаж", "саун", "флоат спа", "нүүрний арчилгаа"], "УБ · Спа төв", "Spa, Ulaanbaatar"],
+[["йогийн студи", "йога"], "УБ · Йогийн студи", "Yoga studio, Ulaanbaatar"],
+[["медитацийн төв"], "УБ · Медитацийн төв", "Meditation center, Ulaanbaatar"],
+[["каяк", "усан спорт", "усан мотоцикл"], "УБ · Туул голын эрэг", "Tuul River water sports, Ulaanbaatar"],
+[["цанаар гулгах"], "УБ · Цанын бааз", "Ski resort, Ulaanbaatar"],
+[["авиралтын хана", "climbing"], "УБ · Авиралтын танхим", "Climbing gym, Ulaanbaatar"],
+[["морь унах"], "УБ · Морин спортын клуб", "Horse riding club, Ulaanbaatar"],
+[["сур харваа"], "УБ · Сур харваа сургалт", "Archery range, Ulaanbaatar"],
+[["усан бассейн"], "УБ · Усан бассейн", "Swimming pool, Ulaanbaatar"],
+[["фитнес клуб", "cross-fit"], "УБ · Фитнес клуб", "Fitness club, Ulaanbaatar"],
+[["бокс клуб"], "УБ · Боксын клуб", "Boxing club, Ulaanbaatar"],
+[["skateboard"], "УБ · Скэйтбордын парк", "Skate park, Ulaanbaatar"],
+[["хоккей"], "УБ · Мөсөн хоккейн талбай", "Ice hockey rink, Ulaanbaatar"],
+[["сагсан бөмбөг"], "УБ · Сагсан бөмбөгийн заал", "Basketball arena, Ulaanbaatar"],
+[["бадминтон", "бадьминтон", "бадьмингтон"], "УБ · Бадминтоны клуб", "Badminton club, Ulaanbaatar"],
+[["теннисний клуб"], "УБ · Теннисний клуб", "Tennis club, Ulaanbaatar"],
+[["хөл бөмбөг"], "УБ · Хөл бөмбөгийн талбай", "Football field, Ulaanbaatar"],
+[["уулын дугуй", "mountain bike"], "УБ · Богд уулын дугуйн зам", "Mountain bike trail, Bogd Khan Mountain, Ulaanbaatar"],
+[["марафон"], "УБ · Гүйлтийн зам", "Running route, Ulaanbaatar"],
+[["слэклайн"], "УБ · Цэцэрлэгт хүрээлэн", "City park, Ulaanbaatar"],
+[["фрисби"], "УБ · Цэцэрлэгт хүрээлэн", "City park, Ulaanbaatar"],
+[["хөвөгч усан онгоц"], "УБ · Туул голын эрэг", "Tuul River, Ulaanbaatar"],
+[["гар барианы клуб", "arm wrestling"], "УБ · Гар барианы клуб", "Arm wrestling club, Ulaanbaatar"],
+[["волейбол"], "УБ · Волейболын клуб", "Volleyball club, Ulaanbaatar"],
+[["хөлбөмбөгийн симулятор", "foosball"], "УБ · Foosball бар", "Foosball bar, Ulaanbaatar"],
+[["явган аялалын клуб"], "УБ · Явган аялалын клуб", "Hiking club, Ulaanbaatar"],
+[["gymnastic", "гимнастик"], "УБ · Гимнастикийн клуб", "Gymnastics club, Ulaanbaatar"],
+[["дугуйгаар хотын гудамж"], "УБ хотын гудамж (дугуйн зам)", "Cycling route, Ulaanbaatar"],
+[["спорт заалны"], "УБ · Спорт заал", "Sports hall, Ulaanbaatar"],
+[["татуировка"], "УБ · Тату студи", "Tattoo studio, Ulaanbaatar"],
+[["аутдор упражнение"], "УБ · Нээлттэй фитнес талбай", "Outdoor fitness area, Ulaanbaatar"],
+[["ном унших клуб"], "УБ · Номын клуб", "Book club venue, Ulaanbaatar"],
+[["их дэлгүүр"], "УБ · Улсын их дэлгүүр", "State Department Store, Ulaanbaatar"],
+[["наран тууль"], "УБ · Наран Туул зах", "Naran Tuul market, Ulaanbaatar"],
+[["гар урлалын зах", "гар урлалын дэлгүүр", "гар урлалын материал"], "УБ · Гар урлалын зах", "Handicraft market, Ulaanbaatar"],
+[["виниль дэлгүүр"], "УБ · Виниль дэлгүүр", "Vinyl record shop, Ulaanbaatar"],
+[["vintage clothing"], "УБ · Vintage clothing дэлгүүр", "Vintage clothing shop, Ulaanbaatar"],
+[["номын дэлгүүр"], "УБ · Номын дэлгүүр", "Bookstore, Ulaanbaatar"],
+[["органик зах"], "УБ · Органик зах", "Organic market, Ulaanbaatar"],
+[["загварын шоу-руум"], "УБ · Загварын шоу-рум", "Fashion showroom, Ulaanbaatar"],
+[["ikea"], "УБ · Гэр ахуйн бараа дэлгүүр", "Home goods store, Ulaanbaatar"],
+[["үнэртний дэлгүүр", "perfume"], "УБ · Үнэртний дэлгүүр", "Perfume boutique, Ulaanbaatar"],
+[["rooftop bar", "дээвэр дээрх"], "УБ · Rooftop bar", "Rooftop bar, Ulaanbaatar"],
+[["wine bar", "дарсны амталгаа", "дарс амтлах", "дарсны цуглуулга"], "УБ · Wine bar", "Wine bar, Ulaanbaatar"],
+[["speakeasy"], "УБ · Speakeasy бар", "Speakeasy bar, Ulaanbaatar"],
+[["караоке"], "УБ · Караоке", "Karaoke, Ulaanbaatar"],
+[["live music бар"], "УБ · Live music бар", "Live music bar, Ulaanbaatar"],
+[["cocktail making", "коктейл"], "УБ · Cocktail bar", "Cocktail bar, Ulaanbaatar"],
+[["салса бүжиг"], "УБ · Бүжгийн клуб", "Dance club, Ulaanbaatar"],
+[["beer garden", "шар айраг"], "УБ · Beer garden", "Beer garden, Ulaanbaatar"],
+[["night market"], "УБ · Шөнийн зах", "Night market, Ulaanbaatar"],
+[["терраса бар"], "УБ · Терраса бар", "Terrace bar, Ulaanbaatar"],
+[["dj тоглолт", "клубт бүжиглэх"], "УБ · Клуб", "Nightclub, Ulaanbaatar"],
+[["whisky bar"], "УБ · Whisky bar", "Whisky bar, Ulaanbaatar"],
+[["cinema bar"], "УБ · Cinema bar", "Cinema bar, Ulaanbaatar"],
+[["party-д оролцох"], "УБ · Тематик party", "Themed party venue, Ulaanbaatar"],
+[["шавар савлуур", "керамик урлал"], "УБ · Керамикийн студи", "Ceramics studio, Ulaanbaatar"],
+[["хоолны мастер класс", "гурил боловсруулах", "бэйкинг"], "УБ · Хоолны студи", "Cooking class, Ulaanbaatar"],
+[["зурах + дарс", "paint & wine"], "УБ · Upaint Studio", "Paint and wine studio, Ulaanbaatar"],
+[["гэрэл зургийн студи"], "УБ · Гэрэл зургийн студи", "Photo studio, Ulaanbaatar"],
+[["дарс хийх мастер класс"], "УБ · Дарс хийх студи", "Winemaking class, Ulaanbaatar"],
+[["каллиграфи"], "УБ · Каллиграфийн студи", "Calligraphy class, Ulaanbaatar"],
+[["соёолж", "bonsai"], "УБ · Ботаникийн студи", "Bonsai studio, Ulaanbaatar"],
+[["танго бүж"], "УБ · Бүжгийн студи", "Tango dance studio, Ulaanbaatar"],
+[["кино хийх workshop"], "УБ · Кино студи", "Filmmaking workshop, Ulaanbaatar"],
+[["chocolate making"], "УБ · Шоколадны студи", "Chocolate making class, Ulaanbaatar"],
+[["нэхмэл"], "УБ · Нэхмэлийн студи", "Weaving studio, Ulaanbaatar"],
+[["латте art"], "УБ · Латте арт сургалт", "Latte art class, Ulaanbaatar"],
+[["оригами"], "УБ · Урлалын студи", "Craft studio, Ulaanbaatar"],
+[["лаа хийх"], "УБ · Лаа хийх студи", "Candle making studio, Ulaanbaatar"],
+[["сабон хийх", "шампунь"], "УБ · Гар хийцийн студи", "Soap making studio, Ulaanbaatar"],
+[["хар цагаан лаборатори"], "УБ · Фото лаборатори", "Darkroom photo lab, Ulaanbaatar"],
+[["скульптур"], "УБ · Урлагийн студи", "Sculpture studio, Ulaanbaatar"],
+[["импровизаци", "impro comedy"], "УБ · Театрын студи", "Improv theatre, Ulaanbaatar"],
+[["комеди клуб", "стэндап"], "УБ · Комеди клуб", "Comedy club, Ulaanbaatar"],
+[["fashion show"], "УБ · Загварын үзэсгэлэн", "Fashion show venue, Ulaanbaatar"],
+[["уран зохиолын үдэшлэг"], "УБ · Номын клуб", "Literary event, Ulaanbaatar"],
+[["rock концерт"], "УБ · Концертын танхим", "Concert hall, Ulaanbaatar"],
+[["инди кино"], "УБ · Инди кино театр", "Independent cinema, Ulaanbaatar"],
+[["агаарын бөмбөлгөн"], "УБ · Агаарын бөмбөлгөний нислэг", "Hot air balloon ride, Ulaanbaatar"],
+[["гэрэлт чимэглэлийн үзэсгэлэн"], "УБ · Гэрэлт чимэглэлийн үзэсгэлэн", "Winter lights exhibition, Ulaanbaatar"],
+[["жимс түүх ферм"], "УБ орчмын жимсний ферм", "Fruit picking farm near Ulaanbaatar"],
+[["silent disco"], "УБ · Silent disco", "Silent disco event, Ulaanbaatar"],
+[["хотын зах зээлээр", "хотын зах"], "УБ · Орон нутгийн зах", "Local market, Ulaanbaatar"],
+[["street art", "гудамжны урлаг"], "УБ хотын төв", "Street art, Ulaanbaatar"],
+[["усан оргилуур", "фонтан"], "УБ хотын төв · Фонтан талбай", "Fountain square, Ulaanbaatar city center"],
+[["мөсөн дээр загас"], "УБ орчмын загасчлалын газар", "Ice fishing spot near Ulaanbaatar"],
+[["christmas market"], "УБ · Christmas market", "Christmas market, Ulaanbaatar"],
+[["мөсөн баримал"], "УБ · Мөсөн баримлын үзэсгэлэн", "Ice sculpture exhibition, Ulaanbaatar"],
+[["кофены наадам"], "УБ · Кофены наадам", "Coffee festival, Ulaanbaatar"],
+[["хүнсний машины наадам", "food truck"], "УБ · Food truck festival", "Food truck festival, Ulaanbaatar"],
+[["цэцгийн наадам"], "УБ · Цэцгийн наадам", "Flower festival, Ulaanbaatar"],
+[["тансаг зочид буудал", "staycation", "зочид буудлын өрөөнд"], "УБ · Тансаг зочид буудал", "Hotel, Ulaanbaatar"],
+[["үндэсний костюмтой зураг", "дээл өмсөж"], "УБ · Гэрэл зургийн студи", "Traditional costume photo studio, Ulaanbaatar"],
+[["робот үзэсгэлэн"], "УБ · Технологийн үзэсгэлэн", "Technology exhibition, Ulaanbaatar"],
+[["үндэсний паркаар"], "УБ · Цэцэрлэгт хүрээлэн", "City park, Ulaanbaatar"],
+[["асаны шёрюугийн цэцэрлэг"], "УБ · Орон нутгийн цэцэрлэгт хүрээлэн", "Neighborhood park, Ulaanbaatar"],
+[["хорооллын ойт цэцэрлэг"], "УБ · Хорооллын ойт цэцэрлэг", "Neighborhood forested park, Ulaanbaatar"],
+[["шинэ парк газраар"], "УБ · Шинэ хотхоны ногоон бүс", "New district green zone, Ulaanbaatar"],
+[["5-р цэцэрлэгт хүрээлэн"], "УБ · 5-р цэцэрлэгт хүрээлэн", "5th micro-district park, Ulaanbaatar"],
+];
+
+// title/desc/feeling бүгдээс тохирох газрыг хайна (олон санааны бодит газар нь title биш
+// desc/feeling-д байдаг тул). Match олдохгүй бол зохиомол дүүрэг зохиохгүй, ерөнхий "Улаанбаатар
+// хот" + map-гүй болно.
+function getIdeaLocation(title, desc, feeling) {
+  const t = (title + " " + (desc||"") + " " + (feeling||"")).toLowerCase();
+  for (const [triggers, label] of HOME_TRIGGERS) {
+    if (triggers.some(k => t.includes(k))) return { label, mapQuery: null };
+  }
+  for (const [triggers, label, mapQuery] of LOCATION_RULES) {
+    if (triggers.some(k => t.includes(k))) return { label, mapQuery };
+  }
+  return { label: "Улаанбаатар хот", mapQuery: null };
+}
+
+// "Юу авч явах вэ?" — очих газрын ТӨРЛӨӨС хамаарсан packing list (пикник, ууланд алхах,
+// усан спорт, музей/кино, гар урлал гэх мэт), ганц идея бүрт биш category-аар бүлэглэсэн.
+// Кафе/ресторан/гэрийн идея зэрэгт заавал зүйл санал болгохгүй — хоосон массив буцаана.
+const ITEMS_RULES = [
+  [["майхан барьж хонох", "нэг өдрийн аялал"], ["Ус", "Тав тухтай алхалтын гутал", "Дулаан хувцас", "Унтлагын уут", "Гар чийдэн", "Powerbank"]],
+  [["пикник"], ["Пикникийн дэвсгэр", "Ус/ундаа", "Хөнгөн зууш", "Нойтон/хуурай салфетка", "Хогийн уут", "Нарны тос"]],
+  [["цанаар гулгах", "snowboard", "ice skating", "гулгуур", "мөсөн дээр загас", "мөсөн баримал", "цасан хүн"], ["Дулаан хувцас, куртка", "Бээлий", "Малгай, шарф", "Дулаан оймс", "Халуун ундаа (термос)"]],
+  [["богд уул", "тэрэлж", "авирах", "алхах", "толгод", "өндөрлөг", "давaa", "даваа", "ойт хэсэг", "уулын бэлд", "уулын хормой", "уулаар аялах"], ["Ус", "Тав тухтай алхалтын гутал", "Нарны тос", "Малгай", "Жижиг үүргэвч", "Powerbank"]],
+  [["каяк", "sup борд", "усан спорт", "усан мотоцикл", "хөвөгч усан онгоц", "завиар", "загас барих"], ["Сэлэлгийн хувцас", "Алчуур", "Нарны тос", "Солих хувцас", "Ус"]],
+  [["фитнес", "бокс клуб", "cross-fit", "теннис", "бадминтон", "хөл бөмбөг", "волейбол", "скейтборд", "skateboard", "climbing", "авиралтын хана", "гар барианы", "гимнастик", "trampoline", "морь унах", "сур харваа", "дугуй", "уралдах", "картинг", "хоккей"], ["Тав тухтай спорт хувцас, гутал", "Ус", "Алчуур"]],
+  [["музей", "кино", "театр", "дуурь", "цирк", "тайз", "концерт", "үзэсгэлэн", "наадам", "фестиваль", "жүжиг", "шоу"], ["Тасалбар/захиалгаа баталгаажуулах", "Утас", "Powerbank"]],
+  [["хичээл", "мастер класс", "студид", "сургалт", "workshop"], ["Тав тухтай хувцас (бохирдож болзошгүй)", "Урьдчилан цаг захиалах"]],
+  [["spa", "спа", "массаж", "саун", "флоат"], ["Сэлгэх хувцас", "Ус уух сав"]],
+  [["дэлгүүр", "зах", "shopping", "mall"], ["Бэлэн мөнгө/карт", "Эко уут"]],
+  [["тансаг", "skybar", "дегустаци", "chef's tasting", "veranda", "rooftop"], ["Ширээ урьдчилан захиалах"]],
+];
+
+function getIdeaItems(title, desc, feeling) {
+  const t = (title + " " + (desc||"") + " " + (feeling||"")).toLowerCase();
+  for (const [triggers, items] of ITEMS_RULES) {
+    if (triggers.some(k => t.includes(k))) return items;
+  }
+  return [];
+}
+
 function imgTag(url, credit, cls, style) {
   const cred = credit === "Wikipedia CC"
     ? `<span class="card-img-credit">© Wikipedia CC</span>`
@@ -498,12 +801,17 @@ function openIdeaModal(id) {
         <div class="modal-meta-item">💸 <strong>${idea.priceText}</strong></div>
         <div class="modal-meta-item">❤️ <strong>${idea.likes + (isLiked?1:0)}</strong></div>
       </div>
-      ${mapEmbedHtml(`${idea.location}, Улаанбаатар`)}
+      ${idea.mapQuery ? mapEmbedHtml(idea.mapQuery) : ''}
       <p style="margin-bottom: 16px; line-height: 1.7;">${idea.desc}</p>
       <div class="feeling-box">
         <h4>💝 Энэ болзоонд танд төрөх мэдрэмж:</h4>
         <p>${idea.feeling}</p>
       </div>
+      ${idea.items && idea.items.length ? `
+      <div class="items-box">
+        <h4>🎒 Очихдоо юу авч явах вэ?</h4>
+        <ul>${idea.items.map(it => `<li>${it}</li>`).join('')}</ul>
+      </div>` : ''}
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
         <button class="btn btn-primary" style="flex:1;min-width:120px" type="button" onclick="openBookingModal(${idea.id})">📅 Захиалах</button>
         <button class="btn ${isLiked?'btn-accent':'btn-ghost'}" type="button" onclick="toggleLike(${idea.id});this.className='btn ${isLiked?'btn-ghost':'btn-accent'}';this.textContent='${isLiked?'🤍 Хадгалах':'❤️ Хадгалсан'}'">

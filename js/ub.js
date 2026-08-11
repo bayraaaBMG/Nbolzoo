@@ -1,6 +1,5 @@
 
 // 365 ИДЕАГ УЛААНБААТАРТ
-const districts = ["Сүхбаатар", "Чингэлтэй", "Баянзүрх", "Хан-Уул", "Сонгинохайрхан", "Баянгол", "Налайх", "Багануур", "Багахангай"];
 const categories = [
   {emoji: "☕", name: "кафе"},
   {emoji: "🍴", name: "ресторан"},
@@ -390,15 +389,17 @@ const ubIdeaTemplates = [
 const allUbIdeas = [];
 for(let i = 0; i < 365; i++) {
   const tmpl = ubIdeaTemplates[i % ubIdeaTemplates.length];
-  const dist = districts[i % districts.length];
   const cat = categories[i % categories.length];
+  const loc = getIdeaLocation(tmpl.title, tmpl.desc, tmpl.feeling);
   allUbIdeas.push({
     id: i + 1,
     day: i + 1,
     emoji: cat.emoji,
     title: tmpl.title,
     desc: tmpl.desc,
-    location: `УБ · ${dist} дүүрэг`,
+    location: loc.label,
+    mapQuery: loc.mapQuery,
+    items: getIdeaItems(tmpl.title, tmpl.desc, tmpl.feeling),
     price: tmpl.price,
     priceText: tmpl.price === 0 ? "Үнэгүй" : `~${tmpl.price.toLocaleString()}₮`,
     feeling: tmpl.feeling,

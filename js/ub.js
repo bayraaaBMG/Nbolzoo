@@ -399,7 +399,7 @@ for(let i = 0; i < 365; i++) {
     desc: tmpl.desc,
     location: loc.label,
     mapQuery: loc.mapQuery,
-    items: getIdeaItems(tmpl.title, tmpl.desc, tmpl.feeling),
+    items: getIdeaItems(tmpl.title, tmpl.desc, tmpl.feeling, !!loc.mapQuery),
     price: tmpl.price,
     priceText: tmpl.price === 0 ? "Үнэгүй" : `~${tmpl.price.toLocaleString()}₮`,
     feeling: tmpl.feeling,

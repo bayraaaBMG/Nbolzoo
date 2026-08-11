@@ -710,14 +710,21 @@ const ITEMS_RULES = [
   [["spa", "спа", "массаж", "саун", "флоат"], ["Сэлгэх хувцас", "Ус уух сав"]],
   [["дэлгүүр", "зах", "shopping", "mall"], ["Бэлэн мөнгө/карт", "Эко уут"]],
   [["тансаг", "skybar", "дегустаци", "chef's tasting", "veranda", "rooftop"], ["Ширээ урьдчилан захиалах"]],
+  [["хийд", "сүм", "шүтээн", "тахил", "залбир", "овоо", "мөргөл"], ["Тав тухтай, даруухан хувцас", "Гутлаа хялбар тайлж болохоор", "Жижиг мөнгө (тахил өргөх бол)", "Утас"]],
+  [["парк", "цэцэрлэг", "гүүр", "эрэг", "алхах", "зугаал", "гудамж", "хүрээлэн"], ["Тав тухтай гутал", "Ус", "Powerbank"]],
+  [["гэрэл зураг", "галерей", "дурсгалт"], ["Утас/камер", "Powerbank"]],
 ];
 
-function getIdeaItems(title, desc, feeling) {
+// Хамгийн сүүлчийн, ерөнхий "гарч явахад хэрэгтэй" жагсаалт — зөвхөн idea-д бодит очих газар
+// (mapQuery) байгаа тохиолдолд ашиглана; гэрийн/тодорхойгүй үйл явдалд юу ч санал болгохгүй.
+const DEFAULT_OUTING_ITEMS = ["Утас", "Powerbank", "Бэлэн мөнгө/карт"];
+
+function getIdeaItems(title, desc, feeling, hasVenue) {
   const t = (title + " " + (desc||"") + " " + (feeling||"")).toLowerCase();
   for (const [triggers, items] of ITEMS_RULES) {
     if (triggers.some(k => t.includes(k))) return items;
   }
-  return [];
+  return hasVenue ? DEFAULT_OUTING_ITEMS : [];
 }
 
 function imgTag(url, credit, cls, style) {

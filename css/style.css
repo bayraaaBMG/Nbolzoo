@@ -1545,6 +1545,40 @@ body {
 .game-solo-mem-front{ background:#fff;border:2px solid var(--border);transform:rotateY(180deg); }
 .game-solo-mem-card.matched .game-solo-mem-front{ border-color:var(--primary);background:var(--primary-soft); }
 
+/* ---- Хурдны шалгалт (Reaction Time) ---- */
+.game-reaction-box{
+  background:#fff;border:2px solid var(--border);border-radius:16px;padding:60px 20px;
+  text-align:center;cursor:pointer;transition:background .15s ease;-webkit-user-select:none;user-select:none;
+}
+.game-reaction-title{ font-size:26px;font-weight:800;margin-bottom:8px; }
+.game-reaction-sub{ color:var(--text-light);font-size:14px; }
+
+/* ---- 2048 ---- */
+.game-2048-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:var(--border);
+  padding:8px;border-radius:12px;max-width:360px;margin:0 auto;
+}
+.game-2048-cell{
+  aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;font-weight:800;font-size:20px;background:#fff;color:var(--text);
+}
+.game-2048-cell[data-val="2"]{ background:#eee4da; }
+.game-2048-cell[data-val="4"]{ background:#ede0c8; }
+.game-2048-cell[data-val="8"]{ background:#f2b179;color:#fff; }
+.game-2048-cell[data-val="16"]{ background:#f59563;color:#fff; }
+.game-2048-cell[data-val="32"]{ background:#f67c5f;color:#fff; }
+.game-2048-cell[data-val="64"]{ background:#f65e3b;color:#fff; }
+.game-2048-cell[data-val="128"]{ background:#edcf72;color:#fff;font-size:17px; }
+.game-2048-cell[data-val="256"]{ background:#edcc61;color:#fff;font-size:17px; }
+.game-2048-cell[data-val="512"]{ background:#edc850;color:#fff;font-size:17px; }
+.game-2048-cell[data-val="1024"]{ background:#edc53f;color:#fff;font-size:15px; }
+.game-2048-cell[data-val="2048"]{ background:#edc22e;color:#fff;font-size:15px;box-shadow:0 0 12px rgba(237,194,46,.7); }
+.game-2048-controls{
+  display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,44px);
+  gap:6px;justify-content:center;margin-top:16px;
+}
+.game-2048-controls button{ padding:0; }
+
 /* ---- Featured card (7 хоногийн Couple Challenge) ---- */
 .game-featured-card{
   display:flex;align-items:center;gap:16px;margin-top:16px;padding:20px;border-radius:18px;cursor:pointer;

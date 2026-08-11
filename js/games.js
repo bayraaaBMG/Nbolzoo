@@ -35,6 +35,9 @@ const SOLO_GAMES = {
   challenge:   { label: "Random Challenge",         emoji: "🎲" },
   question:    { label: "Random Question",          emoji: "🔮" },
   letter:      { label: "Ирээдүйн хосдоо захиа",    emoji: "💌" },
+  reaction:    { label: "Хурдны шалгалт",           emoji: "⚡" },
+  puzzle2048:  { label: "2048",                     emoji: "🔢" },
+  flagguess:   { label: "Улсын туг таах",           emoji: "🌍" },
 };
 
 // ---------- АСУУЛТ/ПРОМПТ САНГУУД ----------
@@ -86,6 +89,19 @@ const CARDS_TRUTHDARE = [
   { type: "dare", text: "Хамгийн сайхан комплиментаа хэл" },
   { type: "truth", text: "Хамгийн ичсэн мөчөө хуваалц" },
   { type: "dare", text: "Нүдээ аниад 10 секунд намайг тэвэр" },
+];
+
+const FLAG_BANK = [
+  { flag: "🇲🇳", name: "Монгол" }, { flag: "🇰🇷", name: "Өмнөд Солонгос" }, { flag: "🇯🇵", name: "Япон" },
+  { flag: "🇨🇳", name: "Хятад" }, { flag: "🇷🇺", name: "Орос" }, { flag: "🇺🇸", name: "АНУ" },
+  { flag: "🇫🇷", name: "Франц" }, { flag: "🇩🇪", name: "Герман" }, { flag: "🇮🇹", name: "Итали" },
+  { flag: "🇪🇸", name: "Испани" }, { flag: "🇬🇧", name: "Их Британи" }, { flag: "🇹🇷", name: "Турк" },
+  { flag: "🇧🇷", name: "Бразил" }, { flag: "🇨🇦", name: "Канад" }, { flag: "🇦🇺", name: "Австрали" },
+  { flag: "🇮🇳", name: "Энэтхэг" }, { flag: "🇹🇭", name: "Тайланд" }, { flag: "🇻🇳", name: "Вьетнам" },
+  { flag: "🇲🇽", name: "Мексик" }, { flag: "🇬🇷", name: "Грек" }, { flag: "🇳🇱", name: "Нидерланд" },
+  { flag: "🇸🇪", name: "Швед" }, { flag: "🇨🇭", name: "Швейцарь" }, { flag: "🇦🇪", name: "ХАЭ" },
+  { flag: "🇪🇬", name: "Египет" }, { flag: "🇿🇦", name: "Өмнөд Африк" }, { flag: "🇸🇬", name: "Сингапур" },
+  { flag: "🇵🇹", name: "Португал" }, { flag: "🇦🇷", name: "Аргентин" }, { flag: "🇰🇿", name: "Казахстан" },
 ];
 
 const CARDS_MEMORIES = [
@@ -1320,6 +1336,9 @@ function startSoloGame(id) {
   if (id === "challenge") return renderSoloChallenge();
   if (id === "question") return renderSoloRandomQuestion();
   if (id === "letter") return renderSoloLetter();
+  if (id === "reaction") return renderSoloReaction();
+  if (id === "puzzle2048") return renderSolo2048();
+  if (id === "flagguess") return renderSoloFlagGuess();
 }
 
 // ---- Memory ----
@@ -1607,4 +1626,177 @@ async function deleteSoloLetter(id) {
     await db.collection("futureLetters").doc(id).delete();
     renderMyLetters();
   } catch (e) { showToast("⚠️ Устгахад алдаа гарлаа"); }
+}
+
+// ---- Улсын туг таах (bored.com-ы Trivia Quiz-с санаа авсан) ----
+function renderSoloFlagGuess() {
+  soloState = { idx: 0, score: 0, order: shuffleArr(FLAG_BANK).slice(0, 8) };
+  renderSoloFlagGuessQuestion();
+}
+function renderSoloFlagGuessQuestion() {
+  const { idx, order } = soloState;
+  const correct = order[idx];
+  const distractors = shuffleArr(FLAG_BANK.filter(f => f.name !== correct.name)).slice(0, 3);
+  const opts = shuffleArr([correct, ...distractors]);
+  gameRoot().innerHTML = `
+    <a class="back-btn" onclick="renderSoloHome()">← Буцах</a>
+    <div class="game-round-progress">Асуулт ${idx + 1} / ${order.length} · Оноо: ${soloState.score}</div>
+    <div class="game-round-card" style="text-align:center;">
+      <div style="font-size:64px;margin-bottom:6px;">${correct.flag}</div>
+      <h2>Энэ аль улсын туг вэ?</h2>
+      <div class="game-opts" id="soloFlagOpts">
+        ${opts.map(o => `<div class="game-opt" onclick="answerSoloFlag('${escapeHtml(o.name).replace(/'/g,"\\'")}')">${escapeHtml(o.name)}</div>`).join("")}
+      </div>
+    </div>`;
+}
+function answerSoloFlag(name) {
+  const { idx, order } = soloState;
+  const correct = order[idx];
+  const isCorrect = name === correct.name;
+  document.querySelectorAll("#soloFlagOpts .game-opt").forEach(el => {
+    el.style.pointerEvents = "none";
+    if (el.textContent === correct.name) el.classList.add("correct");
+    else if (el.textContent === name) el.classList.add("wrong");
+  });
+  if (isCorrect) soloState.score++;
+  setTimeout(() => {
+    soloState.idx++;
+    if (soloState.idx >= order.length) {
+      gameRoot().innerHTML = `
+        <a class="back-btn" onclick="renderSoloHome()">← Буцах</a>
+        <div class="game-round-card" style="text-align:center;">
+          <div style="font-size:52px;">🌍</div>
+          <h2>Дуусгалаа!</h2>
+          <p class="game-round-sub">Таны оноо: <b>${soloState.score} / ${order.length}</b></p>
+          <button class="btn btn-primary" type="button" style="width:100%;margin-top:14px;" onclick="renderSoloFlagGuess()">🔄 Дахин тоглох</button>
+        </div>`;
+    } else renderSoloFlagGuessQuestion();
+  }, 1000);
+}
+
+// ---- Хурдны шалгалт / Reaction Time (bored.com-ы Mini Games-с санаа авсан) ----
+// Ганц утсаа хосоороо дамжуулж, хэн хурдан дарж байгаагаа өрсөлдөж болно.
+let reactionTimeoutId = null;
+function renderSoloReaction() {
+  soloState = { phase: "idle", best: soloState && soloState.best };
+  renderReactionScreen("Хурдаа шалгаарай!", "Дарахад бэлэн болмогц дэлгэц ногоон болно. Хэт эрт бүү дар!", "btn-primary", "startReactionRound()");
+}
+function renderReactionScreen(title, sub, btnClass, onclick, bg) {
+  gameRoot().innerHTML = `
+    <a class="back-btn" onclick="clearTimeout(reactionTimeoutId);renderSoloHome()">← Буцах</a>
+    <h2 style="margin:10px 0 4px;">⚡ Хурдны шалгалт</h2>
+    ${soloState.best ? `<p style="color:var(--text-light);margin-bottom:10px;">🏆 Хамгийн сайн: <b>${soloState.best} ms</b></p>` : ""}
+    <div class="game-reaction-box" style="${bg ? `background:${bg};` : ""}" onclick="${onclick || ""}">
+      <div class="game-reaction-title">${escapeHtml(title)}</div>
+      <p class="game-reaction-sub">${escapeHtml(sub)}</p>
+    </div>`;
+}
+function startReactionRound() {
+  soloState.phase = "waiting";
+  renderReactionScreen("Хүлээж байна...", "Ногоон болтол хүлээгээрэй", "btn-ghost", "earlyClickReaction()", "#e8e8f0");
+  const delay = 1200 + Math.random() * 2800;
+  reactionTimeoutId = setTimeout(() => {
+    if (soloState.phase !== "waiting") return;
+    soloState.phase = "ready";
+    soloState.readyAt = Date.now();
+    renderReactionScreen("ОДОО ДАР!", "", "btn-primary", "clickReaction()", "#2ecc71");
+  }, delay);
+}
+function earlyClickReaction() {
+  clearTimeout(reactionTimeoutId);
+  soloState.phase = "idle";
+  renderReactionScreen("Хэтэрхий яаравчилсан! 😅", "Ногоон болохыг хүлээгээд дараарай", "btn-primary", "startReactionRound()", "#ff6b6b");
+}
+function clickReaction() {
+  const ms = Date.now() - soloState.readyAt;
+  soloState.phase = "idle";
+  if (!soloState.best || ms < soloState.best) soloState.best = ms;
+  renderReactionScreen(`${ms} ms`, "Дахин туршиж үзэх үү?", "btn-primary", "startReactionRound()", "#fff");
+}
+
+// ---- 2048 (bored.com-ы Puzzle Games-с санаа авсан) ----
+let game2048KeyHandler = null;
+function cleanup2048() {
+  if (game2048KeyHandler) { document.removeEventListener("keydown", game2048KeyHandler); game2048KeyHandler = null; }
+}
+function renderSolo2048() {
+  cleanup2048();
+  soloState = { grid: Array.from({length:4},()=>Array(4).fill(0)), score: 0, over: false, won: false };
+  add2048Tile(); add2048Tile();
+  game2048KeyHandler = (e) => {
+    const map = { ArrowLeft:"left", ArrowRight:"right", ArrowUp:"up", ArrowDown:"down" };
+    if (map[e.key]) { e.preventDefault(); move2048(map[e.key]); }
+  };
+  document.addEventListener("keydown", game2048KeyHandler);
+  render2048();
+}
+function add2048Tile() {
+  const empty = [];
+  soloState.grid.forEach((row, r) => row.forEach((v, c) => { if (!v) empty.push([r, c]); }));
+  if (!empty.length) return;
+  const [r, c] = empty[Math.floor(Math.random() * empty.length)];
+  soloState.grid[r][c] = Math.random() < 0.9 ? 2 : 4;
+}
+function slideMergeRow(row) {
+  let vals = row.filter(v => v);
+  let gained = 0;
+  for (let i = 0; i < vals.length - 1; i++) {
+    if (vals[i] === vals[i+1]) { vals[i] *= 2; gained += vals[i]; vals.splice(i+1, 1); }
+  }
+  while (vals.length < 4) vals.push(0);
+  return { row: vals, gained };
+}
+function move2048(dir) {
+  if (soloState.over) return;
+  const g = soloState.grid;
+  let changed = false, gained = 0;
+  const getRow = (i, rev) => {
+    let r;
+    if (dir === "left" || dir === "right") r = [...g[i]];
+    else r = [0,1,2,3].map(k => g[k][i]);
+    return rev ? r.reverse() : r;
+  };
+  const setRow = (i, arr, rev) => {
+    const finalArr = rev ? [...arr].reverse() : arr;
+    if (dir === "left" || dir === "right") { if (JSON.stringify(g[i]) !== JSON.stringify(finalArr)) changed = true; g[i] = finalArr; }
+    else { [0,1,2,3].forEach(k => { if (g[k][i] !== finalArr[k]) changed = true; g[k][i] = finalArr[k]; }); }
+  };
+  const reversed = dir === "right" || dir === "down";
+  for (let i = 0; i < 4; i++) {
+    const { row, gained: g2 } = slideMergeRow(getRow(i, reversed));
+    gained += g2;
+    setRow(i, row, reversed);
+  }
+  if (!changed) return;
+  soloState.score += gained;
+  add2048Tile();
+  if (g.some(row => row.some(v => v === 2048)) && !soloState.won) soloState.won = true;
+  soloState.over = !has2048Moves();
+  render2048();
+}
+function has2048Moves() {
+  const g = soloState.grid;
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+    if (!g[r][c]) return true;
+    if (c < 3 && g[r][c] === g[r][c+1]) return true;
+    if (r < 3 && g[r][c] === g[r+1][c]) return true;
+  }
+  return false;
+}
+function render2048() {
+  const g = soloState.grid;
+  gameRoot().innerHTML = `
+    <a class="back-btn" onclick="cleanup2048();renderSoloHome()">← Буцах</a>
+    <h2 style="margin:10px 0 4px;">🔢 2048</h2>
+    <p style="color:var(--text-light);margin-bottom:10px;">Оноо: <b>${soloState.score}</b>${soloState.won ? " · 🎉 2048-д хүрлээ!" : ""}</p>
+    <div class="game-2048-grid">
+      ${g.map(row => row.map(v => `<div class="game-2048-cell" data-val="${v}">${v || ""}</div>`).join("")).join("")}
+    </div>
+    <div class="game-2048-controls">
+      <div></div><button class="btn btn-ghost" type="button" onclick="move2048('up')">↑</button><div></div>
+      <button class="btn btn-ghost" type="button" onclick="move2048('left')">←</button>
+      <button class="btn btn-ghost" type="button" onclick="move2048('down')">↓</button>
+      <button class="btn btn-ghost" type="button" onclick="move2048('right')">→</button>
+    </div>
+    ${soloState.over ? `<div class="game-round-card" style="text-align:center;margin-top:14px;"><h3>Тоглоом дууслаа</h3><button class="btn btn-primary" type="button" style="width:100%;margin-top:10px;" onclick="renderSolo2048()">🔄 Дахин тоглох</button></div>` : ""}`;
 }

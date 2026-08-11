@@ -105,57 +105,77 @@ const wonderTypeImgDB = {
 };
 
 // UB idea title keyword → image
-function getIdeaImg(title) {
+// category → нэрлэсэн түлхүүр үг олдоогүй үед ашиглах агуулгын хувьд тохирсон нөөц зураг
+// (365 санааны аль нь ч зурагтай алдуулгүй харагдана)
+const CATEGORY_FALLBACK_IMG = {
+  "кафе":      {u: IMG.coffee,   s: "Unsplash"},
+  "ресторан":  {u: IMG.dinner,   s: "Unsplash"},
+  "кино":      {u: IMG.cinema,   s: "Unsplash"},
+  "урлаг":     {u: IMG.art,      s: "Unsplash"},
+  "музей":     {u: IMG.museum,   s: "Unsplash"},
+  "парк":      {u: IMG.park,     s: "Unsplash"},
+  "худалдаа":  {u: IMG.ub,       s: "Wikipedia CC"},
+  "хөгжим":    {u: IMG.music,    s: "Unsplash"},
+  "тоглоом":   {u: IMG.boardgame,s: "Unsplash"},
+  "spa":       {u: IMG.spa,      s: "Unsplash"},
+  "усан":      {u: IMG.hiking,   s: "Unsplash"},
+  "өвлийн":    {u: IMG.skating,  s: "Unsplash"},
+  "идэвхтэй":  {u: IMG.fitness,  s: "Unsplash"},
+  "ном":       {u: IMG.bookshop, s: "Unsplash"},
+};
+
+// idea.title-аас тохирох зургийг оноох. Аль ч түлхүүр үг тохирохгүй бол category-гоор
+// нөөц зураг сонгоно (category заавал биш) — ингэснээр 365 идея бүр зурагтай харагдана.
+function getIdeaImg(title, category) {
   const t = title.toLowerCase();
-  if(t.includes("зайсан") || t.includes("хотын") || t.includes("skybar") || t.includes("sky"))
+  if(t.includes("зайсан") || t.includes("хотын") || t.includes("skybar") || t.includes("sky") || t.includes("хүннү мол") || t.includes("хотхон") || t.includes("сүхбаатар") || t.includes("талбай") || t.includes("энхтайваны гүүр"))
     return {u: IMG.ub,       s: "Wikipedia CC"};
-  if(t.includes("сүхбаатар") || t.includes("талбай"))
-    return {u: IMG.ub,       s: "Wikipedia CC"};
-  if(t.includes("музей") || t.includes("heritage") || t.includes("чойжин") || t.includes("монгол cos"))
+  if(t.includes("музей") || t.includes("heritage") || t.includes("чойжин") || t.includes("монгол cos") || t.includes("галерей") || t.includes("gallery"))
     return {u: IMG.museum,   s: "Unsplash"};
-  if(t.includes("гандан") || t.includes("хийд") || t.includes("залбир"))
+  if(t.includes("гандан") || t.includes("хийд") || t.includes("залбир") || t.includes("шүтээн") || t.includes("хөшөө") || t.includes("будда") || t.includes("сүм") || t.includes("тахил") || t.includes("овоо"))
     return {u: IMG.erdene,   s: "Wikipedia CC"};
-  if(t.includes("богд уул") || t.includes("уулд алх") || t.includes("аялал") || t.includes("хайк"))
+  if(t.includes("богд уул") || t.includes("уулд алх") || t.includes("уулын") || t.includes("аялал") || t.includes("хайк") || t.includes("даваа") || t.includes("толгод"))
     return {u: IMG.hiking,   s: "Unsplash"};
   if(t.includes("art") || t.includes("үзэсгэлэн") || t.includes("экспо"))
     return {u: IMG.art,      s: "Unsplash"};
   if(t.includes("кино") || t.includes("theatre") || t.includes("кинотеатр") || t.includes("шангри"))
     return {u: IMG.cinema,   s: "Unsplash"};
-  if(t.includes("кофешоп") || t.includes("кафе") || t.includes("tom n") || t.includes("stupa cafe"))
+  if(t.includes("кофешоп") || t.includes("кафе") || t.includes("café") || t.includes("tom n") || t.includes("stupa cafe") || t.includes("coffee"))
     return {u: IMG.coffee,   s: "Unsplash"};
-  if(t.includes("internom") || t.includes("ном"))
+  if(t.includes("internom") || t.includes("ном") || t.includes("библиотек"))
     return {u: IMG.bookshop, s: "Unsplash"};
-  if(t.includes("жүжиг") || t.includes("опера") || t.includes("театр"))
+  if(t.includes("жүжиг") || t.includes("опера") || t.includes("театр") || t.includes("цирк"))
     return {u: IMG.theater,  s: "Unsplash"};
-  if(t.includes("ресторан") || t.includes("хархорум 14") || t.includes("цаатан"))
+  if(t.includes("ресторан") || t.includes("хархорум 14") || t.includes("цаатан") || t.includes("гуанз") || t.includes("буррито") || t.includes("рамен") || t.includes("пицца") || t.includes("стейк") || t.includes("кари") || t.includes("хачапури"))
     return {u: IMG.dinner,   s: "Unsplash"};
-  if(t.includes("skybar") || t.includes("sky bar") || t.includes("шөнийн"))
+  if(t.includes("skybar") || t.includes("sky bar") || t.includes("шөнийн") || t.includes("bar-т") || t.includes(" bar"))
     return {u: IMG.bar,      s: "Unsplash"};
-  if(t.includes("карао") || t.includes("mongolyrics") || t.includes("хөгжим") || t.includes("дуу"))
+  if(t.includes("карао") || t.includes("mongolyrics") || t.includes("хөгжим") || t.includes("дуу ") || t.includes("jazz") || t.includes("концерт"))
     return {u: IMG.music,    s: "Unsplash"};
   if(t.includes("боулинг"))
     return {u: IMG.bowling,  s: "Unsplash"};
   if(t.includes("ice") || t.includes("гулгуур") || t.includes("зимний"))
     return {u: IMG.skating,  s: "Unsplash"};
-  if(t.includes("spa") || t.includes("массаж") || t.includes("тайвшрал"))
+  if(t.includes("spa") || t.includes("массаж") || t.includes("тайвшрал") || t.includes("саун"))
     return {u: IMG.spa,      s: "Unsplash"};
-  if(t.includes("парк") || t.includes("зугаал") || t.includes("алхалт"))
+  if(t.includes("парк") || t.includes("зугаал") || t.includes("алхалт") || t.includes("цэцэрлэг") || t.includes("хүрээлэн") || t.includes("ногоон бүс") || t.includes("эрэг") || t.includes("гүүр"))
     return {u: IMG.park,     s: "Unsplash"};
   if(t.includes("савлуур") || t.includes("шавар"))
     return {u: IMG.pottery,  s: "Unsplash"};
   if(t.includes("ёг") || t.includes("yoga"))
     return {u: IMG.yoga,     s: "Unsplash"};
-  if(t.includes("мастер класс") || t.includes("хоол хийх"))
+  if(t.includes("мастер класс") || t.includes("хоол хийх") || t.includes("жигнэ"))
     return {u: IMG.cooking,  s: "Unsplash"};
-  if(t.includes("фитнес") || t.includes("бэлтгэл"))
+  if(t.includes("фитнес") || t.includes("бэлтгэл") || t.includes("гүйлт") || t.includes("бокс") || t.includes("cross-fit"))
     return {u: IMG.fitness,  s: "Unsplash"};
   if(t.includes("сур харваа") || t.includes("archery"))
     return {u: IMG.archery,  s: "Unsplash"};
-  if(t.includes("board game") || t.includes("тоглоом") || t.includes("тоглох"))
+  if(t.includes("board game") || t.includes("тоглоом") || t.includes("тоглох") || t.includes("escape room") || t.includes("vr ") || t.includes("трамплин") || t.includes("картинг"))
     return {u: IMG.boardgame,s: "Unsplash"};
-  if(t.includes("хос") || t.includes("байгаль"))
+  if(t.includes("хос") || t.includes("байгаль") || t.includes("гэрэл зураг"))
     return {u: IMG.couple,   s: "Unsplash"};
-  return null;
+  if(category && CATEGORY_FALLBACK_IMG[category]) return CATEGORY_FALLBACK_IMG[category];
+  return {u: IMG.couple, s: "Unsplash"};
 }
 
 function imgTag(url, credit, cls, style) {
@@ -195,7 +215,7 @@ function navigate(page, param) {
 
 function renderCard(idea) {
   const isLiked = userLikes.has(idea.id);
-  const imgInfo = getIdeaImg(idea.title);
+  const imgInfo = getIdeaImg(idea.title, idea.category);
   const badge = idea.day === 1
     ? '<div class="card-badge gold" style="z-index:3">⭐ Шинэ жил</div>'
     : (idea.likes > 1500 ? '<div class="card-badge" style="z-index:3">🔥 Hot</div>' : '');
@@ -230,7 +250,7 @@ function renderCard(idea) {
 function openIdeaModal(id) {
   const idea = allUbIdeas.find(i => i.id === id);
   if(!idea) return;
-  const imgInfo = getIdeaImg(idea.title);
+  const imgInfo = getIdeaImg(idea.title, idea.category);
   const isLiked = userLikes.has(idea.id);
   const imgHtml = imgInfo
     ? `<div class="modal-image" style="background:${getColor(idea.id)};position:relative;overflow:hidden;padding:0;">

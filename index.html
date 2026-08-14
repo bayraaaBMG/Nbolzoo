@@ -120,16 +120,43 @@
 
     <div class="container">
       <div class="section-title">
-        <h2>🔥 Өнөөдрийн шилдэг санаанууд</h2>
+        <h2>📅 Өнөөдрийн болзоо</h2>
         <a onclick="navigate('ub')">Бүгдийг харах →</a>
       </div>
       <div class="cards-grid" id="featuredGrid"></div>
+
+      <div class="section-title">
+        <h2>💰 Төсвөөр хайх</h2>
+      </div>
+      <div class="filters" id="budgetChips"></div>
+
+      <div class="section-title">
+        <h2>🎭 Мэдрэмжээр хайх</h2>
+        <a onclick="navigate('ub')">Бүгдийг харах →</a>
+      </div>
+      <div class="filters" id="moodChips"></div>
+      <div class="cards-grid" id="moodGrid"></div>
+
+      <div class="section-title">
+        <h2>⭐ Редакцын сонголт</h2>
+      </div>
+      <div class="cards-grid" id="editorialGrid"></div>
 
       <div class="section-title">
         <h2>🌄 Аймагт хамт явах уу?</h2>
         <a onclick="navigate('aimags')">21 аймаг үзэх →</a>
       </div>
       <div class="aimag-grid" id="featuredAimags"></div>
+
+      <div class="section-title">
+        <h2>🎮 Хамтдаа тоглож, урилга илгээцгээе</h2>
+      </div>
+      <div class="promo-row" id="gamesInvitePromo"></div>
+
+      <div class="section-title">
+        <h2>👥 Нийгэмлэгт нэгдээрэй</h2>
+      </div>
+      <div class="promo-row" id="communityPromo"></div>
     </div>
   </div>
 
@@ -196,7 +223,11 @@
 <script src="js/main.js"></script>
 <script>
 renderFeatured();
+renderBudgetSection();
+renderMoodSection();
+renderEditorialPicks();
 renderFeaturedAimags();
+renderPromoSections();
 updateHeroStats();
 </script>
 

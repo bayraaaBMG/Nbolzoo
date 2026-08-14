@@ -1712,3 +1712,22 @@ select:focus-visible, [tabindex]:focus-visible {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }
+
+/* ---- Homepage discovery-flow promo cards (Games/Invitation/Community) ---- */
+.promo-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px; margin-bottom: 32px;
+}
+.promo-card {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  color: white; border-radius: 20px; padding: 28px; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden;
+}
+.promo-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,119,182,0.18); }
+.promo-card.alt { background: linear-gradient(135deg, var(--accent), #B8451F); }
+.promo-card.wide { grid-column: 1 / -1; }
+.promo-card-emoji { font-size: 36px; margin-bottom: 10px; display: block; }
+.promo-card h3 { font-size: 18px; margin-bottom: 6px; }
+.promo-card p { font-size: 13px; opacity: 0.9; margin-bottom: 14px; line-height: 1.5; }
+.promo-card .btn { background: rgba(255,255,255,0.18); color: white; }
+.promo-card .btn:hover { background: rgba(255,255,255,0.28); }

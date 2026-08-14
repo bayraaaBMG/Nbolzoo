@@ -107,8 +107,10 @@
         <div class="filter-chip" data-ub-filter="spring">🌸 Хавар</div>
         <div class="filter-chip" data-ub-filter="summer">☀️ Зун</div>
         <div class="filter-chip" data-ub-filter="autumn">🍂 Намар</div>
-        <div class="filter-chip" data-ub-filter="cheap">💸 Хямд</div>
         <div class="filter-chip" data-ub-filter="free">🆓 Үнэгүй</div>
+        <div class="filter-chip" data-ub-filter="cheap">💸 Бага (≤50,000₮)</div>
+        <div class="filter-chip" data-ub-filter="medium">💳 Дунд (≤150,000₮)</div>
+        <div class="filter-chip" data-ub-filter="expensive">💎 Өндөр (&gt;150,000₮)</div>
       </div>
       <div class="cards-grid" id="ubGrid"></div>
       <div class="pagination" id="ubPagination"></div>
@@ -175,6 +177,14 @@
 <script src="js/ub.js"></script>
 <script src="js/main.js"></script>
 <script>
+const __ubParams = new URLSearchParams(location.search);
+const __ubFilter = __ubParams.get("filter");
+if (__ubFilter && document.querySelector(`[data-ub-filter="${__ubFilter}"]`)) {
+  document.querySelectorAll('[data-ub-filter]').forEach(x => x.classList.remove("active"));
+  const __chip = document.querySelector(`[data-ub-filter="${__ubFilter}"]`);
+  __chip.classList.add("active");
+  currentUbFilter = __ubFilter;
+}
 renderUbIdeas();
 </script>
 

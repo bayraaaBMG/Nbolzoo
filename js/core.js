@@ -775,7 +775,7 @@ function renderCard(idea) {
   const imgInfo = getIdeaImg(idea.title, idea.category);
   const badge = idea.day === 1
     ? '<div class="card-badge gold" style="z-index:3">⭐ Шинэ жил</div>'
-    : (idea.likes > 1500 ? '<div class="card-badge" style="z-index:3">🔥 Hot</div>' : '');
+    : '';
   const imageContent = imgInfo
     ? `<img src="${imgInfo.u}" loading="lazy" alt="${idea.title}" class="card-bg-img" onerror="imgFallback(this)">
        <div class="card-img-overlay"></div>

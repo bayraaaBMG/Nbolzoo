@@ -386,6 +386,31 @@ const ubIdeaTemplates = [
   {title: "Шинжлэх ухааны робот үзэсгэлэнд зочлох", desc: "Технологийн шинэлэг үзэсгэлэн", price: 20000, feeling: "Ирээдүйн технологийг хамт судлах сониуч аялал."},
 ];
 
+// Мэдрэмжийн ангилал (mood) — санаа бүрийн бодит title/desc/feeling текстээс
+// түлхүүр үгээр тодорхойлно. Шинэ баримт зохиохгүй, зөвхөн байгаа контентыг ангилна.
+const MOODS = [
+  {id: "romantic", emoji: "💕", label: "Романтик", keywords: ["романтик", "хайр", "хайрт", "дотно", "дулаахан", "тансаг"]},
+  {id: "calm", emoji: "🌿", label: "Тайван", keywords: ["тайван", "амар", "нам гүм", "чимээгүй", "амрах", "тэнхээ"]},
+  {id: "adventure", emoji: "🔥", label: "Адал явдалт", keywords: ["адал явдал", "эрсдэл", "шинэ зүйл", "идэвхтэй", "авирах", "аюул"]},
+  {id: "fun", emoji: "😄", label: "Хөгжилтэй", keywords: ["хөгжилтэй", "инээдэмтэй", "баяр хөөр", "хөгжөөнт", "инээх"]},
+  {id: "deep", emoji: "💬", label: "Гүнзгий ярилцлага", keywords: ["ярилцлага", "ойлголцол", "гүнзгий", "ярих", "нээлттэй", "мөрөөдөл"]}
+];
+const MOOD_FALLBACK_BY_CATEGORY = {
+  "кафе": "romantic", "ресторан": "romantic", "кино": "romantic",
+  "spa": "calm", "урлаг": "deep", "музей": "deep", "ном": "deep",
+  "парк": "fun", "худалдаа": "fun", "хөгжим": "fun", "тоглоом": "fun",
+  "усан": "adventure", "өвлийн": "adventure", "идэвхтэй": "adventure"
+};
+function classifyMood(tmpl, cat) {
+  const text = `${tmpl.title} ${tmpl.desc} ${tmpl.feeling}`.toLowerCase();
+  let best = null, bestScore = 0;
+  MOODS.forEach(m => {
+    const score = m.keywords.reduce((s, k) => s + (text.includes(k) ? 1 : 0), 0);
+    if (score > bestScore) { bestScore = score; best = m.id; }
+  });
+  return best || MOOD_FALLBACK_BY_CATEGORY[cat.name] || "romantic";
+}
+
 const allUbIdeas = [];
 for(let i = 0; i < 365; i++) {
   const tmpl = ubIdeaTemplates[i % ubIdeaTemplates.length];
@@ -405,6 +430,7 @@ for(let i = 0; i < 365; i++) {
     feeling: tmpl.feeling,
     likes: Math.floor(Math.random() * 2000) + 100,
     category: cat.name,
+    mood: classifyMood(tmpl, cat),
     season: i < 90 ? "winter" : i < 180 ? "spring" : i < 270 ? "summer" : "autumn"
   });
 }
@@ -416,6 +442,8 @@ function renderUbIdeas() {
   else if(currentUbFilter === "summer") filtered = allUbIdeas.filter(i => i.season === "summer");
   else if(currentUbFilter === "autumn") filtered = allUbIdeas.filter(i => i.season === "autumn");
   else if(currentUbFilter === "cheap") filtered = allUbIdeas.filter(i => i.price > 0 && i.price <= 50000);
+  else if(currentUbFilter === "medium") filtered = allUbIdeas.filter(i => i.price > 50000 && i.price <= 150000);
+  else if(currentUbFilter === "expensive") filtered = allUbIdeas.filter(i => i.price > 150000);
   else if(currentUbFilter === "free") filtered = allUbIdeas.filter(i => i.price === 0);
   
   const totalPages = Math.ceil(filtered.length / itemsPerPage);

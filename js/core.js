@@ -842,11 +842,10 @@ function openIdeaModal(id) {
         <ul>${idea.items.map(it => `<li>${it}</li>`).join('')}</ul>
       </div>` : ''}
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="btn btn-primary" style="flex:1;min-width:120px" type="button" onclick="openBookingModal(${idea.id})">📅 Захиалах</button>
-        <button class="btn ${isLiked?'btn-accent':'btn-ghost'}" type="button" onclick="toggleLike(${idea.id});this.className='btn ${isLiked?'btn-ghost':'btn-accent'}';this.textContent='${isLiked?'🤍 Хадгалах':'❤️ Хадгалсан'}'">
+        <button class="btn ${isLiked?'btn-accent':'btn-primary'}" style="flex:1;min-width:120px" type="button" onclick="toggleLike(${idea.id});this.className='btn ${isLiked?'btn-primary':'btn-accent'}';this.textContent='${isLiked?'🤍 Хадгалах':'❤️ Хадгалсан'}'">
           ${isLiked?'❤️ Хадгалсан':'🤍 Хадгалах'}
         </button>
-        <button class="btn btn-ghost" type="button" onclick="shareIdea('${idea.title.replace(/'/g,'').replace(/"/g,'')}', ${idea.id})">🔗 Хуваалцах</button>
+        <button class="btn btn-ghost" style="flex:1;min-width:120px" type="button" onclick="shareIdea('${idea.title.replace(/'/g,'').replace(/"/g,'')}', ${idea.id})">🔗 Хуваалцах</button>
       </div>
     </div>`;
   document.getElementById("modal").classList.add("show");

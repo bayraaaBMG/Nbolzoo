@@ -401,7 +401,7 @@ for(let i = 0; i < 365; i++) {
     mapQuery: loc.mapQuery,
     items: getIdeaItems(tmpl.title, tmpl.desc, tmpl.feeling, !!loc.mapQuery),
     price: tmpl.price,
-    priceText: tmpl.price === 0 ? "Үнэгүй" : `~${tmpl.price.toLocaleString()}₮`,
+    priceText: tmpl.price === 0 ? "Үнэгүй" : (tmpl.price <= 50000 ? "Төсөв: Бага" : tmpl.price <= 150000 ? "Төсөв: Дунд" : "Төсөв: Өндөр"),
     feeling: tmpl.feeling,
     likes: Math.floor(Math.random() * 2000) + 100,
     category: cat.name,

@@ -1710,6 +1710,58 @@ body {
 .inv-my-status.responded{ background:#d1fae5;color:#047857; }
 .inv-my-response{ margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:13px;line-height:1.8;color:var(--text); }
 
+/* ---- Урилга 5-алхамт builder + realtime phone preview ----
+   Сайтын нийтлэг var(--primary) г.м ашигладаг тул .inv-my-* блоктой ижил, --inv-* палетаас
+   тусдаа (тэр палет зөвхөн #inviteApp дотор, өөрөөр хэлбэл preview pane-ий ДОТОР хэрэглэгддэг). */
+.inv-builder-head{ margin-bottom:18px; }
+.inv-builder-steps{ display:flex; gap:6px; margin-top:14px; flex-wrap:wrap; }
+.inv-builder-step-dot{
+  display:flex; align-items:center; gap:6px; padding:6px 12px 6px 6px; border-radius:20px;
+  background:var(--bg); border:1px solid var(--border); cursor:pointer; font-size:12.5px; color:var(--text-light);
+  transition:all .2s;
+}
+.inv-builder-step-dot:hover{ border-color:var(--primary); }
+.inv-builder-step-num{
+  width:22px;height:22px;border-radius:50%;background:var(--border);color:var(--text-light);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;
+}
+.inv-builder-step-dot.active{ background:var(--primary-extra-soft); border-color:var(--primary); color:var(--primary); }
+.inv-builder-step-dot.active .inv-builder-step-num{ background:var(--primary); color:white; }
+.inv-builder-step-dot.done .inv-builder-step-num{ background:var(--success); color:white; }
+.inv-builder-step-desc{ color:var(--text-light); font-size:13px; margin-bottom:16px; line-height:1.6; }
+
+.inv-builder-layout{ display:flex; gap:28px; align-items:flex-start; }
+.inv-builder-editor{ flex:1; min-width:0; }
+.inv-builder-nav{ display:flex; justify-content:space-between; align-items:center; margin-top:20px; gap:10px; }
+
+.inv-builder-preview-col{ flex-shrink:0; width:300px; position:sticky; top:90px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+.inv-phone-frame{
+  width:280px; height:580px; border-radius:36px; background:#1b1b1f; padding:12px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.25); position:relative;
+}
+.inv-phone-notch{
+  position:absolute; top:12px; left:50%; transform:translateX(-50%);
+  width:90px; height:18px; background:#1b1b1f; border-radius:0 0 12px 12px; z-index:2;
+}
+.inv-phone-screen{
+  width:100%; height:100%; border-radius:26px; overflow-y:auto; overflow-x:hidden;
+  background:var(--white); -ms-overflow-style:none; scrollbar-width:none;
+}
+.inv-phone-screen::-webkit-scrollbar{ display:none; }
+.inv-phone-screen #inviteApp{ border-radius:0; min-height:100%; }
+.inv-builder-preview-toggle{ display:none; }
+
+@media (max-width: 900px){
+  .inv-builder-layout{ flex-direction:column; }
+  .inv-builder-preview-col{ position:fixed; inset:0; z-index:2000; width:100%; height:100%;
+    background:rgba(0,0,0,0.55); justify-content:center; display:none; top:0; }
+  #inviteRoot.inv-builder-preview-open .inv-builder-preview-col{ display:flex; }
+  .inv-builder-preview-toggle{
+    display:block; width:100%; padding:12px; border-radius:10px; border:1px solid var(--border);
+    background:white; color:var(--text); font-size:14px; font-weight:600; cursor:pointer; margin-top:8px;
+  }
+}
+
 /* ---- Accessibility: keyboard focus indicator ----
    Safety net for interactive elements without an existing specific :focus/:focus-visible
    style. Only fires for keyboard navigation (not mouse clicks), so it adds nothing visually

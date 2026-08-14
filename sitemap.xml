@@ -7,5 +7,7 @@
   <url><loc>https://nbolzoo.vercel.app/gifts.html</loc><priority>0.8</priority></url>
   <url><loc>https://nbolzoo.vercel.app/expert.html</loc><priority>0.8</priority></url>
   <url><loc>https://nbolzoo.vercel.app/community.html</loc><priority>0.6</priority></url>
+  <url><loc>https://nbolzoo.vercel.app/games.html</loc><priority>0.7</priority></url>
+  <url><loc>https://nbolzoo.vercel.app/urilga.html</loc><priority>0.6</priority></url>
   <url><loc>https://nbolzoo.vercel.app/saved.html</loc><priority>0.5</priority></url>
 </urlset>

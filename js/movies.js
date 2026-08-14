@@ -34,8 +34,12 @@ const movies = [
   // 🇲🇳 МОНГОЛ КИНО
   {id:31, emoji:"🏹", title:"Монгол (Чингис хааны залуу нас)", year:"2007", genres:["mongolian","action","drama"], rating:"7.7", duration:"126 мин", lang:"mongolian", trending:true, dateAdded:"2024-02-01", poster:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Mongol_film.jpg/300px-Mongol_film.jpg", trailer:"https://www.youtube.com/embed/1j-3wfHHAZs", watchUrl:"", director:"Sergei Bodrov", desc:"Чингис хааны залуу насыг дүрсэлсэн алдарт Монгол-Казак-Герман хамтарсан кино. Тэсэх тэвчих, хайрын хүч хамгийн том хүч.", why:"Монголын түүхийг хамтдаа мэдэхэд, бахархал төрүүлдэг"}
 ];
-// TODO: Replace with your TMDB API key (free at https://www.themoviedb.org/settings/api)
+// TMDB-аас автомат хайлт хийхэд зориулсан түлхүүр (үнэгүй, themoviedb.org/settings/api дээрээс
+// авна). Кино каталог, зурган, шүүлт бүгд доорх hardcoded movies массив дээр ажилладаг тул энэ
+// түлхүүр тохируулаагүй үед ч сайт бүрэн ажиллана — зөвхөн "Кино нэмэх" маягт доторх TMDB-с
+// автоматаар бөглөх туслах feature л идэвхгүй болно (доор TMDB_CONFIGURED-аар шалгана).
 const TMDB_KEY = "YOUR_TMDB_API_KEY";
+const TMDB_CONFIGURED = !!TMDB_KEY && TMDB_KEY !== "YOUR_TMDB_API_KEY";
 
 var firebaseMovies = [];
 var tmdbSearchResults = [];
@@ -78,15 +82,21 @@ async function deleteMovieFromFirebase(dbId) {
 }
 
 async function doTMDBSearch() {
+  const resultsEl = document.getElementById("tmdbResults");
+  if (!TMDB_CONFIGURED) {
+    resultsEl.innerHTML = '<div style="padding:12px;color:rgba(255,255,255,0.5);font-size:13px;text-align:center">⚠️ TMDB автомат хайлт тохируулагдаагүй байна. Доорх талбаруудыг гараар бөглөнө үү.</div>';
+    resultsEl.style.display = "block";
+    return;
+  }
   const q = (document.getElementById("tmdbSearchInput").value || "").trim();
   if (!q) return;
   const btn = document.getElementById("tmdbSearchBtn");
-  const resultsEl = document.getElementById("tmdbResults");
   btn.textContent = "...";
   btn.disabled = true;
   try {
     const url = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=en-US&page=1`;
     const res = await fetch(url);
+    if (!res.ok) throw new Error("TMDB API returned " + res.status);
     const data = await res.json();
     tmdbSearchResults = (data.results || []).slice(0, 8);
     if (!tmdbSearchResults.length) {
@@ -96,20 +106,20 @@ async function doTMDBSearch() {
         const poster = m.poster_path ? `https://image.tmdb.org/t/p/w92${m.poster_path}` : "";
         const year = (m.release_date || "").slice(0, 4);
         const imgHtml = poster
-          ? `<img src="${poster}" alt="" loading="lazy">`
+          ? `<img src="${escapeHtml(poster)}" alt="" loading="lazy">`
           : `<div style="width:36px;height:54px;background:#1a1a2e;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px">🎬</div>`;
         return `<div class="tmdb-result-item" onclick="selectTMDBResult(${i})">
           ${imgHtml}
           <div class="tmdb-result-info">
-            <div class="tmdb-result-title">${m.title || m.original_title}</div>
-            <div class="tmdb-result-meta">${year} · ⭐ ${m.vote_average ? m.vote_average.toFixed(1) : "?"}</div>
+            <div class="tmdb-result-title">${escapeHtml(m.title || m.original_title)}</div>
+            <div class="tmdb-result-meta">${escapeHtml(year)} · ⭐ ${m.vote_average ? m.vote_average.toFixed(1) : "?"}</div>
           </div>
         </div>`;
       }).join("");
     }
     resultsEl.style.display = "block";
   } catch(e) {
-    resultsEl.innerHTML = '<div style="padding:12px;color:#e55;font-size:13px;text-align:center">API алдаа — TMDB_KEY шалгана уу</div>';
+    resultsEl.innerHTML = '<div style="padding:12px;color:#e55;font-size:13px;text-align:center">⚠️ TMDB-тэй холбогдоход алдаа гарлаа. Доорх талбаруудыг гараар бөглөнө үү.</div>';
     resultsEl.style.display = "block";
   }
   btn.textContent = "Хайх";
@@ -374,6 +384,12 @@ function toggleMovieWatchlist(id) {
 function openAddMovieModal() {
   const ov = document.getElementById("addMovieOverlay");
   if(ov) { ov.style.display = "block"; document.body.style.overflow = "hidden"; }
+  if (!TMDB_CONFIGURED) {
+    const input = document.getElementById("tmdbSearchInput");
+    const btn = document.getElementById("tmdbSearchBtn");
+    if (input) { input.disabled = true; input.placeholder = "Тохируулагдаагүй — доор гараар бөглөнө үү"; }
+    if (btn) { btn.disabled = true; btn.style.opacity = "0.5"; btn.style.cursor = "not-allowed"; }
+  }
 }
 
 function closeAddMovieModal() {

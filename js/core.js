@@ -928,6 +928,13 @@ function shareIdea(title, id) {
 }
 
 async function toggleLike(id) {
+  // Нэвтрээгүй хэрэглэгчид "амжилттай хадгаллаа" гэсэн худал мессеж үзүүлж болохгүй —
+  // Firestore рүү бичихгүй тул refresh хиймэгц алга болно. Тиймээс эхлээд нэвтрэхийг санал болгоно.
+  if (!currentUser) {
+    showToast("Хадгалах боломжтой болгохын тулд нэвтэрнэ үү.");
+    if (typeof openAuth === "function") openAuth("login");
+    return;
+  }
   const wasLiked = userLikes.has(id);
   if(wasLiked) { userLikes.delete(id); showToast("🤍 Хадгалсан санаанаас хасагдлаа"); }
   else { userLikes.add(id); showToast("❤️ Хадгалсан санаанд нэмэгдлээ"); }
@@ -1014,10 +1021,12 @@ function showToast(message) {
   setTimeout(() => t.remove(), 3500);
 }
 
-// Хэрэглэгчийн бичсэн текстийг innerHTML-д аюулгүй оруулахын тулд escape хийнэ (XSS сэргийлэлт)
+// Хэрэглэгчийн бичсэн текстийг innerHTML-д аюулгүй оруулахын тулд escape хийнэ (XSS сэргийлэлт).
+// Мөн quote тэмдэгтийг escape хийдэг тул text node болон attribute (жишээ нь src="...") хоёрын
+// аль алинд нь аюулгүй ашиглаж болно.
 function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str == null ? "" : String(str);
-  return div.innerHTML;
+  return div.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 

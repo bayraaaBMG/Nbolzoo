@@ -296,7 +296,7 @@ function renderCoupleModal() {
         <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px;">
           ${coupleMemories.length ? coupleMemories.map(m => `
             <div style="border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;gap:10px;align-items:flex-start;">
-              ${m.photoURL ? `<img src="${m.photoURL}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;">` : ''}
+              ${m.photoURL ? `<img src="${escapeHtml(m.photoURL)}" alt="${escapeHtml(m.title)}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;">` : ''}
               <div style="flex:1;">
                 <div style="font-weight:600;font-size:14px;">${escapeHtml(m.title)}</div>
                 <div style="font-size:12px;color:var(--text-light);">${m.date && m.date.toDate ? m.date.toDate().toLocaleDateString('mn-MN') : ''}</div>

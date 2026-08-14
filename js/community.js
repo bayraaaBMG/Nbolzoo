@@ -26,14 +26,14 @@ function renderPosts() {
   el.innerHTML = posts.map(p => `
     <div class="post">
       <div class="post-header">
-        <div class="avatar">${p.authorPhoto ? `<img src="${p.authorPhoto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : escapeHtml((p.authorName||"?").charAt(0))}</div>
+        <div class="avatar">${p.authorPhoto ? `<img src="${escapeHtml(p.authorPhoto)}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : escapeHtml((p.authorName||"?").charAt(0))}</div>
         <div>
           <div class="post-author">${escapeHtml(p.authorName)}${p.feeling ? ` <span style="font-weight:400;color:var(--text-light);">санаа сэтгэл ${p.feeling}</span>` : ""}</div>
           <div class="post-time">${timeAgo(p.createdAt)}${p.location ? ` · 📍 ${escapeHtml(p.location)}` : ""}</div>
         </div>
       </div>
       <div class="post-content">${escapeHtml(p.content)}</div>
-      ${p.imageUrl ? `<img src="${p.imageUrl}" loading="lazy" alt="" class="post-photo" onerror="this.remove()">` : (p.emoji ? `<div class="post-image">${p.emoji}</div>` : "")}
+      ${p.imageUrl ? `<img src="${escapeHtml(p.imageUrl)}" loading="lazy" alt="" class="post-photo" onerror="this.remove()">` : (p.emoji ? `<div class="post-image">${p.emoji}</div>` : "")}
       ${p.budget ? `<div class="post-budget-tag">💸 ${escapeHtml(p.budget)}</div>` : ""}
       <div class="post-actions">
         <div class="post-action ${userPostLikes.has(p.id)?'liked':''}" onclick="togglePostLike('${p.id}')">

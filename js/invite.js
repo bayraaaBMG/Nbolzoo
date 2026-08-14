@@ -607,7 +607,7 @@ function renderDateInviteExperience(recipientName) {
         <div class="inv-final-buttons">
           <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invGoTo('inv-s-wish')">Зөвшөөрөх ❤️</button>
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
-            onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Үгүй</button>
+            onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Үгүй</button>
         </div>
         <button class="inv-btn-text" type="button" onclick="invStartPersuade('inv-s-wish')">бодоод үзье...</button>
         ${INV_RSVP_HINT}
@@ -898,7 +898,7 @@ function invEncourageChain(ids, lines, nextChain) {
 }
 
 // RSVP товчнуудын дор байнга харагдах, "Үгүй"-г зөөлнөөр няцаадаг бичвэр
-const INV_RSVP_HINT = `<p class="inv-rsvp-hint">😉 Энд “Үгүй” гэдэг сонголт байдаггүй шүү... зөвхөн “Тийм” 💛</p>`;
+const INV_RSVP_HINT = `<p class="inv-rsvp-hint">💛 Аль ч хариултаа чөлөөтэй сонгоорой</p>`;
 
 function invStartPetals() {
   const petalEmojis = ["🌸", "🌺", "💮"];
@@ -980,20 +980,20 @@ function invSelectDate(d) {
   invStartLiveCountdown("invDateCountdown", d);
 }
 
+// Урьд нь энэ функц "Үгүй" товчийг курсорын доор зайлсхийлгэдэг байсан (hover/touch бүрд
+// санамсаргүй байрлал руу шилжинэ) — хэрэглэгчийн бодит зөвшөөрлийг хасдаг dark pattern байсан
+// тул идэвхгүй болгов. "Үгүй"/"Ирэхгүй" товч одоо энгийн, бүрэн ажилладаг товч болно.
 function invDodge() {
-  // Идэвхтэй карт (inv-s-final эсвэл inv-s-rsvp г.м, төрлөөс хамаарч өөр өөр id-тай) дотроос хайна —
-  // өмнө нь зөвхөн #inv-s-final гэж хатуу бичсэн тул RSVP алхам нь өөр id-тай 9 төрөлд (birthday, work,
-  // family, holiday, party, meeting, education, sport, culture) "Ирэхгүй" товч огт хөдөлдөггүй байсан.
-  const box = document.querySelector(".inv-card.active .inv-final-buttons");
-  const noBtn = document.getElementById("inv-noBtn");
-  if (!box || !noBtn) return;
-  const bw = box.clientWidth, bh = box.clientHeight;
-  const nw = noBtn.offsetWidth, nh = noBtn.offsetHeight;
-  const maxX = Math.max(bw - nw - 10, 0);
-  const maxY = Math.max(bh - nh - 10, 0);
-  noBtn.style.left = (Math.random() * maxX) + "px";
-  noBtn.style.top = (Math.random() * maxY) + "px";
-  noBtn.style.transform = "none";
+  return;
+}
+
+// "Үгүй"/"Ирэхгүй"/"Оролцохгүй" товчны бодит хариу — өмнө нь эдгээр товчинд onclick огт байгаагүй
+// тул дарахад юу ч болдоггүй байсан (зөвхөн hover дээр зайлсхийдэг байсан). Одоо бодитоор
+// хариултыг хадгалж, хэрэглэгчид тодорхой feedback өгнө.
+function invDecline() {
+  submitInviteResponse({ rsvp: "ирэхгүй" });
+  document.querySelectorAll(".inv-card.active button").forEach(b => b.disabled = true);
+  if (typeof showToast === "function") showToast("Хариултыг чинь хүлээн авлаа 💛");
 }
 
 // ---------- "Дараа бодъё" гэж дарахад муур зурагтай ятгах дараалал (bolzoodate.vercel.app-с санаа авсан) ----------
@@ -1182,7 +1182,7 @@ function renderProposalExperience(recipientName, data) {
         <div class="inv-final-buttons">
           <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateProposal()">Тийм ээ! 💍</button>
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
-            onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Үгүй</button>
+            onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Үгүй</button>
         </div>
         <button class="inv-btn-text" type="button" onclick="invStartPersuade(invCelebrateProposal)">бодоод үзье...</button>
         ${INV_RSVP_HINT}
@@ -1344,7 +1344,7 @@ function renderWeddingExperience(data) {
       <div class="inv-final-buttons">
         <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invGoTo('${data.message ? "inv-s-note" : "inv-s-song"}')">Заавал ирнэ! 🎉</button>
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
-          onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
+          onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
       ${INV_RSVP_HINT}
     </div>`);
@@ -1478,7 +1478,7 @@ function renderBirthdayExperience(data) {
         <div class="inv-final-buttons">
           <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateBirthday()">Заавал ирнэ! 🎉</button>
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
-            onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
+            onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
         </div>
         ${INV_RSVP_HINT}
       </div>
@@ -1603,7 +1603,7 @@ function renderWorkExperience(data) {
       <div class="inv-final-buttons">
         <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invGoTo('inv-s-meal')">Ирнэ ✅</button>
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
-          onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
+          onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
       ${INV_RSVP_HINT}
     </div>`);
@@ -1717,7 +1717,7 @@ function renderFamilyExperience(data) {
       <div class="inv-final-buttons">
         <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateFamily()">Заавал ирнэ! ✅</button>
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
-          onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
+          onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
       ${INV_RSVP_HINT}
     </div>`);
@@ -1813,7 +1813,7 @@ function renderHolidayExperience(data) {
         <div class="inv-final-buttons">
           <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateHoliday()">Заавал ирнэ! 🎊</button>
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
-            onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
+            onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
         </div>
         ${INV_RSVP_HINT}
       </div>
@@ -1924,7 +1924,7 @@ function renderPartyExperience(data) {
       <div class="inv-final-buttons">
         <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateParty()">Заавал ирнэ! 🎉</button>
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
-          onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
+          onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
       ${INV_RSVP_HINT}
     </div>`);
@@ -2018,7 +2018,7 @@ function renderMeetingExperience(data) {
       <div class="inv-final-buttons">
         <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateMeeting()">Ирнэ ✅</button>
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
-          onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
+          onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
       ${INV_RSVP_HINT}
     </div>`);
@@ -2105,7 +2105,7 @@ function renderEducationExperience(data) {
       <div class="inv-final-buttons">
         <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateEducation()">Оролцоно! ✅</button>
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
-          onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Оролцохгүй</button>
+          onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Оролцохгүй</button>
       </div>
       ${INV_RSVP_HINT}
     </div>`);
@@ -2202,7 +2202,7 @@ function renderSportExperience(data) {
       <div class="inv-final-buttons">
         <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateSport()">Заавал орно! 💪</button>
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
-          onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Оролцохгүй</button>
+          onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Оролцохгүй</button>
       </div>
       ${INV_RSVP_HINT}
     </div>`);
@@ -2303,7 +2303,7 @@ function renderCultureExperience(data) {
       <div class="inv-final-buttons">
         <button class="inv-btn" id="inv-yesBtn" type="button" onclick="invCelebrateCulture()">Заавал ирнэ! 🎉</button>
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
-          onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
+          onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
       ${INV_RSVP_HINT}
     </div>`);

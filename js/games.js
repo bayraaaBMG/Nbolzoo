@@ -596,7 +596,7 @@ function renderLobby() {
     <div class="game-player-list">
       ${players.map(([uid, p]) => `
         <div class="game-player-chip ${uid === currentRoom.hostUid ? "is-host" : ""}">
-          <div class="avatar" style="width:32px;height:32px;font-size:13px;">${p.photoURL ? `<img src="${escapeHtml(p.photoURL)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : escapeHtml((p.name || "?").charAt(0))}</div>
+          <div class="avatar" style="width:32px;height:32px;font-size:13px;">${p.photoURL ? `<img src="${escapeHtml(p.photoURL)}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : escapeHtml((p.name || "?").charAt(0))}</div>
           <span>${escapeHtml(p.name)}</span>
           ${uid === currentRoom.hostUid ? '<span class="game-host-badge">👑 Host</span>' : ""}
         </div>`).join("")}

@@ -7,7 +7,7 @@
 <!-- OG Meta Tags - Social Share -->
 <meta property="og:title" content="Нийгэмлэг - NBolzoo">
 <meta property="og:description" content="Хосуудын хуваалцсан болзооны туршлага, санаа.">
-<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Gorkhi-Terelj_National_Park.jpg/640px-Gorkhi-Terelj_National_Park.jpg">
+<meta property="og:image" content="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1200&h=630&fit=crop&auto=format">
 <meta property="og:url" content="https://nbolzoo.vercel.app/community.html">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -105,16 +105,16 @@
           <div class="post-form">
             <div style="display: flex; gap: 12px; align-items: start; margin-bottom: 12px;">
               <div class="avatar">Та</div>
-              <textarea placeholder="Болзооны санаагаа хуваалц..." id="newPost"></textarea>
+              <textarea placeholder="Болзооны санаагаа хуваалц..." id="newPost" aria-label="Нийтлэлийн текст"></textarea>
             </div>
             <div id="postAttachments" class="post-attachments"></div>
-            <input type="file" id="postImageInput" accept="image/*" style="display:none" onchange="onPostImageSelected(this)">
+            <input type="file" id="postImageInput" accept="image/*" style="display:none" aria-label="Зураг сонгох" onchange="onPostImageSelected(this)">
             <div id="postLocationRow" class="post-inline-row" style="display:none;">
-              <input type="text" id="postLocationInput" placeholder="📍 Байршил (жишээ: Зайсан толгой)" onkeypress="if(event.key==='Enter')commitPostLocation()">
+              <input type="text" id="postLocationInput" placeholder="📍 Байршил (жишээ: Зайсан толгой)" aria-label="Байршил" onkeypress="if(event.key==='Enter')commitPostLocation()">
               <button type="button" class="btn btn-primary" onclick="commitPostLocation()">✓</button>
             </div>
             <div id="postBudgetRow" class="post-inline-row" style="display:none;">
-              <input type="text" id="postBudgetInput" placeholder="💸 Зардал (жишээ: 50,000₮)" onkeypress="if(event.key==='Enter')commitPostBudget()">
+              <input type="text" id="postBudgetInput" placeholder="💸 Зардал (жишээ: 50,000₮)" aria-label="Зардал" onkeypress="if(event.key==='Enter')commitPostBudget()">
               <button type="button" class="btn btn-primary" onclick="commitPostBudget()">✓</button>
             </div>
             <div id="postFeelingRow" class="post-feeling-picker" style="display:none;"></div>
@@ -178,11 +178,11 @@
 </footer>
 
 <div class="modal-backdrop" id="modal">
-  <div class="modal" id="modalContent"></div>
+  <div class="modal" id="modalContent" role="dialog" aria-modal="true"></div>
 </div>
 
 <div class="modal-backdrop" id="authModal">
-  <div class="modal" style="max-width: 420px;" id="authModalContent"></div>
+  <div class="modal" style="max-width: 420px;" id="authModalContent" role="dialog" aria-modal="true" aria-label="Нэвтрэх/Бүртгүүлэх"></div>
 </div>
 
 <script src="js/firebase-init.js"></script>

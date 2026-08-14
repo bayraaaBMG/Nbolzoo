@@ -182,7 +182,7 @@ function openProfileModal() {
     <div class="modal-body">
       <div style="text-align:center;margin-bottom:16px;">
         <div class="avatar" id="profileAvatarPreview" style="width:80px;height:80px;font-size:32px;margin:0 auto 10px;">
-          ${currentUser.photoURL ? `<img src="${currentUser.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : escapeHtml((currentUser.name||"?").charAt(0))}
+          ${currentUser.photoURL ? `<img src="${escapeHtml(currentUser.photoURL)}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : escapeHtml((currentUser.name||"?").charAt(0))}
         </div>
         <input type="file" id="profileAvatarFile" accept="image/*" style="font-size:12px;">
       </div>
@@ -242,6 +242,12 @@ if (auth) {
       userPostLikes = new Set();
       updateAuthUI(null);
       if (typeof unsubscribeNotifications === "function") unsubscribeNotifications();
+      // Гарсны дараа өмнөх хэрэглэгчийн зүрх/хадгалсан төлөв дэлгэц дээр хуучин хэвээрээ
+      // үлдэхгүйн тулд идэвхтэй хуудасны grid-ийг шууд дахин зурна.
+      if (document.getElementById("ubGrid") && typeof renderUbIdeas === "function") renderUbIdeas();
+      if (document.getElementById("featuredGrid") && typeof renderFeatured === "function") renderFeatured();
+      if (document.getElementById("savedGrid") && typeof renderSaved === "function") renderSaved();
+      if (document.getElementById("postsList") && typeof renderPosts === "function") renderPosts();
     }
     // Firebase Auth async тул currentUser бэлэн болмогц хуудас өөрийн init-ээ хийх боломжтой
     // (жишээ нь admin.html — currentUser.isAdmin шалгахаас өмнө auth resolve хүлээх ёстой)

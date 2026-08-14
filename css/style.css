@@ -1696,3 +1696,19 @@ body {
 .inv-my-status{ font-size:12px;font-weight:600;white-space:nowrap;padding:4px 10px;border-radius:20px;background:var(--border);color:var(--text-light); }
 .inv-my-status.responded{ background:#d1fae5;color:#047857; }
 .inv-my-response{ margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:13px;line-height:1.8;color:var(--text); }
+
+/* ---- Accessibility: keyboard focus indicator ----
+   Safety net for interactive elements without an existing specific :focus/:focus-visible
+   style. Only fires for keyboard navigation (not mouse clicks), so it adds nothing visually
+   for mouse/touch users and never changes the default appearance of anything. */
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible,
+select:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ---- Accessibility: visually-hidden but screen-reader-accessible text ---- */
+.sr-only{
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}

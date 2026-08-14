@@ -7,7 +7,7 @@
 <!-- OG Meta Tags - Social Share -->
 <meta property="og:title" content="Тоглоом - NBolzoo">
 <meta property="og:description" content="Хосоороо, ганцаараа, олуулаа тоглох болзооны тоглоомууд. Room үүсгээд найзуудаа урь.">
-<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Gorkhi-Terelj_National_Park.jpg/640px-Gorkhi-Terelj_National_Park.jpg">
+<meta property="og:image" content="https://images.unsplash.com/photo-1611996575749-79a3a250f948?w=1200&h=630&fit=crop&auto=format">
 <meta property="og:url" content="https://nbolzoo.vercel.app/games.html">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -98,6 +98,7 @@
 
 <main>
   <div id="page-games" class="page active">
+    <h1 class="sr-only">Тоглоом — NBolzoo</h1>
     <div class="container" id="gamesRoot"></div>
   </div>
 </main>
@@ -144,11 +145,11 @@
 </footer>
 
 <div class="modal-backdrop" id="modal">
-  <div class="modal" id="modalContent"></div>
+  <div class="modal" id="modalContent" role="dialog" aria-modal="true"></div>
 </div>
 
 <div class="modal-backdrop" id="authModal">
-  <div class="modal" style="max-width: 420px;" id="authModalContent"></div>
+  <div class="modal" style="max-width: 420px;" id="authModalContent" role="dialog" aria-modal="true" aria-label="Нэвтрэх/Бүртгүүлэх"></div>
 </div>
 
 <script src="js/firebase-init.js"></script>

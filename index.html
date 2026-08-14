@@ -103,7 +103,7 @@
         <h1>Өнөөдөр хамт хаашаа явах вэ? 💕</h1>
         <p>Монголын анхны болзооны санааны платформ — УБ-д 365 санаа + 21 аймагт 189 санаа</p>
         <div class="search-box">
-          <input type="text" placeholder="Жишээ: Зайсан, кафе, төсөв 50,000₮" id="searchInput" onkeypress="if(event.key==='Enter')performSearch()"/>
+          <input type="text" placeholder="Жишээ: Зайсан, кафе, төсөв 50,000₮" id="searchInput" aria-label="Болзооны санаа хайх" onkeypress="if(event.key==='Enter')performSearch()"/>
           <button class="btn btn-accent" onclick="performSearch()" type="button">Хайх</button>
         </div>
         <div style="margin-top: 14px;">
@@ -177,11 +177,11 @@
 </footer>
 
 <div class="modal-backdrop" id="modal">
-  <div class="modal" id="modalContent"></div>
+  <div class="modal" id="modalContent" role="dialog" aria-modal="true"></div>
 </div>
 
 <div class="modal-backdrop" id="authModal">
-  <div class="modal" style="max-width: 420px;" id="authModalContent"></div>
+  <div class="modal" style="max-width: 420px;" id="authModalContent" role="dialog" aria-modal="true" aria-label="Нэвтрэх/Бүртгүүлэх"></div>
 </div>
 
 <script src="js/firebase-init.js"></script>

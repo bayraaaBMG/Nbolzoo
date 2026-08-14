@@ -184,6 +184,8 @@ function invRenderBuilderStep() {
   editor.innerHTML = html;
   if (invBuilder.step === 1) {
     Object.entries(invBuilder.fields).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
+  } else if (invBuilder.step === 2) {
+    invBuilderRenderPhotoSection();
   }
 }
 
@@ -204,15 +206,76 @@ function invBuilderStep1Html(t) {
     </div>`;
 }
 
-// ---------- Алхам 2: Зураг + дурсамж (бүрэн UI Phase 4-д нэмэгдэнэ) ----------
+// ---------- Алхам 2: Зураг + дурсамж ----------
 function invBuilderStep2Html() {
   return `
-    <p class="inv-builder-step-desc">Хүссэн тооны зураг оруулаад, зураг бүрт дурсамж/тайлбар бичиж болно. Хүлээн авагч эдгээрийг "Дурсамжийн альбом" болгон нэг бол нэгээр үзнэ.</p>
+    <p class="inv-builder-step-desc">Хүссэн тооны зураг оруулаад, зураг бүрт дурсамж/тайлбар бичиж болно. Хүлээн авагч эдгээрийг "Дурсамжийн альбом" болгон нэг бол нэгээр үзнэ. Зураг илгээх үед л Storage руу байршина — энэ алхмаас гарахад юу ч алдагдахгүй.</p>
     <div id="invBuilderPhotoSection"></div>
     <div class="inv-builder-nav">
       <button class="btn btn-ghost" type="button" onclick="invBuilderPrev()">← Буцах</button>
       <button class="btn btn-primary" type="button" onclick="invBuilderNext()">Дараах →</button>
     </div>`;
+}
+
+function invBuilderRenderPhotoSection() {
+  const el = document.getElementById("invBuilderPhotoSection");
+  if (!el || !invBuilder) return;
+  el.innerHTML = `
+    <input type="file" id="invPhotoFileInput" accept="image/*" multiple style="display:none" onchange="invBuilderHandlePhotoFiles(this.files)">
+    <button class="btn btn-ghost" type="button" onclick="document.getElementById('invPhotoFileInput').click()">🖼 Зураг нэмэх</button>
+    <div class="inv-photo-grid" id="invPhotoGrid"></div>`;
+  invBuilderRenderPhotoGrid();
+}
+
+function invBuilderRenderPhotoGrid() {
+  const grid = document.getElementById("invPhotoGrid");
+  if (!grid || !invBuilder) return;
+  if (!invBuilder.photos.length) {
+    grid.innerHTML = `<p style="color:var(--text-light);font-size:13px;margin-top:12px;">Одоогоор зураг ороогүй байна.</p>`;
+    return;
+  }
+  grid.innerHTML = invBuilder.photos.map((p, i) => `
+    <div class="inv-photo-item">
+      <div class="inv-photo-thumb-wrap">
+        <img src="${p.previewUrl || p.thumbUrl || p.url}" alt="">
+        <button type="button" class="inv-photo-remove" onclick="invBuilderRemovePhoto(${i})" title="Устгах">✕</button>
+        ${p.status === "uploading" ? `<div class="inv-photo-status inv-photo-uploading">⏳</div>` : ""}
+        ${p.status === "error" ? `<div class="inv-photo-status inv-photo-error-badge">⚠️</div>` : ""}
+      </div>
+      <input type="text" placeholder="Жижиг гарчиг (заавал биш)" value="${escapeHtml(p.title || "")}" oninput="invBuilderUpdatePhoto(${i},'title',this.value)">
+      <textarea rows="2" placeholder="Дурсамж/тайлбар (заавал биш)" oninput="invBuilderUpdatePhoto(${i},'caption',this.value)">${escapeHtml(p.caption || "")}</textarea>
+      <input type="date" value="${escapeHtml(p.date || "")}" onchange="invBuilderUpdatePhoto(${i},'date',this.value)">
+      ${p.status === "error" ? `<div class="inv-photo-error">⚠️ ${escapeHtml(p.error || "Байршуулахад алдаа гарлаа")}</div>` : ""}
+    </div>`).join("");
+}
+
+function invBuilderHandlePhotoFiles(fileList) {
+  const files = Array.from(fileList || []);
+  files.forEach(file => {
+    if (!file.type || !file.type.startsWith("image/")) { showToast("⚠️ Зөвхөн зураг файл сонгоно уу"); return; }
+    if (file.size > 15 * 1024 * 1024) { showToast(`⚠️ "${file.name}" хэт том байна (15MB-с бага байх ёстой)`); return; }
+    const previewUrl = (typeof URL !== "undefined" && URL.createObjectURL) ? URL.createObjectURL(file) : "";
+    invBuilder.photos.push({ file, previewUrl, caption: "", title: "", date: "", status: "ready" });
+  });
+  invBuilderRenderPhotoGrid();
+  invBuilderSchedulePreview();
+  const input = document.getElementById("invPhotoFileInput");
+  if (input) input.value = "";
+}
+
+function invBuilderUpdatePhoto(i, field, val) {
+  if (!invBuilder || !invBuilder.photos[i]) return;
+  invBuilder.photos[i][field] = val;
+  invBuilderSchedulePreview();
+}
+
+function invBuilderRemovePhoto(i) {
+  if (!invBuilder || !invBuilder.photos[i]) return;
+  const p = invBuilder.photos[i];
+  if (p.previewUrl && typeof URL !== "undefined" && URL.revokeObjectURL) URL.revokeObjectURL(p.previewUrl);
+  invBuilder.photos.splice(i, 1);
+  invBuilderRenderPhotoGrid();
+  invBuilderSchedulePreview();
 }
 
 // ---------- Алхам 3: Дуу + theme (дуу Phase 5-д нэмэгдэнэ) ----------
@@ -249,6 +312,23 @@ function invBuilderStep5Html(t) {
 }
 
 // ---------- Realtime phone preview (жинхэнэ хүлээн авагчийн renderer, screenshot биш) ----------
+// Preview дэх зурагнууд Storage руу хараахан upload хийгдээгүй ч (тэр зөвхөн Send дарахад
+// хийгдэнэ) local blob URL (previewUrl)-ээр шууд харагдана — sender өөрчлөлт бүрийг шууд үзнэ.
+function invBuilderDraftInvite() {
+  return {
+    type: invBuilder.type,
+    data: invBuilder.fields,
+    photos: invBuilder.photos.map(p => ({
+      url: p.url || p.previewUrl, thumbUrl: p.thumbUrl || p.previewUrl,
+      caption: p.caption || "", title: p.title || "", date: p.date || "",
+    })),
+    music: invBuilder.music || null,
+    theme: invBuilder.theme || "classic",
+    enabledPages: invBuilder.enabledPages || [],
+    pageOrder: invBuilder.pageOrder || [],
+  };
+}
+
 function invRenderBuilderPreview() {
   if (!invBuilder) return;
   const stage = document.getElementById("invPreviewStage");
@@ -256,7 +336,7 @@ function invRenderBuilderPreview() {
   currentInviteId = null; // preview үргэлж "хариулаагүй" төлөвтэй - submitInviteResponse() safely no-op хийнэ
   currentInviteResponded = false;
   try {
-    renderInviteView(invBuilder.type, invBuilder.fields, "invPreviewStage");
+    renderInviteView(invBuilder.type, invBuilder.fields, invBuilderDraftInvite(), "invPreviewStage");
   } catch (e) {
     stage.innerHTML = `<p style="padding:40px 16px;text-align:center;color:var(--text-light);font-size:13px;">Preview ачаалахад алдаа гарлаа.</p>`;
     console.warn("invRenderBuilderPreview error:", e);
@@ -278,13 +358,42 @@ async function invSubmitBuilder() {
   if (typeof db === "undefined" || !db) { showToast("⚠️ Firebase холбогдоогүй байна"); return; }
 
   const btn = document.getElementById("invBuilderSubmitBtn");
-  if (btn) { btn.disabled = true; btn.textContent = "⏳ Илгээж байна..."; }
+  if (btn) { btn.disabled = true; }
+
+  // Зургууд Storage руу яг ЭНД, илгээх мөчид л upload хийгдэнэ (builder-аас гарвал орфан
+  // файл үлдэхгүй). Бодит upload/compress storage-utils.js-ийн uploadImageWithThumbnail()-
+  // ээр дамжина; алдаа гарвал тухайн зургийг "error" төлөвт тэмдэглэж, sender-ийг 2-р алхам
+  // руу буцааж бодитоор харуулна (чимээгүй алгасахгүй, зохиомол амжилт мэдэгдэхгүй).
+  if (invBuilder.photos.length) {
+    if (btn) btn.textContent = "📤 Зураг байршуулж байна...";
+    for (let i = 0; i < invBuilder.photos.length; i++) {
+      const p = invBuilder.photos[i];
+      if (p.url) continue; // өмнөх оролдлогод амжилттай байршсан
+      p.status = "uploading"; p.error = null;
+      if (invBuilder.step === 2) invBuilderRenderPhotoGrid();
+      try {
+        const { url, thumbUrl } = await uploadImageWithThumbnail(`invites/${currentUser.uid}/${Date.now()}_${i}`, p.file);
+        p.url = url; p.thumbUrl = thumbUrl; p.status = "done";
+      } catch (e) {
+        p.status = "error"; p.error = e.message || "Байршуулахад алдаа гарлаа";
+      }
+    }
+    const failed = invBuilder.photos.filter(p => p.status === "error");
+    if (failed.length) {
+      showToast(`⚠️ ${failed.length} зураг байршуулж чадсангүй — дахин оролдоно уу эсвэл устгана уу`);
+      if (btn) { btn.disabled = false; btn.textContent = "📱 Урилга үүсгэж QR авах"; }
+      invBuilderGoStep(2);
+      return;
+    }
+  }
+
+  if (btn) btn.textContent = "⏳ Илгээж байна...";
   showToast("⏳ Урилгаа үүсгэж байна...");
   try {
     const ref = await db.collection("invites").add({
       type,
       data: invBuilder.fields,
-      photos: invBuilder.photos.length ? invBuilder.photos : [],
+      photos: invBuilder.photos.map(p => ({ url: p.url, thumbUrl: p.thumbUrl, caption: p.caption || "", title: p.title || "", date: p.date || "" })),
       music: invBuilder.music || null,
       theme: invBuilder.theme || "classic",
       enabledPages: invBuilder.enabledPages && invBuilder.enabledPages.length ? invBuilder.enabledPages : [],

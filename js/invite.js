@@ -69,7 +69,7 @@ async function loadInviteById(id) {
     if (!INVITE_TYPES[inv.type]) { renderTypePicker(); return; }
     currentInviteId = id;
     currentInviteResponded = inv.status === "responded";
-    renderInviteView(inv.type, inv.data || {});
+    renderInviteView(inv.type, inv.data || {}, inv);
   } catch (e) {
     console.warn("loadInviteById error:", e);
     document.getElementById("inviteRoot").innerHTML = `
@@ -462,20 +462,20 @@ function formatInviteResponse(r) {
 // targetId: сонголтоор — Урилга builder-ийн phone preview (Phase 3) яг ижил renderer-ийг
 // #inviteRoot-оос өөр container-т mount хийхэд ашиглана. Бодит хүлээн авагчийн урсгал
 // (loadInviteById) targetId дамжуулдаггүй тул үргэлж өнөөгийн адилхан "inviteRoot" руу ордог.
-function renderInviteView(type, data, targetId) {
+function renderInviteView(type, data, invite, targetId) {
   const t = INVITE_TYPES[type];
-  if (t.family === "date") return renderDateInviteExperience(data.recipient || "", targetId);
-  if (t.family === "proposal") return renderProposalExperience(data.recipient || "", data, targetId);
-  if (t.family === "wedding") return renderWeddingExperience(data, targetId);
-  if (t.family === "birthday") return renderBirthdayExperience(data, targetId);
-  if (t.family === "work") return renderWorkExperience(data, targetId);
-  if (t.family === "family") return renderFamilyExperience(data, targetId);
-  if (t.family === "holiday") return renderHolidayExperience(data, targetId);
-  if (t.family === "party") return renderPartyExperience(data, targetId);
-  if (t.family === "meeting") return renderMeetingExperience(data, targetId);
-  if (t.family === "education") return renderEducationExperience(data, targetId);
-  if (t.family === "sport") return renderSportExperience(data, targetId);
-  if (t.family === "culture") return renderCultureExperience(data, targetId);
+  if (t.family === "date") return renderDateInviteExperience(data.recipient || "", invite, targetId);
+  if (t.family === "proposal") return renderProposalExperience(data.recipient || "", data, invite, targetId);
+  if (t.family === "wedding") return renderWeddingExperience(data, invite, targetId);
+  if (t.family === "birthday") return renderBirthdayExperience(data, invite, targetId);
+  if (t.family === "work") return renderWorkExperience(data, invite, targetId);
+  if (t.family === "family") return renderFamilyExperience(data, invite, targetId);
+  if (t.family === "holiday") return renderHolidayExperience(data, invite, targetId);
+  if (t.family === "party") return renderPartyExperience(data, invite, targetId);
+  if (t.family === "meeting") return renderMeetingExperience(data, invite, targetId);
+  if (t.family === "education") return renderEducationExperience(data, invite, targetId);
+  if (t.family === "sport") return renderSportExperience(data, invite, targetId);
+  if (t.family === "culture") return renderCultureExperience(data, invite, targetId);
 
   document.getElementById(targetId || "inviteRoot").innerHTML = `
     <div class="inv-view-card">
@@ -495,7 +495,7 @@ let invCalDate = new Date();
 const invMonthNames = ["1-р сар","2-р сар","3-р сар","4-р сар","5-р сар","6-р сар","7-р сар","8-р сар","9-р сар","10-р сар","11-р сар","12-р сар"];
 const invDowNames = ["Ням","Дав","Мяг","Лха","Пүр","Баа","Бям"];
 
-function renderDateInviteExperience(recipientName, targetId) {
+function renderDateInviteExperience(recipientName, invite, targetId) {
   targetId = targetId || "inviteRoot";
   const app = document.getElementById(targetId);
   const heading = recipientName ? `${escapeHtml(recipientName)} аа, чамайг олоход хэцүү байлаа 👀` : "Хөөх, чамайг олоход хэцүү байлаа 👀";
@@ -635,7 +635,7 @@ function renderDateInviteExperience(recipientName, targetId) {
       </div>
     </div>
   </div>`;
-  invIndexPages();
+  invIndexPages(invite);
 
   invStartPetals();
   invCalDate = new Date();
@@ -1095,7 +1095,7 @@ function invCelebrateDate() {
 }
 
 // ================= ГЭРЛЭХ САНАЛ (энгийн хувилбар — асуулт/огноо шаардахгүй) =================
-function renderProposalExperience(recipientName, data, targetId) {
+function renderProposalExperience(recipientName, data, invite, targetId) {
   targetId = targetId || "inviteRoot";
   data = data || {};
   const app = document.getElementById(targetId);
@@ -1206,7 +1206,7 @@ function renderProposalExperience(recipientName, data, targetId) {
       </div>
     </div>
   </div>`;
-  invIndexPages();
+  invIndexPages(invite);
   invStartPetals();
   invSetupClickerGame();
   invSetupMemoryGame("invPropMemGrid", "invPropMemNextBtn", ["💍", "💕", "✨", "🥰", "💫", "💖"], "💍");
@@ -1244,7 +1244,7 @@ function invCelebrateProposal() {
 }
 
 // ================= ХУРИМ (хосын түүх, дэлгэрэнгүй, dress code, RSVP, дуу хүсэлт) =================
-function renderWeddingExperience(data, targetId) {
+function renderWeddingExperience(data, invite, targetId) {
   targetId = targetId || "inviteRoot";
   const app = document.getElementById(targetId);
   const names = data.names || "Хос";
@@ -1386,7 +1386,7 @@ function renderWeddingExperience(data, targetId) {
     <div id="inv-heartRain"></div>
     <div id="inv-stage">${steps.join("")}</div>
   </div>`;
-  invIndexPages();
+  invIndexPages(invite);
   invStartPetals();
   invSetupMemoryGame("invWedMemGrid", "invWedMemNextBtn", ["💍", "🥂", "💐", "🎂", "✨", "👰"], "💌");
   invSetupClickerGame();
@@ -1404,7 +1404,7 @@ function invCelebrateWedding() {
 }
 
 // ================= ТӨРСӨН ӨДӨР (лаа унтраах, хүслийн тэмдэглэл, тоглоом) =================
-function renderBirthdayExperience(data, targetId) {
+function renderBirthdayExperience(data, invite, targetId) {
   targetId = targetId || "inviteRoot";
   const app = document.getElementById(targetId);
   const name = data.recipient || "найз";
@@ -1497,7 +1497,7 @@ function renderBirthdayExperience(data, targetId) {
       </div>
     </div>
   </div>`;
-  invIndexPages();
+  invIndexPages(invite);
   invStartPetals();
   invSetupBirthdayCandles();
   invSetupMemoryGame("invBdayMemGrid", "invBdayMemNextBtn", ["🎂","🎈","🎁","🕯️","🎉","🍰"], "🎊");
@@ -1534,7 +1534,7 @@ function invCelebrateBirthday() {
 }
 
 // ================= АЖЛЫН АРГА ХЭМЖЭЭ (хөтөлбөр, dress code, RSVP + хоолны сонголт) =================
-function renderWorkExperience(data, targetId) {
+function renderWorkExperience(data, invite, targetId) {
   targetId = targetId || "inviteRoot";
   const app = document.getElementById(targetId);
   const agendaItems = (data.agenda || "").split("\n").map(s => s.trim()).filter(Boolean);
@@ -1635,7 +1635,7 @@ function renderWorkExperience(data, targetId) {
     </div>`);
 
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
-  invIndexPages();
+  invIndexPages(invite);
   invSetupMemoryGame("invWorkMemGrid", "invWorkMemNextBtn", ["💼","📊","🤝","📈","✅","🗓️"], "💼");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_FORMAL);
@@ -1650,7 +1650,7 @@ function invCelebrateWork(el) {
 }
 
 // ================= ГЭР БҮЛИЙН АРГА ХЭМЖЭЭ (юу авчрах, зочны тоо, мессеж) =================
-function renderFamilyExperience(data, targetId) {
+function renderFamilyExperience(data, invite, targetId) {
   targetId = targetId || "inviteRoot";
   const app = document.getElementById(targetId);
   const encLines = invPickEncourageSet(false, 7);
@@ -1745,7 +1745,7 @@ function renderFamilyExperience(data, targetId) {
     <div id="inv-heartRain"></div>
     <div id="inv-stage">${steps.join("")}</div>
   </div>`;
-  invIndexPages();
+  invIndexPages(invite);
   invSetupMemoryGame("invFamMemGrid", "invFamMemNextBtn", ["🏡","👨‍👩‍👧","🎈","🍰","✨","💛"], "🏡");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);
@@ -1758,7 +1758,7 @@ function invCelebrateFamily() {
 }
 
 // ================= БАЯРЫН УРИЛГА (баярын тоглоом, мэндчилгээ, RSVP) =================
-function renderHolidayExperience(data, targetId) {
+function renderHolidayExperience(data, invite, targetId) {
   targetId = targetId || "inviteRoot";
   const app = document.getElementById(targetId);
   const holidayName = data.holidayName || "Баяр";
@@ -1838,7 +1838,7 @@ function renderHolidayExperience(data, targetId) {
       </div>
     </div>
   </div>`;
-  invIndexPages();
+  invIndexPages(invite);
   invStartPetals();
   invSetupMemoryGame("invHolMemGrid", "invHolMemNextBtn", ["🎄","🎁","🔔","⭐","❄️","🥂"], "🎊");
   invSetupClickerGame();
@@ -1853,7 +1853,7 @@ function invCelebrateHoliday() {
 }
 
 // ================= ҮДЭШЛЭГ (сэдэв, дуу хүсэлт, RSVP) =================
-function renderPartyExperience(data, targetId) {
+function renderPartyExperience(data, invite, targetId) {
   targetId = targetId || "inviteRoot";
   const app = document.getElementById(targetId);
   const encLines = invPickEncourageSet(false, 6);
@@ -1951,7 +1951,7 @@ function renderPartyExperience(data, targetId) {
       <p class="inv-sub" id="invPartyNote">Тэсэн ядан хүлээж байна 🥳</p>
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-heartRain"></div><div id="inv-stage">${steps.join("")}</div></div>`;
-  invIndexPages();
+  invIndexPages(invite);
   invSetupMemoryGame("invPartyMemGrid", "invPartyMemNextBtn", ["🥳","🎉","🎊","🕺","🎵","✨"], "🎈");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);
@@ -1967,7 +1967,7 @@ function invCelebrateParty() {
 }
 
 // ================= УУЛЗАЛТ (зорилго, RSVP) =================
-function renderMeetingExperience(data, targetId) {
+function renderMeetingExperience(data, invite, targetId) {
   targetId = targetId || "inviteRoot";
   const app = document.getElementById(targetId);
   const encLines = invPickEncourageSet(false, 8);
@@ -2047,7 +2047,7 @@ function renderMeetingExperience(data, targetId) {
       <p class="inv-sub">Таны ирцийг бүртгэлээ 👥</p>
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
-  invIndexPages();
+  invIndexPages(invite);
   invSetupMemoryGame("invMeetMemGrid", "invMeetMemNextBtn", ["👥","🤝","💼","📋","✅","🎯"], "👥");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_FORMAL);
@@ -2055,7 +2055,7 @@ function renderMeetingExperience(data, targetId) {
 function invCelebrateMeeting() { invGoTo("inv-s-celebrate"); submitInviteResponse({ rsvp: "ирнэ" }); }
 
 // ================= БОЛОВСРОЛ (хөтөлбөр, RSVP) =================
-function renderEducationExperience(data, targetId) {
+function renderEducationExperience(data, invite, targetId) {
   targetId = targetId || "inviteRoot";
   const app = document.getElementById(targetId);
   const programItems = (data.program || "").split("\n").map(s => s.trim()).filter(Boolean);
@@ -2136,7 +2136,7 @@ function renderEducationExperience(data, targetId) {
       <p class="inv-sub">Таны оролцоог бүртгэлээ 🎓</p>
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
-  invIndexPages();
+  invIndexPages(invite);
   invSetupMemoryGame("invEduMemGrid", "invEduMemNextBtn", ["🎓","📖","✏️","🏆","✅","💡"], "🎓");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_FORMAL);
@@ -2144,7 +2144,7 @@ function renderEducationExperience(data, targetId) {
 function invCelebrateEducation() { invGoTo("inv-s-celebrate"); submitInviteResponse({ rsvp: "оролцоно" }); }
 
 // ================= СПОРТ (хэрэгсэл, RSVP) =================
-function renderSportExperience(data, targetId) {
+function renderSportExperience(data, invite, targetId) {
   targetId = targetId || "inviteRoot";
   const app = document.getElementById(targetId);
   const encLines = invPickEncourageSet(false, 7);
@@ -2235,7 +2235,7 @@ function renderSportExperience(data, targetId) {
       <p class="inv-sub">Таны оролцоог бүртгэлээ 💪</p>
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-heartRain"></div><div id="inv-stage">${steps.join("")}</div></div>`;
-  invIndexPages();
+  invIndexPages(invite);
   invSetupMemoryGame("invSportMemGrid", "invSportMemNextBtn", ["🏆","⚽","🏀","💪","🎯","🥇"], "🏆");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);
@@ -2247,7 +2247,7 @@ function invCelebrateSport() {
 }
 
 // ================= СОЁЛ УРЛАГ (хувцасны код, RSVP) =================
-function renderCultureExperience(data, targetId) {
+function renderCultureExperience(data, invite, targetId) {
   targetId = targetId || "inviteRoot";
   const app = document.getElementById(targetId);
   const encLines = invPickEncourageSet(false, 7);
@@ -2338,7 +2338,7 @@ function renderCultureExperience(data, targetId) {
       <p class="inv-sub">Таны ирцийг бүртгэлээ 🎭</p>
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
-  invIndexPages();
+  invIndexPages(invite);
   invSetupMemoryGame("invCultMemGrid", "invCultMemNextBtn", ["🎭","🎨","🎬","🎻","✨","👏"], "🎭");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);

@@ -22,6 +22,16 @@ service firebase.storage {
       allow write: if isSignedIn() && request.auth.uid == uid && isImage() && underSize(8);
     }
 
+    // Invitation photos ("Дурсамжийн альбом") — sender only, 8MB cap. Recipients never
+    // sign in (the invite link/doc id is the shared secret, same as invites/{} in
+    // firestore.rules), so uploads are keyed off the sender's own uid, not the invite id —
+    // this also lets the sender upload photos during the builder wizard before the
+    // invites/{id} Firestore doc even exists yet.
+    match /invites/{uid}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.uid == uid && isImage() && underSize(8);
+    }
+
     // Movie posters — admin only, 8MB cap
     match /movies/{movieId}/{fileName} {
       allow read: if true;

@@ -162,7 +162,7 @@ function renderDateForm() {
   document.getElementById("inviteRoot").innerHTML = `
     <a class="back-btn" onclick="renderTypePicker()">← Буцах</a>
     <h2 style="margin:10px 0 4px;">💕 Болзооны урилга</h2>
-    <p style="color:var(--text-light);font-size:13px;margin-bottom:16px;">Энэ бол интерактив урилга — хүлээн авагч 3 асуултад хариулж, огноо сонгоод, эцэст нь "Тийм" эсвэл "Үгүй" гэж хариулна.</p>
+    <p style="color:var(--text-light);font-size:13px;margin-bottom:16px;">Энэ бол интерактив урилга — хүлээн авагч 4 асуултад хариулж, огноо сонгоод, эцэст нь "Тийм" эсвэл "Үгүй" гэж хариулна.</p>
     <div class="inv-form">
       <div class="form-group"><label>Хэнд зориулав вэ? (заавал биш)</label><input id="invField1" placeholder="жишээ: Наранцэцэг"></div>
       <button class="btn btn-primary" style="width:100%" type="button" onclick="generateInviteQr('date')">📱 QR код үүсгэх</button>
@@ -509,7 +509,7 @@ function renderDateInviteExperience(recipientName) {
       </div>
       <div class="inv-card" id="inv-s-q1">
         <div class="inv-progress"><span class="inv-done"></span><span></span><span></span><span></span></div>
-        <div class="inv-eyebrow">Асуулт 1 / 3</div>
+        <div class="inv-eyebrow">Асуулт 1 / 4</div>
         <h1 style="font-size:32px;">Бид хаашаа явах вэ? 🤔</h1>
         <div class="inv-options" id="inv-opts-q1">
           <div class="inv-opt" data-val="Кино" onclick="invPick('inv-opts-q1', this, 'q1', 'inv-s-q2')"><span class="inv-emoji">🎬</span> Кино үзэх</div>
@@ -520,7 +520,7 @@ function renderDateInviteExperience(recipientName) {
       </div>
       <div class="inv-card" id="inv-s-q2">
         <div class="inv-progress"><span class="inv-done"></span><span class="inv-done"></span><span></span><span></span></div>
-        <div class="inv-eyebrow">Асуулт 2 / 3</div>
+        <div class="inv-eyebrow">Асуулт 2 / 4</div>
         <h1 style="font-size:32px;">Юу хийхэд дуртай вэ? 😊</h1>
         <div class="inv-options" id="inv-opts-q2">
           <div class="inv-opt" data-val="Зураг авах" onclick="invPick('inv-opts-q2', this, 'q2', 'inv-s-q3')"><span class="inv-emoji">📸</span> Зураг авах</div>

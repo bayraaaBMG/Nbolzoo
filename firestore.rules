@@ -148,7 +148,13 @@ service cloud.firestore {
 
     // ---- invites/{inviteId} : Урилга feature. Sender must be signed in to create;
     // the doc id itself is the shareable secret (recipient never signs in), so anyone
-    // holding the link may read it and write a response exactly once. ----
+    // holding the link may read it and write a response exactly once.
+    // `data` may also carry these optional sender-authored fields (all written once at
+    // create time, never updated afterward — no create-time allowlist restricts them):
+    // photos[] (Storage URLs from invites/{senderUid}/... , see storage.rules),
+    // music ({trackId,url}|null), theme (string), enabledPages[] (disabled page keys),
+    // pageOrder[] (custom order of reorderable page keys). Absent on older docs, which
+    // render with the default catalog/order — see js/invite-engine.js. ----
     match /invites/{inviteId} {
       allow read: if true;
       allow create: if isSignedIn()

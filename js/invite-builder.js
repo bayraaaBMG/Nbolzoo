@@ -186,6 +186,8 @@ function invRenderBuilderStep() {
     Object.entries(invBuilder.fields).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
   } else if (invBuilder.step === 2) {
     invBuilderRenderPhotoSection();
+  } else if (invBuilder.step === 3) {
+    invBuilderRenderThemeMusicSection();
   }
 }
 
@@ -278,16 +280,39 @@ function invBuilderRemovePhoto(i) {
   invBuilderSchedulePreview();
 }
 
-// ---------- Алхам 3: Дуу + theme (дуу Phase 5-д нэмэгдэнэ) ----------
+// ---------- Алхам 3: Дуу + theme ----------
 function invBuilderStep3Html() {
   return `
-    <p class="inv-builder-step-desc">Урилгынхаа өнгө/theme сонго.</p>
+    <p class="inv-builder-step-desc">Урилгынхаа өнгө/theme сонгоод, хүсвэл дэвсгэр хөгжим нэм.</p>
     <div id="invBuilderThemeSection"></div>
     <div id="invBuilderMusicSection"></div>
     <div class="inv-builder-nav">
       <button class="btn btn-ghost" type="button" onclick="invBuilderPrev()">← Буцах</button>
       <button class="btn btn-primary" type="button" onclick="invBuilderNext()">Дараах →</button>
     </div>`;
+}
+
+function invBuilderRenderThemeMusicSection() {
+  const themeEl = document.getElementById("invBuilderThemeSection");
+  const musicEl = document.getElementById("invBuilderMusicSection");
+  if (themeEl && typeof invRenderThemePicker === "function") themeEl.innerHTML = invRenderThemePicker(invBuilder.theme);
+  if (musicEl && typeof invRenderMusicPicker === "function") musicEl.innerHTML = invRenderMusicPicker(invBuilder.type, invBuilder.music && invBuilder.music.id);
+}
+
+function invBuilderSetTheme(themeId) {
+  if (!invBuilder) return;
+  invBuilder.theme = themeId;
+  invBuilderRenderThemeMusicSection();
+  invBuilderSchedulePreview();
+}
+
+function invBuilderSetMusic(trackId) {
+  if (!invBuilder) return;
+  if (!trackId) { invBuilder.music = null; invBuilderSchedulePreview(); return; }
+  const category = invMusicCategoryForType(invBuilder.type);
+  const track = (INV_MUSIC_LIBRARY[category] || []).find(t => t.id === trackId);
+  invBuilder.music = track ? { id: track.id, url: track.url, title: track.title } : null;
+  invBuilderSchedulePreview();
 }
 
 // ---------- Алхам 4: Бүтэц/pages (enable/disable + reorder Phase 6-д нэмэгдэнэ) ----------

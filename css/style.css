@@ -1280,6 +1280,46 @@ body {
   --inv-gold: #e3a857;
   --inv-line: #f3d9dd;
 }
+
+/* Theme presets — override ONLY the --inv-* variable names above, so every existing .inv-*
+   rule re-themes automatically with zero other CSS changes. Absent/"classic" theme = no
+   class added by invApplyThemeAndMusic() (js/invite-music.js) = exactly today's palette. */
+#inviteApp.inv-theme-pink{
+  --inv-bg-1:#fff0f5; --inv-bg-2:#ffd6e8; --inv-card:#fffbfd; --inv-rose:#ff5c8a;
+  --inv-rose-deep:#e0356b; --inv-peach:#ffc2d9; --inv-plum:#5c2340; --inv-plum-soft:#8a4d68;
+  --inv-gold:#e39ab0; --inv-line:#ffd9e6;
+}
+#inviteApp.inv-theme-vintage{
+  --inv-bg-1:#f4ead9; --inv-bg-2:#e8d3ac; --inv-card:#fffaf0; --inv-rose:#b5793f;
+  --inv-rose-deep:#8a5a2c; --inv-peach:#dcbb87; --inv-plum:#4a3626; --inv-plum-soft:#7a6248;
+  --inv-gold:#c9a15a; --inv-line:#e4d3b5;
+}
+#inviteApp.inv-theme-minimal{
+  --inv-bg-1:#fafbfc; --inv-bg-2:#eef1f4; --inv-card:#ffffff; --inv-rose:#5b6b7a;
+  --inv-rose-deep:#37424c; --inv-peach:#dfe4e9; --inv-plum:#2b333a; --inv-plum-soft:#6c7680;
+  --inv-gold:#a9b4bd; --inv-line:#e3e7eb;
+}
+#inviteApp.inv-theme-elegant{
+  --inv-bg-1:#f3ecf7; --inv-bg-2:#ddc7ea; --inv-card:#fffbfe; --inv-rose:#7b4397;
+  --inv-rose-deep:#5b2c73; --inv-peach:#e4c9ec; --inv-plum:#2e1f38; --inv-plum-soft:#6a5578;
+  --inv-gold:#c9a15a; --inv-line:#e6d5ee;
+}
+#inviteApp.inv-theme-cute{
+  --inv-bg-1:#fff2fb; --inv-bg-2:#f4d6ff; --inv-card:#fffcff; --inv-rose:#ff8fd8;
+  --inv-rose-deep:#e560bb; --inv-peach:#ffd1f0; --inv-plum:#5c2a52; --inv-plum-soft:#8f5a83;
+  --inv-gold:#ffb6e6; --inv-line:#ffdaf4;
+}
+#inviteApp.inv-theme-celebration{
+  --inv-bg-1:#fff6e0; --inv-bg-2:#ffe0a3; --inv-card:#fffdf6; --inv-rose:#f2a92e;
+  --inv-rose-deep:#d1811a; --inv-peach:#ffcf7a; --inv-plum:#5a3a0f; --inv-plum-soft:#8a6a3a;
+  --inv-gold:#ffb703; --inv-line:#ffe3ab;
+}
+#inviteApp.inv-theme-dark{
+  --inv-bg-1:#1b0f18; --inv-bg-2:#2b1424; --inv-card:#241420; --inv-rose:#ff4d7d;
+  --inv-rose-deep:#ff2f66; --inv-peach:#5a2a3d; --inv-plum:#f3e3ea; --inv-plum-soft:#c9a8bb;
+  --inv-gold:#e3a857; --inv-line:#3d2333;
+}
+
 #inviteApp{
   font-family:'Quicksand',sans-serif;
   color:var(--inv-plum);
@@ -1465,6 +1505,13 @@ body {
 .inv-gallery-item{ border-radius:12px; overflow:hidden; background:var(--inv-bg-2); }
 .inv-gallery-item img{ width:100%; aspect-ratio:1/1; object-fit:cover; display:block; }
 .inv-gallery-caption{ font-size:11px; color:var(--inv-plum-soft); padding:6px 8px; text-align:left; }
+
+/* ---- Дэвсгэр хөгжмийн товч (recipient side, js/invite-music.js) ---- */
+.inv-music-toggle{
+  position:absolute; top:14px; right:14px; z-index:4; width:36px; height:36px; border-radius:50%;
+  border:1px solid var(--inv-line); background:var(--inv-card); font-size:15px; cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,0,0,0.12);
+}
 
 @media (prefers-reduced-motion: reduce){
   .inv-petal, .inv-heart-fall{animation:none !important; display:none;}
@@ -1834,6 +1881,27 @@ body {
   font-family:inherit; resize:vertical;
 }
 .inv-photo-error{ font-size:11.5px; color:var(--accent); line-height:1.4; }
+
+/* ---- Урилга builder: theme + music сонголт (Алхам 3) ---- */
+.inv-theme-picker{ margin-bottom:22px; }
+.inv-theme-swatches{ display:flex; flex-wrap:wrap; gap:10px; }
+.inv-theme-swatch{
+  display:flex; flex-direction:column; align-items:center; gap:6px; padding:8px; border-radius:10px;
+  border:1px solid var(--border); cursor:pointer; width:76px; text-align:center; transition:all .15s;
+}
+.inv-theme-swatch:hover{ border-color:var(--primary); }
+.inv-theme-swatch.active{ border-color:var(--primary); background:var(--primary-extra-soft); }
+.inv-theme-swatch-dot{ width:28px; height:28px; border-radius:50%; display:block; box-shadow:inset 0 0 0 2px rgba(255,255,255,0.5); }
+.inv-theme-swatch-label{ font-size:11px; color:var(--text-light); line-height:1.2; }
+
+.inv-music-picker{ margin-top:8px; }
+.inv-music-option{
+  display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px;
+  border:1px solid var(--border); margin-bottom:6px; font-size:13px; cursor:pointer;
+}
+.inv-music-option input{ flex-shrink:0; }
+.inv-music-option audio{ margin-left:auto; max-width:160px; }
+.inv-music-empty{ color:var(--text-light); font-size:13px; padding:10px 0; }
 
 /* ---- Accessibility: keyboard focus indicator ----
    Safety net for interactive elements without an existing specific :focus/:focus-visible

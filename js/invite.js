@@ -636,6 +636,7 @@ function renderDateInviteExperience(recipientName, invite, targetId) {
     </div>
   </div>`;
   invIndexPages(invite);
+  if (typeof invApplyThemeAndMusic === "function") invApplyThemeAndMusic(invite);
 
   invStartPetals();
   invCalDate = new Date();
@@ -1207,6 +1208,7 @@ function renderProposalExperience(recipientName, data, invite, targetId) {
     </div>
   </div>`;
   invIndexPages(invite);
+  if (typeof invApplyThemeAndMusic === "function") invApplyThemeAndMusic(invite);
   invStartPetals();
   invSetupClickerGame();
   invSetupMemoryGame("invPropMemGrid", "invPropMemNextBtn", ["💍", "💕", "✨", "🥰", "💫", "💖"], "💍");
@@ -1387,6 +1389,7 @@ function renderWeddingExperience(data, invite, targetId) {
     <div id="inv-stage">${steps.join("")}</div>
   </div>`;
   invIndexPages(invite);
+  if (typeof invApplyThemeAndMusic === "function") invApplyThemeAndMusic(invite);
   invStartPetals();
   invSetupMemoryGame("invWedMemGrid", "invWedMemNextBtn", ["💍", "🥂", "💐", "🎂", "✨", "👰"], "💌");
   invSetupClickerGame();
@@ -1498,6 +1501,7 @@ function renderBirthdayExperience(data, invite, targetId) {
     </div>
   </div>`;
   invIndexPages(invite);
+  if (typeof invApplyThemeAndMusic === "function") invApplyThemeAndMusic(invite);
   invStartPetals();
   invSetupBirthdayCandles();
   invSetupMemoryGame("invBdayMemGrid", "invBdayMemNextBtn", ["🎂","🎈","🎁","🕯️","🎉","🍰"], "🎊");
@@ -1636,6 +1640,7 @@ function renderWorkExperience(data, invite, targetId) {
 
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
   invIndexPages(invite);
+  if (typeof invApplyThemeAndMusic === "function") invApplyThemeAndMusic(invite);
   invSetupMemoryGame("invWorkMemGrid", "invWorkMemNextBtn", ["💼","📊","🤝","📈","✅","🗓️"], "💼");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_FORMAL);
@@ -1746,6 +1751,7 @@ function renderFamilyExperience(data, invite, targetId) {
     <div id="inv-stage">${steps.join("")}</div>
   </div>`;
   invIndexPages(invite);
+  if (typeof invApplyThemeAndMusic === "function") invApplyThemeAndMusic(invite);
   invSetupMemoryGame("invFamMemGrid", "invFamMemNextBtn", ["🏡","👨‍👩‍👧","🎈","🍰","✨","💛"], "🏡");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);
@@ -1839,6 +1845,7 @@ function renderHolidayExperience(data, invite, targetId) {
     </div>
   </div>`;
   invIndexPages(invite);
+  if (typeof invApplyThemeAndMusic === "function") invApplyThemeAndMusic(invite);
   invStartPetals();
   invSetupMemoryGame("invHolMemGrid", "invHolMemNextBtn", ["🎄","🎁","🔔","⭐","❄️","🥂"], "🎊");
   invSetupClickerGame();
@@ -1952,6 +1959,7 @@ function renderPartyExperience(data, invite, targetId) {
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-heartRain"></div><div id="inv-stage">${steps.join("")}</div></div>`;
   invIndexPages(invite);
+  if (typeof invApplyThemeAndMusic === "function") invApplyThemeAndMusic(invite);
   invSetupMemoryGame("invPartyMemGrid", "invPartyMemNextBtn", ["🥳","🎉","🎊","🕺","🎵","✨"], "🎈");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);
@@ -2048,6 +2056,7 @@ function renderMeetingExperience(data, invite, targetId) {
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
   invIndexPages(invite);
+  if (typeof invApplyThemeAndMusic === "function") invApplyThemeAndMusic(invite);
   invSetupMemoryGame("invMeetMemGrid", "invMeetMemNextBtn", ["👥","🤝","💼","📋","✅","🎯"], "👥");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_FORMAL);
@@ -2137,6 +2146,7 @@ function renderEducationExperience(data, invite, targetId) {
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
   invIndexPages(invite);
+  if (typeof invApplyThemeAndMusic === "function") invApplyThemeAndMusic(invite);
   invSetupMemoryGame("invEduMemGrid", "invEduMemNextBtn", ["🎓","📖","✏️","🏆","✅","💡"], "🎓");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_FORMAL);
@@ -2236,6 +2246,7 @@ function renderSportExperience(data, invite, targetId) {
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-heartRain"></div><div id="inv-stage">${steps.join("")}</div></div>`;
   invIndexPages(invite);
+  if (typeof invApplyThemeAndMusic === "function") invApplyThemeAndMusic(invite);
   invSetupMemoryGame("invSportMemGrid", "invSportMemNextBtn", ["🏆","⚽","🏀","💪","🎯","🥇"], "🏆");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);
@@ -2339,6 +2350,7 @@ function renderCultureExperience(data, invite, targetId) {
     </div>`);
   app.innerHTML = `<div id="inviteApp"><div id="inv-stage">${steps.join("")}</div></div>`;
   invIndexPages(invite);
+  if (typeof invApplyThemeAndMusic === "function") invApplyThemeAndMusic(invite);
   invSetupMemoryGame("invCultMemGrid", "invCultMemNextBtn", ["🎭","🎨","🎬","🎻","✨","👏"], "🎭");
   invSetupClickerGame();
   invSetupWheel("invWheel1", INV_WHEEL_CELEBRATION);

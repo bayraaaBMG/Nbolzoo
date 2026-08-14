@@ -893,7 +893,7 @@ function invEncourageChain(ids, lines, nextChain) {
   return ids.map((id, i) => {
     const line = lines[i];
     return `
-    <div class="inv-card" id="${id}" data-step="${id}">
+    <div class="inv-card" id="${id}" data-step="${id}" data-group="encourage">
       <div class="inv-encourage-emoji">${line.e}</div>
       <h1 style="font-size:24px;">${escapeHtml(line.t)}</h1>
       <button class="inv-btn" type="button" onclick="invAdvance()">Үргэлжлүүлэх →</button>
@@ -1354,6 +1354,7 @@ function renderWeddingExperience(data, invite, targetId) {
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
           onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
+      ${invite && invite.persuade ? `<button class="inv-btn-text" type="button" onclick="invStartPersuade(invAdvance)">бодоод үзье...</button>` : ""}
       ${INV_RSVP_HINT}
     </div>`);
 
@@ -1491,6 +1492,7 @@ function renderBirthdayExperience(data, invite, targetId) {
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
             onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
         </div>
+        ${invite && invite.persuade ? `<button class="inv-btn-text" type="button" onclick="invStartPersuade(invCelebrateBirthday)">бодоод үзье...</button>` : ""}
         ${INV_RSVP_HINT}
       </div>
       <div class="inv-card" id="inv-s-celebrate" data-step="inv-s-celebrate">
@@ -1736,6 +1738,7 @@ function renderFamilyExperience(data, invite, targetId) {
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
           onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
+      ${invite && invite.persuade ? `<button class="inv-btn-text" type="button" onclick="invStartPersuade(invCelebrateFamily)">бодоод үзье...</button>` : ""}
       ${INV_RSVP_HINT}
     </div>`);
   steps.push(`
@@ -1835,6 +1838,7 @@ function renderHolidayExperience(data, invite, targetId) {
           <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
             onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
         </div>
+        ${invite && invite.persuade ? `<button class="inv-btn-text" type="button" onclick="invStartPersuade(invCelebrateHoliday)">бодоод үзье...</button>` : ""}
         ${INV_RSVP_HINT}
       </div>
       <div class="inv-card" id="inv-s-celebrate" data-step="inv-s-celebrate">
@@ -1949,6 +1953,7 @@ function renderPartyExperience(data, invite, targetId) {
         <button class="inv-btn inv-btn-ghost" id="inv-noBtn" type="button"
           onclick="invDecline()" onmouseenter="invDodge()" ontouchstart="invDodge(); event.preventDefault();">Ирэхгүй</button>
       </div>
+      ${invite && invite.persuade ? `<button class="inv-btn-text" type="button" onclick="invStartPersuade(invCelebrateParty)">бодоод үзье...</button>` : ""}
       ${INV_RSVP_HINT}
     </div>`);
   steps.push(`

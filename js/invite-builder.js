@@ -112,7 +112,7 @@ let invBuilderPreviewTimer = null;
 
 function invStartBuilder(type) {
   if (!INVITE_TYPES[type]) return;
-  invBuilder = { step: 1, type, fields: {}, photos: [], music: null, theme: "classic", enabledPages: [], pageOrder: null };
+  invBuilder = { step: 1, type, fields: {}, photos: [], music: null, theme: "classic", enabledPages: [], pageOrder: null, persuade: false };
   invRenderBuilder();
 }
 
@@ -188,6 +188,8 @@ function invRenderBuilderStep() {
     invBuilderRenderPhotoSection();
   } else if (invBuilder.step === 3) {
     invBuilderRenderThemeMusicSection();
+  } else if (invBuilder.step === 4) {
+    invBuilderRenderPagesSection();
   }
 }
 
@@ -315,16 +317,99 @@ function invBuilderSetMusic(trackId) {
   invBuilderSchedulePreview();
 }
 
-// ---------- Алхам 4: Бүтэц/pages (enable/disable + reorder Phase 6-д нэмэгдэнэ) ----------
-function invBuilderStep4Html() {
+// ---------- Алхам 4: Бүтэц/pages (optional хуудсыг unчкэх/асаах + чирж эрэмбэлэх) ----------
+// Диск card бүрийг устгаж эвдэх эрсдэлгүйгээр: зөвхөн доорх мэдэгдэж буй "бонус" төрлийн
+// key/group-үүд л checklist-д гарна (intro/RSVP/celebrate г.м fixed картууд огт харагдахгүй,
+// тул sender санамсаргүй тэдгээрийг унтраах боломжгүй).
+// Түлхүүрүүд бодит DOM id-тай (data-step="inv-s-X") яг тохирсон байх ёстой — key нь богино
+// нэр биш, invIndexPages()-ийн c.dataset.step-ээс ирдэг ЯГ ТЭР утга (js/invite-engine.js).
+const INV_TOGGLEABLE_PAGES = {
+  "inv-s-memgame": "🃏 Хосыг олох тоглоом", "inv-s-memory": "🃏 Хосыг олох тоглоом",
+  "inv-s-clicker": "💗 5 секундийн тоглоом",
+  "inv-s-poll1": "💭 Хөгжилтэй асуулт", "inv-s-poll": "💭 Хөгжилтэй асуулт",
+  "inv-s-wheel": "🎡 Азын дугуй",
+  album: "🖼 Дурсамжийн альбом",
+  encourage: "✨ Урам зоригийн үгс",
+};
+const INV_PERSUADE_ELIGIBLE_FAMILIES = new Set(["birthday", "wedding", "family", "holiday", "party"]);
+
+function invBuilderStep4Html(t) {
   return `
-    <p class="inv-builder-step-desc">Урилгынхаа доторх нэмэлт хуудсуудыг удирдана.</p>
+    <p class="inv-builder-step-desc">Урилгынхаа доторх нэмэлт хуудсуудыг унтраах/асаах, чирж эрэмбэлэх боломжтой. Үндсэн алхмууд (эхлэл, RSVP г.м) үргэлж хэвээрээ үлдэнэ.</p>
     <div id="invBuilderPagesSection"></div>
     <div class="inv-builder-nav">
       <button class="btn btn-ghost" type="button" onclick="invBuilderPrev()">← Буцах</button>
       <button class="btn btn-primary" type="button" onclick="invBuilderNext()">Дараах →</button>
     </div>`;
 }
+
+function invBuilderRenderPagesSection() {
+  const el = document.getElementById("invBuilderPagesSection");
+  if (!el || !invBuilder) return;
+  invRenderBuilderPreview(); // invPages-ийг (invite-engine.js) энэ төрлийн хамгийн сүүлийн render-т тааруулна
+
+  const pages = typeof invPages !== "undefined" ? invPages : [];
+  const seen = new Set();
+  const items = [];
+  pages.forEach(p => {
+    const dedupeKey = p.group || p.key;
+    if (!INV_TOGGLEABLE_PAGES[dedupeKey] || seen.has(dedupeKey)) return;
+    seen.add(dedupeKey);
+    items.push({ key: dedupeKey, label: INV_TOGGLEABLE_PAGES[dedupeKey] });
+  });
+  const disabled = new Set(invBuilder.enabledPages || []);
+
+  const t = INVITE_TYPES[invBuilder.type];
+  const persuadeEligible = t && INV_PERSUADE_ELIGIBLE_FAMILIES.has(t.family);
+
+  el.innerHTML = `
+    ${items.length ? `
+    <div class="inv-page-manage-list" id="invPageManageList">
+      ${items.map(it => `
+        <div class="inv-page-manage-item" draggable="true" data-key="${it.key}"
+             ondragstart="invPageDragStart(event)" ondragover="invPageDragOver(event)" ondrop="invPageDrop(event)" ondragend="invPageDragEnd(event)">
+          <span class="inv-page-drag-handle" title="Чирж эрэмбэлэх">⠿</span>
+          <label><input type="checkbox" ${disabled.has(it.key) ? "" : "checked"} onchange="invBuilderTogglePage('${it.key}', this.checked)"> ${escapeHtml(it.label)}</label>
+        </div>`).join("")}
+    </div>` : `<p style="color:var(--text-light);font-size:13px;">Энэ төрөлд унтраах боломжтой нэмэлт хуудас алга.</p>`}
+    ${persuadeEligible ? `
+    <label class="inv-page-manage-item" style="margin-top:14px;">
+      <input type="checkbox" ${invBuilder.persuade ? "checked" : ""} onchange="invBuilderSetPersuade(this.checked)">
+      🐱 "Бодоод үзье..." муурын дэлгэц (хүлээн авагч "Үгүй" гэхээс өмнө хөөрхөн ятгах мессеж)
+    </label>` : ""}`;
+}
+
+function invBuilderTogglePage(key, isEnabled) {
+  if (!invBuilder) return;
+  const set = new Set(invBuilder.enabledPages || []);
+  if (isEnabled) set.delete(key); else set.add(key);
+  invBuilder.enabledPages = [...set];
+  invBuilderSchedulePreview();
+}
+
+function invBuilderSetPersuade(isOn) {
+  if (!invBuilder) return;
+  invBuilder.persuade = !!isOn;
+  invBuilderSchedulePreview();
+}
+
+let invPageDragKey = null;
+function invPageDragStart(e) { invPageDragKey = e.currentTarget.dataset.key; }
+function invPageDragOver(e) { e.preventDefault(); }
+function invPageDrop(e) {
+  e.preventDefault();
+  const targetKey = e.currentTarget.dataset.key;
+  if (!invPageDragKey || invPageDragKey === targetKey) return;
+  const list = Array.from(document.querySelectorAll("#invPageManageList .inv-page-manage-item")).map(item => item.dataset.key);
+  const from = list.indexOf(invPageDragKey);
+  const to = list.indexOf(targetKey);
+  if (from === -1 || to === -1) return;
+  list.splice(to, 0, list.splice(from, 1)[0]);
+  invBuilder.pageOrder = list;
+  invBuilderRenderPagesSection();
+  invBuilderSchedulePreview();
+}
+function invPageDragEnd() { invPageDragKey = null; }
 
 // ---------- Алхам 5: Preview + Link/QR ----------
 function invBuilderStep5Html(t) {
@@ -351,6 +436,7 @@ function invBuilderDraftInvite() {
     theme: invBuilder.theme || "classic",
     enabledPages: invBuilder.enabledPages || [],
     pageOrder: invBuilder.pageOrder || [],
+    persuade: !!invBuilder.persuade,
   };
 }
 
@@ -423,6 +509,7 @@ async function invSubmitBuilder() {
       theme: invBuilder.theme || "classic",
       enabledPages: invBuilder.enabledPages && invBuilder.enabledPages.length ? invBuilder.enabledPages : [],
       pageOrder: invBuilder.pageOrder && invBuilder.pageOrder.length ? invBuilder.pageOrder : [],
+      persuade: !!invBuilder.persuade,
       senderUid: currentUser.uid,
       senderName: currentUser.name || "",
       status: "sent",

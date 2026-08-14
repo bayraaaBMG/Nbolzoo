@@ -1903,6 +1903,16 @@ body {
 .inv-music-option audio{ margin-left:auto; max-width:160px; }
 .inv-music-empty{ color:var(--text-light); font-size:13px; padding:10px 0; }
 
+/* ---- Урилга builder: pages удирдах (Алхам 4 — enable/disable + drag reorder) ---- */
+.inv-page-manage-list{ display:flex; flex-direction:column; gap:8px; }
+.inv-page-manage-item{
+  display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border);
+  border-radius:8px; background:var(--white); font-size:13.5px; cursor:default;
+}
+.inv-page-manage-item[draggable="true"]{ cursor:grab; }
+.inv-page-manage-item label{ display:flex; align-items:center; gap:8px; cursor:pointer; }
+.inv-page-drag-handle{ color:var(--text-lighter); font-size:16px; -webkit-user-select:none; user-select:none; }
+
 /* ---- Accessibility: keyboard focus indicator ----
    Safety net for interactive elements without an existing specific :focus/:focus-visible
    style. Only fires for keyboard navigation (not mouse clicks), so it adds nothing visually

@@ -54,17 +54,27 @@ function invIndexPages(invite) {
     const disabled = new Set(invite.enabledPages);
     order = order.filter(p => !disabled.has(p.key) && !(p.group && disabled.has(p.group)));
   }
-  // Phase 6: pageOrder — зөвхөн заасан key-үүдийг дахин эрэмбэлнэ; жагсаалтад ороогүй
-  // (жишээ нь: invite үүсгэгдсэний дараа код дээр шинэ card нэмэгдсэн) key бол төгсгөлд нь
-  // хэвээрээ орно.
+  // Phase 6: pageOrder — ЗӨВХӨН reorderable (pageOrder-д дурдсан key-тэй) картуудын ХАРЬЦАНГУЙ
+  // дараалал өөрчлөгдөнө; fixed картууд (intro, RSVP, celebrate г.м — pageOrder-д огт
+  // дурдагдаагүй) яг өнөөгийн байрандаа хэвээр үлдэнэ. Reorderable картууд энэ codebase-д
+  // үргэлж НЭГ тасралтгүй блок болж бөөгнөрдөг (details → memgame → clicker → wheel →
+  // encourage → album → RSVP хоорондох "бонус" хэсэг), тул тэр блокийг бүхэлд нь дахин
+  // эрэмбэлж, өмнө/хойд fixed картуудыг хөндөхгүй орхино. Нэг key олон карт агуулж болно
+  // (жишээ нь "album" — хэд хэдэн page нэг блок болж хамт зөөгдөнө).
   if (invite && Array.isArray(invite.pageOrder) && invite.pageOrder.length) {
-    const byKey = new Map(order.map(p => [p.key, p]));
-    const reordered = [];
-    invite.pageOrder.forEach(k => {
-      if (byKey.has(k)) { reordered.push(byKey.get(k)); byKey.delete(k); }
-    });
-    byKey.forEach(p => reordered.push(p));
-    order = reordered;
+    const reorderSet = new Set(invite.pageOrder);
+    const firstReorderIdx = order.findIndex(p => reorderSet.has(p.key));
+    if (firstReorderIdx !== -1) {
+      const before = order.slice(0, firstReorderIdx);
+      const cluster = order.slice(firstReorderIdx).filter(p => reorderSet.has(p.key));
+      const afterFixed = order.slice(firstReorderIdx).filter(p => !reorderSet.has(p.key));
+      const blocks = new Map(); // key -> ordered items sharing that key, in original relative order
+      cluster.forEach(p => { if (!blocks.has(p.key)) blocks.set(p.key, []); blocks.get(p.key).push(p); });
+      const reordered = [];
+      invite.pageOrder.forEach(k => { if (blocks.has(k)) { reordered.push(...blocks.get(k)); blocks.delete(k); } });
+      blocks.forEach(items => reordered.push(...items)); // keys sender didn't mention keep their relative spot at the end of the cluster
+      order = [...before, ...reordered, ...afterFixed];
+    }
   }
 
   invPages = order;

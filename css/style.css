@@ -1346,6 +1346,19 @@ body {
 .inv-progress{ display:flex;gap:6px;justify-content:center;margin-bottom:22px; }
 .inv-progress span{ width:7px;height:7px;border-radius:50%;background:var(--inv-line);transition:background .2s ease, transform .2s ease; }
 .inv-progress span.inv-done{background:var(--inv-rose); transform:scale(1.15);}
+
+/* Persistent, real (computed) progress indicator — replaces the old per-card hardcoded
+   dots/text above, which could go stale relative to the actual step count. Injected once
+   per render by invEnsureProgressBar() (js/invite-engine.js), shown only while the active
+   card is part of the tracked page sequence. */
+.inv-page-progress{
+  position:relative; z-index:3; display:flex; flex-direction:column; align-items:center;
+  gap:4px; padding:16px 20px 0;
+}
+.inv-progress-dots{ display:flex; gap:6px; }
+.inv-progress-dots .inv-done-dot{ width:7px;height:7px;border-radius:50%;background:var(--inv-line);transition:background .2s ease, transform .2s ease; }
+.inv-progress-dots .inv-done-dot.done{ background:var(--inv-rose); transform:scale(1.15); }
+.inv-progress-text{ font-size:11px; color:var(--inv-rose-deep); font-weight:600; letter-spacing:.02em; }
 .inv-cal-head{ display:flex;align-items:center;justify-content:space-between;margin-bottom:14px; }
 .inv-cal-head button{ background:none;border:none;font-size:18px;color:var(--inv-rose-deep);cursor:pointer;width:32px;height:32px;border-radius:50%; }
 .inv-cal-head button:hover{background:var(--inv-line);}

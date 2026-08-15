@@ -105,7 +105,7 @@ const INV_BUILDER_FIELDS = {
   ],
 };
 
-const INV_BUILDER_STEP_LABELS = ["Төрөл", "Зураг", "Дуу/Theme", "Бүтэц", "Preview"];
+const INV_BUILDER_STEP_LABELS = ["Мэдээлэл", "Зураг", "Дуу ба загвар", "Бүтэц", "Урьдчилан харах"];
 
 let invBuilder = null;
 let invBuilderPreviewTimer = null;
@@ -146,25 +146,27 @@ function invRenderBuilder() {
   if (!root || !invBuilder) return;
   const t = INVITE_TYPES[invBuilder.type];
   root.innerHTML = `
-    <a class="back-btn" onclick="invBuilder=null;renderTypePicker()">← Урилгын төрөл сонгох</a>
-    <div class="inv-builder-head">
-      <h2 style="margin:6px 0 2px;">${t.emoji} ${t.label} — урилга үүсгэх</h2>
-      <div class="inv-builder-steps">
-        ${[1, 2, 3, 4, 5].map(n => `
-          <div class="inv-builder-step-dot ${n === invBuilder.step ? "active" : ""} ${n < invBuilder.step ? "done" : ""}" onclick="invBuilderGoStep(${n})">
-            <span class="inv-builder-step-num">${n < invBuilder.step ? "✓" : n}</span>
-            <span class="inv-builder-step-label">${INV_BUILDER_STEP_LABELS[n - 1]}</span>
-          </div>`).join("")}
-      </div>
-    </div>
-    <div class="inv-builder-layout">
-      <div class="inv-builder-editor" id="invBuilderEditor"></div>
-      <div class="inv-builder-preview-col">
-        <div class="inv-phone-frame">
-          <div class="inv-phone-notch"></div>
-          <div class="inv-phone-screen" id="invPreviewStage"></div>
+    <div class="inv-builder-wrap">
+      <a class="back-btn" onclick="invBuilder=null;renderTypePicker()">← Урилгын төрөл сонгох</a>
+      <div class="inv-builder-head">
+        <h2 style="margin:6px 0 2px;">${t.emoji} ${t.label} — урилга үүсгэх</h2>
+        <div class="inv-builder-steps">
+          ${[1, 2, 3, 4, 5].map(n => `
+            <div class="inv-builder-step-dot ${n === invBuilder.step ? "active" : ""} ${n < invBuilder.step ? "done" : ""}" onclick="invBuilderGoStep(${n})">
+              <span class="inv-builder-step-num">${n < invBuilder.step ? "✓" : n}</span>
+              <span class="inv-builder-step-label">${INV_BUILDER_STEP_LABELS[n - 1]}</span>
+            </div>`).join("")}
         </div>
-        <button class="inv-builder-preview-toggle" type="button" onclick="document.getElementById('inviteRoot').classList.toggle('inv-builder-preview-open')">📱 Preview харах/нуух</button>
+      </div>
+      <div class="inv-builder-layout">
+        <div class="inv-builder-editor" id="invBuilderEditor"></div>
+        <div class="inv-builder-preview-col">
+          <button class="inv-builder-preview-toggle" type="button" onclick="document.getElementById('inviteRoot').classList.toggle('inv-builder-preview-open')">📱 Урьдчилан харах</button>
+          <div class="inv-phone-frame">
+            <div class="inv-phone-notch"></div>
+            <div class="inv-phone-screen" id="invPreviewStage"></div>
+          </div>
+        </div>
       </div>
     </div>`;
   invRenderBuilderStep();

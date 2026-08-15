@@ -1029,3 +1029,69 @@ function escapeHtml(str) {
   return div.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
+// ===== PWA: 100% сонголтоор апп суулгах (автомат prompt/popup ОГТ ҮГҮЙ) =====
+// Chrome/Edge/Android "beforeinstallprompt" event-ийг үргэлж preventDefault() хийж browser-ийн
+// автомат mini-infobar-ыг зогсооно; хэрэглэгч зөвхөн доорх "📲 Апп суулгах" товчийг ӨӨРӨӨ
+// дарахад л bodит install prompt (invDeferredInstallPrompt.prompt()) дуудагдана. Энэ event
+// огт garahagvi бол (Safari/iOS, аль хэдийн суулгасан, эсвэл installability criteria
+// хангаагүй) — товч ЯМАР Ч НӨХЦӨЛД гарч ирэхгүй, сайт browser дээр өмнөх шигээ ажиллана.
+let invDeferredInstallPrompt = null;
+
+function pwaShowInstallButtons() {
+  if (document.getElementById("pwaInstallBtn")) return; // давхардуулахгүй
+  const navActions = document.querySelector(".nav-actions");
+  if (navActions) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = "pwaInstallBtn";
+    btn.className = "btn btn-ghost";
+    btn.style.cssText = "font-size:13px;padding:8px 12px;";
+    btn.textContent = "📲 Апп суулгах";
+    btn.onclick = pwaTriggerInstall;
+    navActions.insertBefore(btn, navActions.firstChild);
+  }
+  const mobileActions = document.querySelector(".mobile-nav-actions");
+  if (mobileActions) {
+    const btn2 = document.createElement("button");
+    btn2.type = "button";
+    btn2.id = "pwaInstallBtnMobile";
+    btn2.className = "btn btn-ghost";
+    btn2.style.cssText = "width:100%;margin-top:8px;";
+    btn2.textContent = "📲 Апп суулгах";
+    btn2.onclick = pwaTriggerInstall;
+    mobileActions.appendChild(btn2);
+  }
+}
+
+function pwaHideInstallButtons() {
+  const b1 = document.getElementById("pwaInstallBtn");
+  if (b1) b1.remove();
+  const b2 = document.getElementById("pwaInstallBtnMobile");
+  if (b2) b2.remove();
+}
+
+async function pwaTriggerInstall() {
+  if (!invDeferredInstallPrompt) return;
+  invDeferredInstallPrompt.prompt();
+  try { await invDeferredInstallPrompt.userChoice; } catch (e) { /* хэрэглэгч цуцалсан ч алдаа биш */ }
+  invDeferredInstallPrompt = null;
+  pwaHideInstallButtons();
+}
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  invDeferredInstallPrompt = event;
+  pwaShowInstallButtons();
+});
+
+window.addEventListener("appinstalled", () => {
+  invDeferredInstallPrompt = null;
+  pwaHideInstallButtons();
+});
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js").catch(() => {});
+  });
+}
+

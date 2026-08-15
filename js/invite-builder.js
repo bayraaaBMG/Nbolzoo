@@ -315,7 +315,7 @@ function invBuilderSetMusic(trackId) {
   if (!trackId) { invBuilder.music = null; invBuilderSchedulePreview(); return; }
   const category = invMusicCategoryForType(invBuilder.type);
   const track = (INV_MUSIC_LIBRARY[category] || []).find(t => t.id === trackId);
-  invBuilder.music = track ? { id: track.id, url: track.url, title: track.title } : null;
+  invBuilder.music = track ? { id: track.id, url: track.url, title: track.title, credit: track.credit || "" } : null;
   invBuilderSchedulePreview();
 }
 

@@ -1990,6 +1990,7 @@ body {
 .inv-music-option input{ flex-shrink:0; width:18px; height:18px; }
 .inv-music-option audio{ margin-left:auto; max-width:100%; width:min(220px,100%); height:32px; }
 .inv-music-empty{ color:var(--text-light); font-size:13px; padding:10px 0; line-height:1.6; }
+.inv-music-credit{ color:var(--text-lighter); font-size:11px; margin-top:8px; line-height:1.5; }
 
 /* ---- Урилга builder: pages удирдах (Алхам 4 — enable/disable + drag reorder) ---- */
 .inv-page-manage-list{ display:flex; flex-direction:column; gap:8px; }

@@ -81,9 +81,12 @@ function renderComments(postId) {
   section.innerHTML = `
     ${cmts.map(c => `
       <div class="comment-item">
-        <div class="comment-avatar">${escapeHtml((c.authorName||"?").charAt(0))}</div>
+        <div class="comment-avatar">${c.authorPhoto ? `<img src="${escapeHtml(c.authorPhoto)}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : escapeHtml((c.authorName||"?").charAt(0))}</div>
         <div class="comment-body">
-          <div class="comment-author">${escapeHtml(c.authorName)}</div>
+          <div class="comment-header-row">
+            <div class="comment-author">${escapeHtml(c.authorName)}</div>
+            ${(currentUser && (currentUser.uid===c.authorId || currentUser.isAdmin)) ? `<span class="comment-delete" onclick="deleteComment('${c.id}','${postId}')" title="Устгах">🗑</span>` : ""}
+          </div>
           <div class="comment-text">${escapeHtml(c.text)}</div>
           <div class="comment-time">${timeAgo(c.createdAt)}</div>
         </div>
@@ -105,14 +108,26 @@ async function addComment(postId) {
   input.value = "";
   try {
     await db.collection("comments").add({
-      postId, authorId: currentUser.uid, authorName: currentUser.name, text,
+      postId, authorId: currentUser.uid, authorName: currentUser.name, authorPhoto: currentUser.photoURL || "", text,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
     await db.collection("posts").doc(postId).update({ commentCount: firebase.firestore.FieldValue.increment(1) });
     const post = posts.find(p => p.id === postId);
     if (post && post.authorId) createNotification(post.authorId, "comment", `${currentUser.name} таны нийтлэлд сэтгэгдэл бичлээ`, "community.html");
   } catch (e) {
-    showToast("⚠️ Сэтгэгдэл илгээхэд алдаа гарлаа");
+    input.value = text;
+    showToast("⚠️ Сэтгэгдэл илгээхэд алдаа гарлаа: " + (e.message || e.code || ""));
+    console.warn(e);
+  }
+}
+
+async function deleteComment(commentId, postId) {
+  if (!confirm("Энэ сэтгэгдлийг устгах уу?")) return;
+  try {
+    await db.collection("comments").doc(commentId).delete();
+    await db.collection("posts").doc(postId).update({ commentCount: firebase.firestore.FieldValue.increment(-1) });
+  } catch (e) {
+    showToast("⚠️ Сэтгэгдэл устгахад алдаа гарлаа");
     console.warn(e);
   }
 }
@@ -138,6 +153,10 @@ async function togglePostLike(id) {
       if (post && post.authorId) createNotification(post.authorId, "like", `${currentUser.name} таны нийтлэлд таалагдлаа гэж дарлаа`, "community.html");
     }
   } catch (e) {
+    // Firestore write амжилтгүй бол optimistic UI-г буцааж, хэрэглэгчид харагдуулна
+    if (wasLiked) userPostLikes.add(id); else userPostLikes.delete(id);
+    renderPosts();
+    showToast("⚠️ Таалагдсанаа тэмдэглэхэд алдаа гарлаа");
     console.warn("togglePostLike error:", e);
   }
 }
@@ -264,10 +283,11 @@ async function submitPost() {
     resetPostAttachments();
     showToast("✅ Нийтлэл амжилттай нэмэгдлээ");
   } catch (e) {
-    showToast("⚠️ Нийтлэл нэмэхэд алдаа гарлаа");
+    showToast("⚠️ Нийтлэл нэмэхэд алдаа гарлаа: " + (e.message || e.code || ""));
     console.warn(e);
+  } finally {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Нийтлэх"; }
   }
-  if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Нийтлэх"; }
 }
 
 async function deletePost(id) {
@@ -276,7 +296,8 @@ async function deletePost(id) {
     await db.collection("posts").doc(id).delete();
     showToast("🗑 Нийтлэл устгагдлаа");
   } catch (e) {
-    showToast("⚠️ Устгахад алдаа гарлаа");
+    showToast("⚠️ Устгахад алдаа гарлаа: " + (e.message || e.code || ""));
+    console.warn(e);
   }
 }
 

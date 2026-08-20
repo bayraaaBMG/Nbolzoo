@@ -189,7 +189,7 @@ function openProfileModal() {
       <div class="form-group"><label>Нэр</label><input type="text" id="profileName" value="${escapeHtml(currentUser.name||"")}"></div>
       <div class="form-group"><label>Танилцуулга</label><textarea id="profileBio" rows="3">${escapeHtml(currentUser.bio||"")}</textarea></div>
       <div id="profileStatus" style="min-height:18px;font-size:13px;margin-bottom:8px;"></div>
-      <button class="btn btn-primary" type="button" style="width:100%" onclick="saveProfile()">Хадгалах</button>
+      <button class="btn btn-primary" type="button" id="profileSaveBtn" style="width:100%" onclick="saveProfile()">Хадгалах</button>
       <button class="btn btn-ghost" type="button" style="width:100%;margin-top:10px;" onclick="openCoupleModal()">💑 Хосын дурсамж</button>
     </div>`;
   document.getElementById("modal").classList.add("show");
@@ -200,7 +200,9 @@ async function saveProfile() {
   const bio = document.getElementById("profileBio").value.trim();
   const fileInput = document.getElementById("profileAvatarFile");
   const statusEl = document.getElementById("profileStatus");
+  const saveBtn = document.getElementById("profileSaveBtn");
   if (!name) return showToast("⚠️ Нэрээ оруулна уу");
+  if (saveBtn) saveBtn.disabled = true;
   statusEl.textContent = "Хадгалж байна...";
   try {
     const updates = { name, bio };
@@ -216,7 +218,10 @@ async function saveProfile() {
     closeModal();
     showToast("✅ Профайл шинэчлэгдлээ");
   } catch (e) {
-    statusEl.textContent = "⚠️ Алдаа гарлаа: " + e.message;
+    statusEl.textContent = "⚠️ Алдаа гарлаа: " + (e.message || e.code || "Тодорхойгүй алдаа");
+    console.warn("saveProfile error:", e);
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
   }
 }
 

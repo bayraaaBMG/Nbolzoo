@@ -344,14 +344,14 @@ function renderGamesHome() {
     <div class="game-featured-card game-anim-in" onclick="renderCoupleChallenge()">
       <div class="game-featured-emoji">💕</div>
       <div>
-        <h3>7 хоногийн Couple Challenge</h3>
+        <h3>Couple Challenge (7/30 хоног)</h3>
         <p>Өдөр бүр нэг жижиг challenge — streak цуглуулж, хамтдаа дурсамж бүтээгээрэй.</p>
       </div>
       <span class="game-featured-arrow">→</span>
     </div>`;
 }
 
-// ================= 7 ХОНОГИЙН COUPLE CHALLENGE =================
+// ================= 7/30 ХОНОГИЙН COUPLE CHALLENGE =================
 async function renderCoupleChallenge() {
   if (typeof currentUser === "undefined" || !currentUser) {
     showToast("⚠️ Эхлээд нэвтэрнэ үү");
@@ -378,7 +378,7 @@ async function renderCoupleChallenge() {
       <a class="back-btn" onclick="renderGamesHome()">← Буцах</a>
       <div class="game-round-card game-anim-in" style="text-align:center;">
         <div style="font-size:44px;">💕</div>
-        <h2>7 хоногийн Couple Challenge</h2>
+        <h2>Couple Challenge</h2>
         <p class="game-round-sub">Энэ feature-г ашиглахын тулд эхлээд хосоо холбох хэрэгтэй. Профайл цэснээс "💑 Хосын дурсамж" хэсэгт ороод кодоор холбогдоорой.</p>
         <button class="btn btn-primary" type="button" style="width:100%;margin-top:10px;" onclick="openProfileModal()">Профайл руу очих</button>
       </div>`;
@@ -392,23 +392,29 @@ function renderChallengeBoard() {
   const hasStarted = !!state.startedAt;
   const completedDays = state.completedDays || {};
   const doneCount = Object.keys(completedDays).length;
-  const allDone = doneCount >= 7;
-  const nextDay = CHALLENGE_DAYS.find(d => !completedDays[d.day]);
+  const totalDays = state.totalDays || 7;
+  const days = challengeDaysFor(totalDays);
+  const allDone = doneCount >= totalDays;
+  const nextDay = days.find(d => !completedDays[d.day]);
 
   gameRoot().innerHTML = `
     <a class="back-btn" onclick="renderGamesHome()">← Буцах</a>
-    <h2 style="margin:10px 0 4px;">💕 7 хоногийн Couple Challenge</h2>
+    <h2 style="margin:10px 0 4px;">💕 Couple Challenge</h2>
     <p style="color:var(--text-light);margin-bottom:16px;">Өдөр бүр нэг жижиг challenge хийж, хамтдаа дурсамж бүтээгээрэй.</p>
     ${!hasStarted ? `
       <div class="game-round-card game-anim-in" style="text-align:center;">
-        <button class="btn btn-primary" type="button" style="width:100%" onclick="handleStartChallenge()">🚀 Challenge эхлүүлэх</button>
+        <p style="margin-bottom:14px;color:var(--text-light);">Хугацаагаа сонгоно уу:</p>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" type="button" style="flex:1" onclick="handleStartChallenge(7)">🚀 7 хоног</button>
+          <button class="btn btn-primary" type="button" style="flex:1" onclick="handleStartChallenge(30)">🚀 30 хоног</button>
+        </div>
       </div>` : `
       <div class="game-challenge-progress">
-        <div class="game-challenge-streak">🔥 ${doneCount} / 7 өдөр</div>
-        <div class="game-challenge-bar"><div class="game-challenge-bar-fill" style="width:${(doneCount / 7) * 100}%;"></div></div>
+        <div class="game-challenge-streak">🔥 ${doneCount} / ${totalDays} өдөр</div>
+        <div class="game-challenge-bar"><div class="game-challenge-bar-fill" style="width:${(doneCount / totalDays) * 100}%;"></div></div>
       </div>
       <div class="game-challenge-days">
-        ${CHALLENGE_DAYS.map(d => `
+        ${days.map(d => `
           <div class="game-challenge-day ${completedDays[d.day] ? "is-done" : ""}">
             <div class="game-challenge-day-num">${d.day}</div>
             <div class="game-challenge-day-emoji">${d.emoji}</div>
@@ -418,18 +424,19 @@ function renderChallengeBoard() {
               : (nextDay && d.day === nextDay.day ? `<button class="btn btn-primary" type="button" style="width:100%;margin-top:6px;font-size:12px;padding:8px;" onclick="handleMarkDay(${d.day})">Дуусгасан ✓</button>` : "")}
           </div>`).join("")}
       </div>
+      ${doneCount > 0 ? `<button class="btn btn-ghost" type="button" style="width:100%;margin-top:16px;" onclick="handleShareChallenge()">📢 Community-д хуваалцах</button>` : ""}
       ${allDone ? `
         <div class="game-round-card game-anim-in game-challenge-badge" style="text-align:center;margin-top:16px;">
           <div style="font-size:52px;">🏆</div>
           <h2>Challenge Champion!</h2>
-          <p class="game-round-sub">7 хоногийн challenge-г амжилттай дуусгалаа 🎉</p>
+          <p class="game-round-sub">${totalDays} хоногийн challenge-г амжилттай дуусгалаа 🎉</p>
           <button class="btn btn-ghost" type="button" style="width:100%;margin-top:10px;" onclick="handleResetChallenge()">🔄 Дахин эхлүүлэх</button>
         </div>` : ""}
     `}`;
 }
 
-async function handleStartChallenge() {
-  try { await startCoupleChallenge(); renderChallengeBoard(); showToast("🚀 Challenge эхэллээ!"); }
+async function handleStartChallenge(totalDays) {
+  try { await startCoupleChallenge(totalDays); renderChallengeBoard(); showToast("🚀 Challenge эхэллээ!"); }
   catch (e) { console.warn("handleStartChallenge error:", e); showToast("⚠️ Алдаа гарлаа: " + (e.message || "")); }
 }
 async function handleMarkDay(day) {
@@ -439,6 +446,10 @@ async function handleMarkDay(day) {
 async function handleResetChallenge() {
   try { await resetCoupleChallenge(); renderChallengeBoard(); }
   catch (e) { console.warn("handleResetChallenge error:", e); showToast("⚠️ Алдаа гарлаа: " + (e.message || "")); }
+}
+async function handleShareChallenge() {
+  try { await shareChallengeToFeed(); }
+  catch (e) { console.warn("handleShareChallenge error:", e); showToast("⚠️ Алдаа гарлаа: " + (e.message || "")); }
 }
 
 // ================= ROOM ҮҮСГЭХ / НЭГДЭХ =================

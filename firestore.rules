@@ -31,19 +31,59 @@ service cloud.firestore {
       allow delete: if isAdmin() && resource.data.email != 'bbayraaa20@gmail.com';
     }
 
-    // ---- posts/{postId} : community feed ----
+    // ---- posts/{postId} : community feed. Besides the original fields, a post may now
+    // carry: type (one of the 6 enum values below, optional), visibility ('public'|'private',
+    // absent == public), helpfulCount (number, mirrors likeCount's counter pattern), and
+    // coupleId/authorType:'couple' (optional — a post shared under a linked couple's identity;
+    // authorId is still always the acting user's own uid, so ownership/moderation/reporting
+    // all keep working exactly as before with zero extra rules). ----
     match /posts/{postId} {
-      allow read: if true;
-      allow create: if isSignedIn() && !isBanned() && request.resource.data.authorId == request.auth.uid;
+      // A private post is readable only by its author (or an admin, for moderation) — a feed
+      // query with no explicit visibility filter still works correctly: Firestore silently
+      // drops any doc that fails this per-document check from list/query results, so private
+      // posts simply never appear to anyone else, with no client-side trust required.
+      allow read: if resource.data.visibility != 'private'
+        || (isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin()));
+      allow create: if isSignedIn() && !isBanned()
+        && request.resource.data.authorId == request.auth.uid
+        && (!('type' in request.resource.data) || request.resource.data.type in ['advice', 'relationship', 'dateshare', 'travel', 'surprise', 'question'])
+        && (!('visibility' in request.resource.data) || request.resource.data.visibility in ['public', 'private']);
       // Owner can edit their own post; admin may additionally toggle moderation state (hidden);
-      // anyone signed-in may update ONLY likeCount/commentCount (maintained via transactions
-      // from toggleLike/addComment) — author/content/hidden stay immutable for non-owner non-admins.
+      // anyone signed-in may update ONLY likeCount/commentCount/helpfulCount (maintained via
+      // transactions from toggleLike/addComment/toggleHelpful) — author/content/hidden stay
+      // immutable for non-owner non-admins.
       allow update: if isSignedIn() && (
         resource.data.authorId == request.auth.uid ||
         isAdmin() ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'commentCount'])
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'commentCount', 'helpfulCount'])
       );
       allow delete: if isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
+    }
+
+    // ---- helpfulVotes/{uid_postId} : the distinct "👍 Хэрэгтэй зөвлөгөө" reaction, kept as
+    // its own collection (not reusing likes/) so a post's ❤️ and 👍 counts are independent —
+    // exact same one-doc-per-(user,target) pattern as likes/{uid_targetId} below. ----
+    match /helpfulVotes/{voteId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && voteId == request.auth.uid + '_' + request.resource.data.postId;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // ---- follows/{followerUid_targetUid} : the social graph. Doc id encodes both uids (same
+    // pattern as likes/saved) so "does A follow B" is a single get(), and a user can never
+    // create more than one follow doc for the same target. Publicly readable so
+    // follower/following counts and lists work for any visitor viewing a profile. ----
+    match /follows/{followId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+        && request.resource.data.followerUid == request.auth.uid
+        && request.resource.data.targetUid != request.auth.uid
+        && followId == request.auth.uid + '_' + request.resource.data.targetUid;
+      allow delete: if isSignedIn() && resource.data.followerUid == request.auth.uid;
+      allow update: if false;
     }
 
     // ---- comments/{commentId} ----
@@ -72,6 +112,19 @@ service cloud.firestore {
       allow create: if isSignedIn()
         && request.resource.data.uid == request.auth.uid
         && savedId == request.auth.uid + '_' + request.resource.data.ideaId;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // ---- savedPosts/{uid_postId} : per-user saved community posts, private. Kept separate
+    // from saved/{uid_ideaId} (date ideas) on purpose — js/saved.js's renderSaved() looks
+    // saved ideaIds up in allUbIdeas, which a postId would never match; a distinct collection
+    // means the existing Saved page and its rules stay completely untouched. ----
+    match /savedPosts/{savedId} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && savedId == request.auth.uid + '_' + request.resource.data.postId;
       allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
       allow update: if false;
     }
@@ -136,9 +189,13 @@ service cloud.firestore {
     }
 
     // ---- couples/{coupleId} : a linked pair + their shared memories subcollection.
-    // members is always exactly the 2 uids; only those 2 may read/write. ----
+    // members is always exactly the 2 uids; only those 2 may write. May also carry optional
+    // story/photoURL/isPublic — when isPublic==true the pair opted into a public couple
+    // profile, so the top-level doc becomes world-readable (openCouplePublicProfile()).
+    // The memories subcollection below is UNAFFECTED by isPublic and always stays
+    // members-only — a public couple profile never exposes private shared memories. ----
     match /couples/{coupleId} {
-      allow read: if isSignedIn() && resource.data.members.hasAny([request.auth.uid]);
+      allow read: if resource.data.isPublic == true || (isSignedIn() && resource.data.members.hasAny([request.auth.uid]));
       allow create: if isSignedIn()
         && request.resource.data.members.size() == 2
         && request.resource.data.members.hasAny([request.auth.uid]);

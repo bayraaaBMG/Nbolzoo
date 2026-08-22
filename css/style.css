@@ -424,7 +424,7 @@ body {
   margin-bottom: 14px; border: 1px solid var(--border);
 }
 
-.post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
 
 .avatar {
   width: 42px; height: 42px; border-radius: 50%;
@@ -444,7 +444,7 @@ body {
 }
 
 .post-actions {
-  display: flex; gap: 22px; padding-top: 10px; border-top: 1px solid var(--border);
+  display: flex; gap: 16px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border);
 }
 
 .post-photo { width: 100%; max-height: 360px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; display: block; }
@@ -481,6 +481,42 @@ body {
 
 .post-action:hover { color: var(--primary); }
 .post-action.liked { color: var(--accent); }
+
+/* Social community: post type chips, visibility, feed tabs, follow button, type badge */
+.post-type-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.post-type-chip {
+  background: var(--bg); border: 1px solid var(--border); padding: 6px 12px;
+  border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s; user-select: none;
+}
+.post-type-chip:hover { border-color: var(--primary); }
+.post-type-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+.post-visibility-select {
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px;
+  font-size: 12px; font-family: inherit; color: var(--text-light); background: white; cursor: pointer;
+}
+
+.feed-tabs { display: flex; gap: 8px; margin-bottom: 14px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.feed-tab {
+  padding: 10px 16px; cursor: pointer; font-size: 14px; color: var(--text-light);
+  border-bottom: 2px solid transparent; user-select: none; white-space: nowrap;
+}
+.feed-tab:hover { color: var(--primary); }
+.feed-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+
+.post-type-badge {
+  background: var(--primary-extra-soft); color: var(--primary-dark); font-size: 11px; font-weight: 600;
+  padding: 4px 9px; border-radius: 999px; white-space: nowrap; flex-shrink: 0;
+}
+
+.post-follow-btn {
+  border: 1px solid var(--primary); background: transparent; color: var(--primary);
+  font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 999px; cursor: pointer;
+  flex-shrink: 0; transition: all 0.2s; font-family: inherit;
+}
+.post-follow-btn:hover { background: var(--primary); color: white; }
+.post-follow-btn.is-following { border-color: var(--border); color: var(--text-light); }
+.post-follow-btn.is-following:hover { border-color: #ef4444; color: #ef4444; background: transparent; }
 
 .sidebar { position: sticky; top: 90px; height: fit-content; }
 

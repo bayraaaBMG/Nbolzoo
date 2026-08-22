@@ -16,23 +16,89 @@ function subscribeToPosts() {
 
 const POST_FEELINGS = ["😊","😍","🥰","😂","🥳","😢","😴","🤔"];
 
+// Хосууд бие биенээсээ суралцаж хамтдаа хөгждөг social community: нийтлэл бүр эдгээр 6
+// төрлийн аль нэгийг сонгож болно (сонгохгүй бол "ерөнхий" 💬 хэвээр).
+const POST_TYPES = [
+  { id: "advice", emoji: "💡", label: "Зөвлөгөө" },
+  { id: "relationship", emoji: "❤️", label: "Харилцаа" },
+  { id: "dateshare", emoji: "📸", label: "Бидний болзоо" },
+  { id: "travel", emoji: "✈️", label: "Аялал" },
+  { id: "surprise", emoji: "🎁", label: "Сюрприз" },
+  { id: "question", emoji: "❓", label: "Асуулт" },
+];
+function postTypeInfo(type) { return POST_TYPES.find(t => t.id === type) || null; }
+
+let selectedPostType = "";        // compose form-ийн сонгосон төрөл ("" = ерөнхий)
+let selectedPostVisibility = "public";
+let currentFeedTab = "all";       // "all" | "following" | "trending"
+
+function selectPostType(type) {
+  selectedPostType = type;
+  document.querySelectorAll(".post-type-chip").forEach(chip => chip.classList.toggle("active", chip.dataset.type === type));
+}
+
+function selectPostVisibility(v) {
+  selectedPostVisibility = v;
+}
+
+function selectFeedTab(tab) {
+  currentFeedTab = tab;
+  document.querySelectorAll(".feed-tab").forEach(t => t.classList.toggle("active", t.dataset.feed === tab));
+  renderPosts();
+}
+
+function visiblePostsForFeed() {
+  // Admin-hidden posts (moderation) never show in the public feed, even to their own author.
+  // Private posts only ever show to their own author — everyone else's Firestore read is
+  // already blocked at the rules layer, but the local realtime cache can still briefly hold
+  // a stale copy right after the author flips visibility, so this stays defense-in-depth.
+  let list = posts.filter(p => !p.hidden && (p.visibility !== "private" || (currentUser && p.authorId === currentUser.uid)));
+  if (currentFeedTab === "following") {
+    list = list.filter(p => currentUser && (followingSet.has(p.authorId) || p.authorId === currentUser.uid));
+  } else if (currentFeedTab === "trending") {
+    list = list.filter(p => (p.helpfulCount || 0) > 0).sort((a, b) => (b.helpfulCount || 0) - (a.helpfulCount || 0));
+  }
+  return list;
+}
+
+function renderFeedTabs() {
+  const el = document.getElementById("feedTabs");
+  if (!el) return;
+  el.innerHTML = `
+    <div class="feed-tab ${currentFeedTab === "all" ? "active" : ""}" data-feed="all" onclick="selectFeedTab('all')">🏠 Бүгд</div>
+    <div class="feed-tab ${currentFeedTab === "following" ? "active" : ""}" data-feed="following" onclick="selectFeedTab('following')">👥 Дагасан</div>
+    <div class="feed-tab ${currentFeedTab === "trending" ? "active" : ""}" data-feed="trending" onclick="selectFeedTab('trending')">🔥 Шилдэг</div>`;
+}
+
 function renderPosts() {
   const el = document.getElementById("postsList");
   if (!el) return;
-  // Admin-hidden posts (moderation) never show in the public feed, even to their own author.
-  const visible = posts.filter(p => !p.hidden);
+  renderFeedTabs();
+  const visible = visiblePostsForFeed();
   if (!visible.length) {
-    el.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text-light);">Одоохондоо нийтлэл алга. Эхний санаагаа хуваалцаарай! 💬</div>`;
+    const emptyMsg = currentFeedTab === "following"
+      ? `Одоогоор дагасан хүмүүсийн нийтлэл алга. Сонирхолтой хүмүүсийг дагаад эхлээрэй! 👥`
+      : currentFeedTab === "trending"
+      ? `Одоогоор "Хэрэгтэй" гэж тэмдэглэгдсэн нийтлэл алга.`
+      : `Одоохондоо нийтлэл алга. Эхний санаагаа хуваалцаарай! 💬`;
+    el.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text-light);">${emptyMsg}</div>`;
     return;
   }
-  el.innerHTML = visible.map(p => `
+  el.innerHTML = visible.map(p => {
+    const typeInfo = postTypeInfo(p.type);
+    const isOwn = currentUser && currentUser.uid === p.authorId;
+    return `
     <div class="post">
       <div class="post-header">
-        <div class="avatar">${p.authorPhoto ? `<img src="${escapeHtml(p.authorPhoto)}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : escapeHtml((p.authorName||"?").charAt(0))}</div>
-        <div>
-          <div class="post-author">${escapeHtml(p.authorName)}${p.feeling ? ` <span style="font-weight:400;color:var(--text-light);">санаа сэтгэл ${p.feeling}</span>` : ""}</div>
-          <div class="post-time">${timeAgo(p.createdAt)}${p.location ? ` · 📍 ${escapeHtml(p.location)}` : ""}</div>
+        <div class="avatar" onclick="openUserProfile('${p.authorId}')" style="cursor:pointer;">${p.authorPhoto ? `<img src="${escapeHtml(p.authorPhoto)}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : escapeHtml((p.authorName||"?").charAt(0))}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="post-author">
+            <span onclick="openUserProfile('${p.authorId}')" style="cursor:pointer;">${escapeHtml(p.authorName)}</span>${p.authorType === "couple" ? " 💑" : ""}${p.feeling ? ` <span style="font-weight:400;color:var(--text-light);">санаа сэтгэл ${p.feeling}</span>` : ""}
+          </div>
+          <div class="post-time">${timeAgo(p.createdAt)}${p.location ? ` · 📍 ${escapeHtml(p.location)}` : ""}${p.visibility === "private" ? ` · 🔒 Зөвхөн танд` : ""}</div>
         </div>
+        ${typeInfo ? `<div class="post-type-badge">${typeInfo.emoji} ${typeInfo.label}</div>` : ""}
+        ${(currentUser && !isOwn) ? `<button type="button" class="post-follow-btn ${followingSet.has(p.authorId) ? "is-following" : ""}" onclick="toggleFollow('${p.authorId}')">${followingSet.has(p.authorId) ? "✓ Дагасан" : "+ Дагах"}</button>` : ""}
       </div>
       <div class="post-content">${escapeHtml(p.content)}</div>
       ${p.imageUrl ? `<img src="${escapeHtml(p.imageUrl)}" loading="lazy" alt="" class="post-photo" onerror="this.remove()">` : (p.emoji ? `<div class="post-image">${p.emoji}</div>` : "")}
@@ -41,14 +107,18 @@ function renderPosts() {
         <div class="post-action ${userPostLikes.has(p.id)?'liked':''}" onclick="togglePostLike('${p.id}')">
           ${userPostLikes.has(p.id)?'❤️':'🤍'} <span>${p.likeCount||0}</span>
         </div>
+        <div class="post-action ${userHelpfulVotes.has(p.id)?'liked':''}" onclick="toggleHelpful('${p.id}')" title="Хэрэгтэй зөвлөгөө">
+          👍 <span>${p.helpfulCount||0}</span>
+        </div>
         <div class="post-action" onclick="toggleComments('${p.id}', this)">💬 <span id="cmt-count-${p.id}">${p.commentCount||0}</span></div>
+        <div class="post-action ${savedPostsSet.has(p.id)?'liked':''}" onclick="toggleSavePost('${p.id}')" title="Хадгалах">${savedPostsSet.has(p.id) ? "🔖" : "📑"}</div>
         <div class="post-action" onclick="sharePost('${p.id}')">🔗</div>
-        ${(currentUser && currentUser.uid !== p.authorId) ? `<div class="post-action" onclick="openReportModal('post','${p.id}','${p.authorId}')" title="Мэдэгдэх">🚩</div>` : ""}
-        ${(currentUser && (currentUser.uid===p.authorId || currentUser.isAdmin)) ? `<div class="post-action" onclick="deletePost('${p.id}')">🗑</div>` : ""}
+        ${(currentUser && !isOwn) ? `<div class="post-action" onclick="openReportModal('post','${p.id}','${p.authorId}')" title="Мэдэгдэх">🚩</div>` : ""}
+        ${(currentUser && (isOwn || currentUser.isAdmin)) ? `<div class="post-action" onclick="deletePost('${p.id}')">🗑</div>` : ""}
       </div>
       <div class="comments-section" id="comments-${p.id}" style="display:none;"></div>
-    </div>
-  `).join("");
+    </div>`;
+  }).join("");
 }
 
 function toggleComments(postId, btn) {
@@ -169,6 +239,88 @@ async function togglePostLike(id) {
   }
 }
 
+// "👍 Хэрэгтэй зөвлөгөө" — ❤️-с тусдаа, өөрийн helpfulVotes/helpfulCount-той reaction. Хамгийн
+// их "хэрэгтэй" гэж тэмдэглэгдсэн нийтлэлүүд Шилдэг feed tab-д гардаг (visiblePostsForFeed()).
+async function toggleHelpful(id) {
+  if (!currentUser) return showToast("⚠️ Эхлээд нэвтэрнэ үү");
+  const wasHelpful = userHelpfulVotes.has(id);
+  const voteId = currentUser.uid + "_" + id;
+  if (wasHelpful) userHelpfulVotes.delete(id); else userHelpfulVotes.add(id);
+  renderPosts();
+  try {
+    const postRef = db.collection("posts").doc(id);
+    if (wasHelpful) {
+      await db.collection("helpfulVotes").doc(voteId).delete();
+      await postRef.update({ helpfulCount: firebase.firestore.FieldValue.increment(-1) });
+    } else {
+      await db.collection("helpfulVotes").doc(voteId).set({
+        uid: currentUser.uid, postId: id,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      await postRef.update({ helpfulCount: firebase.firestore.FieldValue.increment(1) });
+      const post = posts.find(p => p.id === id);
+      if (post && post.authorId) createNotification(post.authorId, "helpful", `${currentUser.name} таны зөвлөгөөг хэрэгтэй гэж тэмдэглэлээ`, "community.html");
+    }
+  } catch (e) {
+    if (wasHelpful) userHelpfulVotes.add(id); else userHelpfulVotes.delete(id);
+    renderPosts();
+    showToast("⚠️ Тэмдэглэхэд алдаа гарлаа");
+    console.warn("toggleHelpful error:", e);
+  }
+}
+
+async function toggleSavePost(id) {
+  if (!currentUser) return showToast("⚠️ Эхлээд нэвтэрнэ үү");
+  const wasSaved = savedPostsSet.has(id);
+  const saveId = currentUser.uid + "_" + id;
+  if (wasSaved) savedPostsSet.delete(id); else savedPostsSet.add(id);
+  renderPosts();
+  try {
+    if (wasSaved) {
+      await db.collection("savedPosts").doc(saveId).delete();
+    } else {
+      await db.collection("savedPosts").doc(saveId).set({
+        uid: currentUser.uid, postId: id,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+    showToast(wasSaved ? "Хадгалснаас хасагдлаа" : "🔖 Хадгаллаа");
+  } catch (e) {
+    if (wasSaved) savedPostsSet.add(id); else savedPostsSet.delete(id);
+    renderPosts();
+    showToast("⚠️ Алдаа гарлаа");
+    console.warn("toggleSavePost error:", e);
+  }
+}
+
+// Дагах/Дагахаа болих — targetUid==currentUser.uid бол rules-ээр аль хэдийн хориглосон.
+async function toggleFollow(targetUid) {
+  if (!currentUser) return openAuth("login");
+  if (targetUid === currentUser.uid) return;
+  const wasFollowing = followingSet.has(targetUid);
+  const followId = currentUser.uid + "_" + targetUid;
+  if (wasFollowing) followingSet.delete(targetUid); else followingSet.add(targetUid);
+  renderPosts();
+  if (typeof refreshOpenProfileModal === "function") refreshOpenProfileModal(targetUid);
+  try {
+    if (wasFollowing) {
+      await db.collection("follows").doc(followId).delete();
+    } else {
+      await db.collection("follows").doc(followId).set({
+        followerUid: currentUser.uid, targetUid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      if (typeof createNotification === "function") createNotification(targetUid, "follow", `${currentUser.name} таныг дагалаа`, "community.html");
+    }
+  } catch (e) {
+    if (wasFollowing) followingSet.add(targetUid); else followingSet.delete(targetUid);
+    renderPosts();
+    if (typeof refreshOpenProfileModal === "function") refreshOpenProfileModal(targetUid);
+    showToast("⚠️ Дагахад алдаа гарлаа");
+    console.warn("toggleFollow error:", e);
+  }
+}
+
 // ---------- Facebook-шиг post attachments: зураг / байршил / сэтгэгдэл / зардал ----------
 let pendingPostImage = null;    // File
 let pendingPostLocation = null; // string
@@ -271,11 +423,18 @@ async function submitPost() {
   const submitBtn = document.querySelector(".post-form-actions .btn-primary");
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Илгээж байна..."; }
   try {
+    const postAsCoupleCheckbox = document.getElementById("postAsCoupleCheckbox");
+    const postingAsCouple = postAsCoupleCheckbox && postAsCoupleCheckbox.checked && currentCouple;
     const postData = {
-      authorId: currentUser.uid, authorName: currentUser.name, authorPhoto: currentUser.photoURL || "",
-      content, emoji: pendingPostImage ? "" : "💬", likeCount: 0, commentCount: 0,
+      authorId: currentUser.uid,
+      authorName: postingAsCouple ? coupleDisplayName(currentCouple) : currentUser.name,
+      authorPhoto: currentUser.photoURL || "",
+      content, emoji: pendingPostImage ? "" : "💬", likeCount: 0, commentCount: 0, helpfulCount: 0,
+      visibility: selectedPostVisibility === "private" ? "private" : "public",
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
+    if (selectedPostType) postData.type = selectedPostType;
+    if (postingAsCouple) { postData.authorType = "couple"; postData.coupleId = currentCouple.id; }
     if (pendingPostLocation) postData.location = pendingPostLocation;
     if (pendingPostFeeling) postData.feeling = pendingPostFeeling;
     if (pendingPostBudget) postData.budget = pendingPostBudget;
@@ -290,6 +449,11 @@ async function submitPost() {
     await db.collection("posts").add(postData);
     input.value = "";
     resetPostAttachments();
+    selectPostType("");
+    selectedPostVisibility = "public";
+    const visSelect = document.getElementById("postVisibilitySelect");
+    if (visSelect) visSelect.value = "public";
+    if (postAsCoupleCheckbox) postAsCoupleCheckbox.checked = false;
     showToast("✅ Нийтлэл амжилттай нэмэгдлээ");
   } catch (e) {
     showToast("⚠️ Нийтлэл нэмэхэд алдаа гарлаа: " + (e.message || e.code || ""));
@@ -365,6 +529,96 @@ async function submitReport(targetType, targetId, targetAuthorId) {
   } finally {
     if (btn) btn.disabled = false;
   }
+}
+
+// ---------- Public profile (хүн бүрийн зураг/bio/нийтлэл/followers-following) ----------
+let openProfileUid = null; // одоо нээлттэй байгаа профайл модалын uid (Follow товч дахин зурахад)
+
+async function openUserProfile(uid) {
+  if (!db || !uid) return;
+  openProfileUid = uid;
+  document.getElementById("modalContent").innerHTML = `<div class="modal-body" style="text-align:center;padding:40px 24px;">Ачааллаж байна...</div>`;
+  document.getElementById("modal").classList.add("show");
+  try {
+    const [userSnap, postsSnap, followersCountSnap, followingCountSnap] = await Promise.all([
+      db.collection("users").doc(uid).get(),
+      db.collection("posts").where("authorId", "==", uid).get(), // no orderBy: avoids a composite index, sorted client-side below
+      db.collection("follows").where("targetUid", "==", uid).count().get(),
+      db.collection("follows").where("followerUid", "==", uid).count().get(),
+    ]);
+    if (!userSnap.exists) {
+      document.getElementById("modalContent").innerHTML = `<div class="modal-body" style="text-align:center;padding:40px 24px;">Хэрэглэгч олдсонгүй.</div>`;
+      return;
+    }
+    const u = userSnap.data();
+    const userPosts = postsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .filter(p => !p.hidden && (p.visibility !== "private" || (currentUser && currentUser.uid === uid)))
+      .sort((a, b) => (b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0) - (a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0));
+    renderUserProfileModal(uid, u, userPosts, followersCountSnap.data().count, followingCountSnap.data().count);
+  } catch (e) {
+    console.warn("openUserProfile error:", e);
+    document.getElementById("modalContent").innerHTML = `
+      <div class="modal-body" style="text-align:center;padding:40px 24px;">
+        <p style="margin-bottom:14px;">⚠️ Профайл ачаалахад алдаа гарлаа.</p>
+        <button class="btn btn-primary" type="button" onclick="openUserProfile('${uid}')">🔄 Дахин оролдох</button>
+      </div>`;
+  }
+}
+
+function renderUserProfileModal(uid, u, userPosts, followersCount, followingCount) {
+  const el = document.getElementById("modalContent");
+  if (!el) return;
+  const isOwn = currentUser && currentUser.uid === uid;
+  el.innerHTML = `
+    <div class="modal-header">
+      <h3>👤 ${escapeHtml(u.name || "?")}</h3>
+      <button class="modal-close" onclick="closeModal()" type="button">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="text-align:center;margin-bottom:14px;">
+        <div class="avatar" style="width:72px;height:72px;font-size:28px;margin:0 auto 10px;">${u.photoURL ? `<img src="${escapeHtml(u.photoURL)}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : escapeHtml((u.name || "?").charAt(0))}</div>
+        <div style="font-weight:700;font-size:17px;">${escapeHtml(u.name || "?")}</div>
+        ${u.bio ? `<div style="color:var(--text-light);font-size:13px;margin-top:6px;">${escapeHtml(u.bio)}</div>` : ""}
+        <div style="display:flex;justify-content:center;gap:24px;margin-top:12px;">
+          <div><strong>${userPosts.length}</strong><div style="font-size:12px;color:var(--text-light);">нийтлэл</div></div>
+          <div><strong>${followersCount}</strong><div style="font-size:12px;color:var(--text-light);">дагагч</div></div>
+          <div><strong>${followingCount}</strong><div style="font-size:12px;color:var(--text-light);">дагасан</div></div>
+        </div>
+        ${(!isOwn && currentUser) ? `<button type="button" class="btn ${followingSet.has(uid) ? "btn-ghost" : "btn-primary"}" id="profileFollowBtn" style="margin-top:12px;" onclick="toggleFollow('${uid}')">${followingSet.has(uid) ? "✓ Дагасан" : "+ Дагах"}</button>` : ""}
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;">
+        ${userPosts.length ? userPosts.map(p => {
+          const t = postTypeInfo(p.type);
+          return `<div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;">
+            ${t ? `<span style="color:var(--primary);">${t.emoji} ${t.label}</span> · ` : ""}${escapeHtml((p.content || "").slice(0, 100))}${(p.content || "").length > 100 ? "..." : ""}
+            <div style="color:var(--text-lighter);font-size:11px;margin-top:2px;">${timeAgo(p.createdAt)} · 👍 ${p.helpfulCount || 0} · ❤️ ${p.likeCount || 0}</div>
+          </div>`;
+        }).join("") : `<div style="text-align:center;color:var(--text-light);padding:20px 0;">Нийтлэл алга</div>`}
+      </div>
+    </div>`;
+}
+
+// togglePostLike/toggleHelpful мэтийн шиг Follow ч бас optimistic тул нээлттэй профайл
+// модал дээрх товчийг тэр даруй sync хийнэ (feed дээрх бусад товч renderPosts()-оор аль хэдийн шинэчлэгдсэн байна).
+function refreshOpenProfileModal(uid) {
+  if (openProfileUid !== uid) return;
+  const modal = document.getElementById("modal");
+  if (!modal || !modal.classList.contains("show")) return;
+  const btn = document.getElementById("profileFollowBtn");
+  if (!btn) return;
+  btn.textContent = followingSet.has(uid) ? "✓ Дагасан" : "+ Дагах";
+  btn.className = "btn " + (followingSet.has(uid) ? "btn-ghost" : "btn-primary");
+}
+
+// ---------- community.html-ийн auth-resolve хугацаанд дуудагдана (admin.html-тай ижил хэв
+// маяг): "Хосоороо нийтлэх" checkbox зөвхөн currentCouple байгаа үед харагдана. ----------
+async function initCommunityExtras() {
+  const coupleRow = document.getElementById("postAsCoupleRow");
+  if (!currentUser) { if (coupleRow) coupleRow.style.display = "none"; return; }
+  try {
+    if (typeof loadCoupleData === "function") await loadCoupleData();
+  } catch (e) { console.warn("initCommunityExtras loadCoupleData error:", e); }
+  if (coupleRow) coupleRow.style.display = (typeof currentCouple !== "undefined" && currentCouple) ? "block" : "none";
 }
 
 subscribeToPosts();

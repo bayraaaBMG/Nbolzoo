@@ -102,13 +102,23 @@
 <main>
   <div id="page-community" class="page active">
     <div class="container">
-      <h1 style="margin-bottom: 24px;">👥 Нийгэмлэг</h1>
+      <h1 style="margin-bottom: 6px;">👥 Нийгэмлэг</h1>
+      <p style="color:var(--text-light);margin-bottom:18px;">Хосууд бие биенээсээ суралцаж, хамтдаа хөгждөг газар — санаагаа хуваалц, бусдын туршлагаас суралц 💕</p>
       <div class="community-layout">
         <div>
           <div class="post-form">
             <div style="display: flex; gap: 12px; align-items: start; margin-bottom: 12px;">
               <div class="avatar">Та</div>
               <textarea placeholder="Болзооны санаагаа хуваалц..." id="newPost" aria-label="Нийтлэлийн текст"></textarea>
+            </div>
+            <div class="post-type-row" id="postTypeRow">
+              <div class="post-type-chip active" data-type="" onclick="selectPostType('')">💬 Ерөнхий</div>
+              <div class="post-type-chip" data-type="advice" onclick="selectPostType('advice')">💡 Зөвлөгөө</div>
+              <div class="post-type-chip" data-type="relationship" onclick="selectPostType('relationship')">❤️ Харилцаа</div>
+              <div class="post-type-chip" data-type="dateshare" onclick="selectPostType('dateshare')">📸 Бидний болзоо</div>
+              <div class="post-type-chip" data-type="travel" onclick="selectPostType('travel')">✈️ Аялал</div>
+              <div class="post-type-chip" data-type="surprise" onclick="selectPostType('surprise')">🎁 Сюрприз</div>
+              <div class="post-type-chip" data-type="question" onclick="selectPostType('question')">❓ Асуулт</div>
             </div>
             <div id="postAttachments" class="post-attachments"></div>
             <input type="file" id="postImageInput" accept="image/*" style="display:none" aria-label="Зураг сонгох" onchange="onPostImageSelected(this)">
@@ -121,16 +131,26 @@
               <button type="button" class="btn btn-primary" onclick="commitPostBudget()">✓</button>
             </div>
             <div id="postFeelingRow" class="post-feeling-picker" style="display:none;"></div>
+            <div id="postAsCoupleRow" style="display:none;margin-top:6px;">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text-light);">
+                <input type="checkbox" id="postAsCoupleCheckbox" style="width:auto;"> 💑 Хосоороо нийтлэх
+              </label>
+            </div>
             <div class="post-form-actions">
-              <div style="display: flex; gap: 8px; color: var(--text-light); font-size: 18px;">
+              <div style="display: flex; gap: 8px; color: var(--text-light); font-size: 18px; align-items:center;">
                 <span style="cursor: pointer;" onclick="document.getElementById('postImageInput').click()" title="Зураг нэмэх">📷</span>
                 <span style="cursor: pointer;" onclick="togglePostRow('postLocationRow')" title="Байршил тэмдэглэх">📍</span>
                 <span style="cursor: pointer;" onclick="togglePostFeelingPicker()" title="Сэтгэгдэл сонгох">😊</span>
                 <span style="cursor: pointer;" onclick="togglePostRow('postBudgetRow')" title="Зардал нэмэх">💸</span>
+                <select id="postVisibilitySelect" class="post-visibility-select" onchange="selectPostVisibility(this.value)" title="Хэн харах вэ" aria-label="Нийтлэлийн нууцлал">
+                  <option value="public">🌍 Нийтэд</option>
+                  <option value="private">🔒 Зөвхөн би</option>
+                </select>
               </div>
               <button type="button" class="btn btn-primary" onclick="submitPost()">Нийтлэх</button>
             </div>
           </div>
+          <div class="feed-tabs" id="feedTabs"></div>
           <div id="postsList"></div>
         </div>
       </div>
@@ -198,6 +218,7 @@
 <script src="js/main.js"></script>
 <script>
 renderPosts();
+function onAuthStateResolved() { initCommunityExtras(); }
 </script>
 
 </body>

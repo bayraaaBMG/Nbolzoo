@@ -193,6 +193,18 @@ async function loadUserLikesAndSaved(uid) {
     const likesSnap = await db.collection("likes").where("uid", "==", uid).where("targetType", "==", "post").get();
     userPostLikes = new Set(likesSnap.docs.map(d => d.data().targetId));
   } catch (e) { console.warn("loadUserLikesAndSaved(likes) error:", e); }
+  try {
+    const helpfulSnap = await db.collection("helpfulVotes").where("uid", "==", uid).get();
+    userHelpfulVotes = new Set(helpfulSnap.docs.map(d => d.data().postId));
+  } catch (e) { console.warn("loadUserLikesAndSaved(helpfulVotes) error:", e); }
+  try {
+    const savedPostsSnap = await db.collection("savedPosts").where("uid", "==", uid).get();
+    savedPostsSet = new Set(savedPostsSnap.docs.map(d => d.data().postId));
+  } catch (e) { console.warn("loadUserLikesAndSaved(savedPosts) error:", e); }
+  try {
+    const followSnap = await db.collection("follows").where("followerUid", "==", uid).get();
+    followingSet = new Set(followSnap.docs.map(d => d.data().targetUid));
+  } catch (e) { console.warn("loadUserLikesAndSaved(follows) error:", e); }
 
   if (document.getElementById("featuredGrid")) renderFeatured();
   if (document.getElementById("ubGrid")) renderUbIdeas();
@@ -276,6 +288,9 @@ if (auth) {
         currentUser = null;
         userLikes = new Set();
         userPostLikes = new Set();
+        userHelpfulVotes = new Set();
+        savedPostsSet = new Set();
+        followingSet = new Set();
         updateAuthUI(null);
         if (typeof unsubscribeNotifications === "function") unsubscribeNotifications();
         // Гарсны дараа өмнөх хэрэглэгчийн зүрх/хадгалсан төлөв дэлгэц дээр хуучин хэвээрээ

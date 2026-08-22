@@ -11,6 +11,11 @@ function partnerUidOf(couple) {
   return couple.members.find(u => u !== currentUser.uid);
 }
 
+function coupleDisplayName(couple) {
+  const names = Object.values((couple && couple.memberNames) || {}).filter(Boolean);
+  return names.length === 2 ? `${names[0]} & ${names[1]}` : (names[0] || "Хос");
+}
+
 async function loadCoupleData() {
   if (!db || !currentUser) { currentCouple = null; return null; }
   const snap = await db.collection("couples").where("members", "array-contains", currentUser.uid).limit(1).get();
@@ -103,9 +108,15 @@ async function saveCoupleDetails() {
   const annivEl = document.getElementById("coupleAnniversary");
   const birthdayEl = document.getElementById("coupleBirthday");
   const foodEl = document.getElementById("coupleFavFood");
+  const storyEl = document.getElementById("coupleStory");
+  const isPublicEl = document.getElementById("couplePublicToggle");
+  const photoFileEl = document.getElementById("couplePhotoFile");
+  const statusEl = document.getElementById("coupleDetailsStatus");
 
   const updates = {
     anniversaryDate: annivEl && annivEl.value ? firebase.firestore.Timestamp.fromDate(new Date(annivEl.value)) : null,
+    story: storyEl ? storyEl.value.trim() : (currentCouple.story || ""),
+    isPublic: isPublicEl ? isPublicEl.checked : !!currentCouple.isPublic,
   };
   const partnerInfo = { ...(currentCouple.partnerInfo || {}) };
   partnerInfo[currentUser.uid] = {
@@ -114,10 +125,21 @@ async function saveCoupleDetails() {
   };
   updates.partnerInfo = partnerInfo;
 
-  await db.collection("couples").doc(currentCouple.id).update(updates);
-  currentCouple = { ...currentCouple, ...updates };
-  showToast("✅ Хадгаллаа");
-  renderCoupleModal();
+  if (statusEl) statusEl.textContent = "Хадгалж байна...";
+  try {
+    if (photoFileEl && photoFileEl.files && photoFileEl.files[0] && typeof uploadImageWithThumbnail === "function") {
+      const { url } = await uploadImageWithThumbnail(`couples/${currentCouple.id}/photo`, photoFileEl.files[0]);
+      updates.photoURL = url;
+    }
+    await db.collection("couples").doc(currentCouple.id).update(updates);
+    currentCouple = { ...currentCouple, ...updates };
+    if (statusEl) statusEl.textContent = "";
+    showToast("✅ Хадгаллаа");
+    renderCoupleModal();
+  } catch (e) {
+    if (statusEl) statusEl.textContent = "⚠️ Алдаа гарлаа: " + (e.message || e.code || "");
+    console.warn("saveCoupleDetails error:", e);
+  }
 }
 
 async function addCoupleMemory() {
@@ -157,6 +179,53 @@ async function deleteCoupleMemory(id) {
   await db.collection("couples").doc(currentCouple.id).collection("memories").doc(id).delete();
   coupleMemories = coupleMemories.filter(m => m.id !== id);
   renderCoupleModal();
+}
+
+// ---------- Public couple profile ("Хосын profile" — isPublic==true үед хэн ч харна) ----------
+// Зөвхөн top-level couples/{id} баримт (story/photo/names) л нийтэд харагдана — memories
+// subcollection isPublic-ээс үл хамааран гишүүд рүү л хязгаарлагдсан хэвээр (firestore.rules).
+async function openCouplePublicProfile(coupleId) {
+  if (!db || !coupleId) return;
+  document.getElementById("modalContent").innerHTML = `<div class="modal-body" style="text-align:center;padding:40px 24px;">Ачааллаж байна...</div>`;
+  document.getElementById("modal").classList.add("show");
+  try {
+    const snap = await db.collection("couples").doc(coupleId).get();
+    if (!snap.exists || !snap.data().isPublic) {
+      document.getElementById("modalContent").innerHTML = `<div class="modal-body" style="text-align:center;padding:40px 24px;">Энэ хосын profile нээлттэй биш байна.</div>`;
+      return;
+    }
+    const couple = { id: snap.id, ...snap.data() };
+    const postsSnap = await db.collection("posts").where("coupleId", "==", coupleId).get();
+    const coupPosts = postsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .filter(p => !p.hidden && p.visibility !== "private")
+      .sort((a, b) => (b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0) - (a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0));
+    document.getElementById("modalContent").innerHTML = `
+      <div class="modal-header">
+        <h3>💑 ${escapeHtml(coupleDisplayName(couple))}</h3>
+        <button class="modal-close" onclick="closeModal()" type="button">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align:center;margin-bottom:16px;">
+          ${couple.photoURL ? `<img src="${escapeHtml(couple.photoURL)}" alt="" style="width:100px;height:100px;border-radius:50%;object-fit:cover;margin-bottom:10px;">` : ""}
+          ${couple.story ? `<p style="color:var(--text);font-size:14px;line-height:1.6;">${escapeHtml(couple.story)}</p>` : `<p style="color:var(--text-light);font-size:13px;">Энэ хос "Бидний түүх"-ээ хараахан нэмээгүй байна.</p>`}
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:14px;">
+          <h4 style="margin-bottom:10px;font-size:14px;">📝 Хамтын нийтлэлүүд</h4>
+          ${coupPosts.length ? coupPosts.map(p => `
+            <div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;">
+              ${escapeHtml((p.content || "").slice(0, 120))}${(p.content || "").length > 120 ? "..." : ""}
+              <div style="color:var(--text-lighter);font-size:11px;margin-top:2px;">${timeAgo(p.createdAt)} · 👍 ${p.helpfulCount || 0} · ❤️ ${p.likeCount || 0}</div>
+            </div>`).join("") : `<div style="text-align:center;color:var(--text-light);padding:16px 0;">Хамтын нийтлэл алга</div>`}
+        </div>
+      </div>`;
+  } catch (e) {
+    console.warn("openCouplePublicProfile error:", e);
+    document.getElementById("modalContent").innerHTML = `
+      <div class="modal-body" style="text-align:center;padding:40px 24px;">
+        <p style="margin-bottom:14px;">⚠️ Ачаалахад алдаа гарлаа.</p>
+        <button class="btn btn-primary" type="button" onclick="openCouplePublicProfile('${coupleId}')">🔄 Дахин оролдох</button>
+      </div>`;
+  }
 }
 
 // ===== Огноо давхцлыг шалгах + санамж (LLM биш, deterministic) =====
@@ -282,7 +351,26 @@ function renderCoupleModal() {
         <label>Миний дуртай хоол</label>
         <input type="text" id="coupleFavFood" value="${escapeHtml(myInfo.favoriteFood || '')}" placeholder="жишээ: Хуушуур">
       </div>
-      <button class="btn btn-primary" type="button" style="width:100%" onclick="saveCoupleDetails()">Хадгалах</button>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+        <h4 style="margin-bottom:10px;">💑 Хосын Public Profile</h4>
+        <div class="form-group">
+          <label>Бидний түүх</label>
+          <textarea id="coupleStory" rows="3" placeholder="Хэрхэн танилцсан, хамт өнгөрүүлсэн цаг хугацаагаа хуваалцаарай...">${escapeHtml(currentCouple.story || '')}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Хосын зураг (сонголтоор)</label>
+          <input type="file" id="couplePhotoFile" accept="image/*" style="font-size:12px;">
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;margin-bottom:4px;">
+          <input type="checkbox" id="couplePublicToggle" style="width:auto;" ${currentCouple.isPublic ? "checked" : ""}>
+          Public profile идэвхжүүлэх (хэн ч "Бидний түүх"-ийг харах боломжтой)
+        </label>
+        <div id="coupleDetailsStatus" style="min-height:16px;font-size:12px;margin-bottom:6px;"></div>
+        ${currentCouple.isPublic ? `<a onclick="openCouplePublicProfile('${currentCouple.id}')" style="cursor:pointer;text-decoration:underline;font-size:13px;color:var(--primary);">👁 Public profile-оо харах →</a>` : ""}
+      </div>
+
+      <button class="btn btn-primary" type="button" style="width:100%;margin-top:16px;" onclick="saveCoupleDetails()">Хадгалах</button>
 
       <div style="margin-top:24px;">
         <h4 style="margin-bottom:10px;">📸 Дурсамжууд</h4>
@@ -338,7 +426,9 @@ async function handleAcceptCode() {
   }
 }
 
-// ===== 7 ХОНОГИЙН COUPLE CHALLENGE (couples/{coupleId}.challenge талбарт хадгална) =====
+// ===== 7/30 ХОНОГИЙН COUPLE CHALLENGE (couples/{coupleId}.challenge талбарт хадгална) =====
+// CHALLENGE_DAYS (7 items) хадгалсан хэвээр — өмнө нь эхэлсэн challenge-үүд (totalDays
+// талбаргүй, зөвхөн 7 хоногийн UI дэмждэг) хуучин хэвээрээ ажиллана.
 const CHALLENGE_DAYS = [
   { day: 1, emoji: "💛", title: "Бие биедээ 3 сайхан зүйл хэл" },
   { day: 2, emoji: "📸", title: "Хамтдаа зураг ав" },
@@ -348,15 +438,44 @@ const CHALLENGE_DAYS = [
   { day: 6, emoji: "🍳", title: "Хамт хоол хий" },
   { day: 7, emoji: "🔮", title: "Ирээдүйн мөрөөдлөө ярилц" },
 ];
+const CHALLENGE_DAYS_30 = [
+  ...CHALLENGE_DAYS,
+  { day: 8, emoji: "🌅", title: "Хамт нар мандах/жаргахыг үзэх" },
+  { day: 9, emoji: "📖", title: "Тус бүрийн дуртай номоо танилцуулах" },
+  { day: 10, emoji: "🎵", title: "Дуртай дуугаа хамт сонсож бүжиглэх" },
+  { day: 11, emoji: "💌", title: "Бие биедээ гар бичмэл захидал бичих" },
+  { day: 12, emoji: "🧩", title: "Хамтдаа тоглоом тоглох" },
+  { day: 13, emoji: "🚶", title: "Шинэ газраар хамт алхах" },
+  { day: 14, emoji: "🎨", title: "Хамтдаа зурах/гар урлал хийх" },
+  { day: 15, emoji: "⭐", title: "Ирэх жилийн зорилгоо хамт төлөвлөх" },
+  { day: 16, emoji: "🍫", title: "Бие биедээ дуртай амттанаа өгөх" },
+  { day: 17, emoji: "📱", title: "Нийгмийн сүлжээнд хосын зураг нийтлэх" },
+  { day: 18, emoji: "🕯️", title: "Романтик орой зохион байгуулах" },
+  { day: 19, emoji: "🙏", title: "Юунд талархаж байгаагаа ярилцах" },
+  { day: 20, emoji: "🎬", title: "Хамтдаа кино үзэх" },
+  { day: 21, emoji: "🏡", title: "Гэрээ хамт цэвэрлэх/тохижуулах" },
+  { day: 22, emoji: "💭", title: "Хамгийн сайхан дурсамжаа дахин ярих" },
+  { day: 23, emoji: "🎯", title: "Шинэ зүйл хамтдаа сурах" },
+  { day: 24, emoji: "🌳", title: "Байгальд хамт цаг өнгөрөөх" },
+  { day: 25, emoji: "📸", title: "Анхны болзооныхоо газарт дахин очих" },
+  { day: 26, emoji: "💐", title: "Санамсаргүй бэлэг өгөх" },
+  { day: 27, emoji: "🗣️", title: "Хэзээ ч ярьж байгаагүй сэдвээр ярилцах" },
+  { day: 28, emoji: "🍽️", title: "Шинэ ресторан/хоол туршиж үзэх" },
+  { day: 29, emoji: "🤝", title: "Бие биедээ хэрэгтэй тусламжаа хэлэх" },
+  { day: 30, emoji: "🎉", title: "30 хоногийн аяллаа тэмдэглэж баяр хийх" },
+];
+function challengeDaysFor(totalDays) { return totalDays === 30 ? CHALLENGE_DAYS_30 : CHALLENGE_DAYS; }
 
 function getChallengeState() {
   if (!currentCouple) return null;
-  return currentCouple.challenge || { startedAt: null, completedDays: {}, streak: 0 };
+  const state = currentCouple.challenge || { startedAt: null, completedDays: {}, streak: 0, totalDays: 7 };
+  return { totalDays: 7, ...state }; // хуучин (totalDays-гүй) challenge-үүд 7 хоногийнх гэж тооцогдоно
 }
 
-async function startCoupleChallenge() {
+async function startCoupleChallenge(totalDays) {
   if (!currentCouple || !db) return;
-  const challenge = { startedAt: firebase.firestore.Timestamp.now(), completedDays: {}, streak: 0 };
+  const days = totalDays === 30 ? 30 : 7;
+  const challenge = { startedAt: firebase.firestore.Timestamp.now(), completedDays: {}, streak: 0, totalDays: days };
   await db.collection("couples").doc(currentCouple.id).update({ challenge });
   currentCouple = { ...currentCouple, challenge };
 }
@@ -374,7 +493,32 @@ async function markChallengeDay(day) {
 
 async function resetCoupleChallenge() {
   if (!currentCouple || !db) return;
-  const challenge = { startedAt: firebase.firestore.Timestamp.now(), completedDays: {}, streak: 0 };
+  const challenge = { startedAt: firebase.firestore.Timestamp.now(), completedDays: {}, streak: 0, totalDays: (getChallengeState() || {}).totalDays || 7 };
   await db.collection("couples").doc(currentCouple.id).update({ challenge });
   currentCouple = { ...currentCouple, challenge };
+}
+
+// Challenge-ийн явц/дүнг Community feed-д хосын нэрээр нийтэлнэ (authorType:'couple').
+async function shareChallengeToFeed() {
+  if (!currentCouple || !db || !currentUser) return;
+  const state = getChallengeState();
+  if (!state || !state.startedAt) return showToast("⚠️ Эхлээд challenge-ээ эхлүүлнэ үү");
+  const doneCount = Object.keys(state.completedDays || {}).length;
+  const totalDays = state.totalDays || 7;
+  const isComplete = doneCount >= totalDays;
+  const content = isComplete
+    ? `🎉 Бид ${totalDays} хоногийн Couple Challenge-ийг амжилттай дуусгалаа! ${totalDays} өдрийн турш бие биедээ анхаарал тавьж, шинэ дурсамж бүтээлээ 💕`
+    : `💪 Бид ${totalDays} хоногийн Couple Challenge-ийн ${doneCount}/${totalDays} өдрийг дуусгалаа! Хамтдаа үргэлжлүүлж байна 🔥`;
+  try {
+    await db.collection("posts").add({
+      authorId: currentUser.uid, authorName: coupleDisplayName(currentCouple), authorPhoto: currentUser.photoURL || "",
+      content, emoji: isComplete ? "🎉" : "🔥", type: "relationship", authorType: "couple", coupleId: currentCouple.id,
+      visibility: "public", likeCount: 0, commentCount: 0, helpfulCount: 0,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    showToast("✅ Community-д хуваалцлаа!");
+  } catch (e) {
+    showToast("⚠️ Хуваалцахад алдаа гарлаа: " + (e.message || e.code || ""));
+    console.warn("shareChallengeToFeed error:", e);
+  }
 }

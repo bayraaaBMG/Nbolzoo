@@ -1216,9 +1216,6 @@ body {
   .home-banner, .home-banner-img { max-height: 200px; height: 200px; }
   .home-banner.has-mobile .home-banner-img-desktop { display: none; }
   .home-banner.has-mobile .home-banner-img-mobile { display: block; }
-  .admin-shell { flex-direction: column; gap: 14px; }
-  .admin-tabs { flex-direction: row; width: 100%; overflow-x: auto; position: static; }
-  .admin-tab { flex-shrink: 0; }
 }
 @media (max-width: 480px) {
   .footer-grid { grid-template-columns: 1fr; }
@@ -1271,6 +1268,14 @@ body {
 .admin-tab.active { color: var(--primary); background: var(--primary-extra-soft); font-weight: 600; }
 .admin-main { flex: 1; min-width: 0; }
 .admin-tab-content { min-height: 200px; }
+/* Kept right after the base rules above (not in the shared early-in-file 900px block)
+   so source order — not just specificity — resolves correctly: a later same-specificity
+   rule always wins, and these must win over .admin-shell's desktop gap/layout on mobile. */
+@media (max-width: 900px) {
+  .admin-shell { flex-direction: column; gap: 14px; }
+  .admin-tabs { flex-direction: row; width: 100%; overflow-x: auto; position: static; }
+  .admin-tab { flex-shrink: 0; }
+}
 .admin-card {
   display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
   background: #fff; border: 1px solid var(--primary-extra-soft); border-radius: 10px;

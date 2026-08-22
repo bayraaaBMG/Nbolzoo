@@ -256,36 +256,46 @@ async function saveProfile() {
 
 if (auth) {
   auth.onAuthStateChanged(async (fbUser) => {
-    if (fbUser) {
-      let profile = { name: fbUser.displayName || fbUser.email?.split("@")[0] || "Хэрэглэгч", email: fbUser.email, photoURL: fbUser.photoURL, isAdmin: false, adminRole: null };
-      if (db) {
-        try {
-          const snap = await db.collection("users").doc(fbUser.uid).get();
-          if (snap.exists) profile = { ...profile, ...snap.data() };
-          const adminSnap = await db.collection("admins").doc(fbUser.uid).get();
-          profile.isAdmin = adminSnap.exists;
-          profile.adminRole = adminSnap.exists ? (adminSnap.data().role || "admin") : null;
-        } catch (e) { console.warn("profile load error:", e); }
+    try {
+      if (fbUser) {
+        let profile = { name: fbUser.displayName || fbUser.email?.split("@")[0] || "Хэрэглэгч", email: fbUser.email, photoURL: fbUser.photoURL, isAdmin: false, adminRole: null };
+        if (db) {
+          try {
+            const snap = await db.collection("users").doc(fbUser.uid).get();
+            if (snap.exists) profile = { ...profile, ...snap.data() };
+            const adminSnap = await db.collection("admins").doc(fbUser.uid).get();
+            profile.isAdmin = adminSnap.exists;
+            profile.adminRole = adminSnap.exists ? (adminSnap.data().role || "admin") : null;
+          } catch (e) { console.warn("profile load error:", e); }
+        }
+        currentUser = { uid: fbUser.uid, ...profile };
+        updateAuthUI(currentUser);
+        loadUserLikesAndSaved(fbUser.uid);
+        if (typeof subscribeNotifications === "function") subscribeNotifications(fbUser.uid);
+      } else {
+        currentUser = null;
+        userLikes = new Set();
+        userPostLikes = new Set();
+        updateAuthUI(null);
+        if (typeof unsubscribeNotifications === "function") unsubscribeNotifications();
+        // Гарсны дараа өмнөх хэрэглэгчийн зүрх/хадгалсан төлөв дэлгэц дээр хуучин хэвээрээ
+        // үлдэхгүйн тулд идэвхтэй хуудасны grid-ийг шууд дахин зурна.
+        if (document.getElementById("ubGrid") && typeof renderUbIdeas === "function") renderUbIdeas();
+        if (document.getElementById("featuredGrid") && typeof renderFeatured === "function") renderFeatured();
+        if (document.getElementById("savedGrid") && typeof renderSaved === "function") renderSaved();
+        if (document.getElementById("postsList") && typeof renderPosts === "function") renderPosts();
       }
-      currentUser = { uid: fbUser.uid, ...profile };
-      updateAuthUI(currentUser);
-      loadUserLikesAndSaved(fbUser.uid);
-      if (typeof subscribeNotifications === "function") subscribeNotifications(fbUser.uid);
-    } else {
-      currentUser = null;
-      userLikes = new Set();
-      userPostLikes = new Set();
-      updateAuthUI(null);
-      if (typeof unsubscribeNotifications === "function") unsubscribeNotifications();
-      // Гарсны дараа өмнөх хэрэглэгчийн зүрх/хадгалсан төлөв дэлгэц дээр хуучин хэвээрээ
-      // үлдэхгүйн тулд идэвхтэй хуудасны grid-ийг шууд дахин зурна.
-      if (document.getElementById("ubGrid") && typeof renderUbIdeas === "function") renderUbIdeas();
-      if (document.getElementById("featuredGrid") && typeof renderFeatured === "function") renderFeatured();
-      if (document.getElementById("savedGrid") && typeof renderSaved === "function") renderSaved();
-      if (document.getElementById("postsList") && typeof renderPosts === "function") renderPosts();
+    } catch (e) {
+      // Дээрх алдаа (мэдэгдэл/лайк ачаалах, grid дахин зурах г.м. side-effect алдаа) энд
+      // зогсоод байх ёстой — currentUser аль хэдийн зөв тохируулагдсан тул хуудасны өөрийн
+      // init (admin.html-ийн Dashboard гэх мэт) доор ЗААВАЛ ажиллах ёстой, өөрөөр хэлбэл энэ
+      // алдаа бусад бүх дараагийн init-ийг блоклож, хуудсыг бүрмөсөн хоосон үлдээж болохгүй.
+      console.warn("onAuthStateChanged side-effect error:", e);
+    } finally {
+      // Firebase Auth async тул currentUser бэлэн болмогц хуудас өөрийн init-ээ хийх боломжтой
+      // (жишээ нь admin.html — currentUser.isAdmin шалгахаас өмнө auth resolve хүлээх ёстой).
+      // finally-д байрлуулснаар дээрх алдаа гарсан ч энэ мөр ЗААВАЛ ажиллана.
+      if (typeof onAuthStateResolved === "function") onAuthStateResolved();
     }
-    // Firebase Auth async тул currentUser бэлэн болмогц хуудас өөрийн init-ээ хийх боломжтой
-    // (жишээ нь admin.html — currentUser.isAdmin шалгахаас өмнө auth resolve хүлээх ёстой)
-    if (typeof onAuthStateResolved === "function") onAuthStateResolved();
   });
 }

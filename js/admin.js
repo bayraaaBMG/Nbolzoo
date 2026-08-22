@@ -13,13 +13,29 @@ function checkAdminAccess() {
     gate.style.display = "block"; panel.style.display = "none";
     return false;
   }
-  gate.style.display = "none"; panel.style.display = "block";
+  gate.style.display = "none";
+  // .admin-shell-ийн CSS (display:flex, sidebar+content) ажиллахын тулд style.display-г
+  // "block" гэж хатуу тохируулахгүй, зөвхөн inline override-г арилгана — ингэснээр
+  // stylesheet-ийн display:flex дахин үйлчилнэ (өмнө нь "block" гэж хатуу бичсэн нь sidebar
+  // + content хажуу хажуугаараа биш, зөвхөн доогуур давхарлагдаж харагдах шалтгаан байсан).
+  panel.style.removeProperty("display");
   return true;
 }
 
 function initAdminDashboard() {
-  if (!checkAdminAccess()) return;
-  showAdminTab("overview");
+  try {
+    if (!checkAdminAccess()) return;
+    showAdminTab("overview");
+  } catch (e) {
+    // Dashboard хэзээ ч бүрмөсөн хоосон үлдэж болохгүй — юу ч гэнэт эвдэрсэн ч
+    // хэрэглэгчид ойлгомжтой алдаа, сэргээх зөвлөмжтэйгээр харуулна.
+    console.warn("initAdminDashboard error:", e);
+    const gate = document.getElementById("adminGate");
+    if (gate) {
+      gate.innerHTML = `<div class="admin-denied">⚠️ Dashboard ачаалахад алдаа гарлаа.<br><a onclick="location.reload()" style="cursor:pointer;text-decoration:underline;font-size:14px;">↻ Хуудсыг дахин ачаалах</a></div>`;
+      gate.style.display = "block";
+    }
+  }
 }
 
 function showAdminTab(tab) {
@@ -334,10 +350,15 @@ async function renderAdminUsers() {
   el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>`;
   const isOwner = currentUser.adminRole === "owner";
   try {
-    const [usersSnap, adminsSnap] = await Promise.all([
-      db.collection("users").orderBy("createdAt", "desc").limit(100).get(),
-      isOwner ? db.collection("admins").get() : Promise.resolve(null), // only the owner needs to know who else is admin (to show grant/revoke buttons)
-    ]);
+    const usersSnap = await db.collection("users").orderBy("createdAt", "desc").limit(100).get();
+    // Fetched separately from usersSnap on purpose: this is a secondary, owner-only
+    // enhancement (admin badges/grant-revoke buttons) — if it fails for any reason, the
+    // user list itself must still render, just without those extras.
+    let adminsSnap = null;
+    if (isOwner) {
+      try { adminsSnap = await db.collection("admins").get(); }
+      catch (e) { console.warn("admins list fetch failed:", e); }
+    }
     const adminMap = {};
     if (adminsSnap) adminsSnap.docs.forEach(d => { adminMap[d.id] = d.data(); });
     const rows = usersSnap.docs.map(d => {
@@ -540,39 +561,41 @@ async function adminDeleteBanner(id) {
 }
 
 // ---------- Overview (dashboard home) ----------
+// Promise.allSettled (NOT Promise.all): one collection's count failing — e.g. a brand-new
+// collection whose rules haven't been published yet — must show "-" for THAT stat, not
+// blank the whole Overview tab. Each stat degrades independently.
 async function renderAdminOverview() {
   const el = document.getElementById("admin-overview");
   el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>`;
-  try {
-    const [users, posts, comments, movies, saved, invites, pendingSuggestions, pendingReports] = await Promise.all([
-      db.collection("users").count().get(),
-      db.collection("posts").count().get(),
-      db.collection("comments").count().get(),
-      db.collection("movies").count().get(),
-      db.collection("saved").count().get(),
-      db.collection("invites").count().get(),
-      db.collection("movieSuggestions").where("status", "==", "pending").count().get(),
-      db.collection("reports").where("status", "==", "pending").count().get(),
-    ]);
-    const pendingSuggCount = pendingSuggestions.data().count;
-    const pendingReportCount = pendingReports.data().count;
-    el.innerHTML = `
-      <div class="admin-stats-grid">
-        <div class="admin-stat"><div class="admin-stat-num">${users.data().count}</div><div class="admin-stat-label">Хэрэглэгч</div></div>
-        <div class="admin-stat"><div class="admin-stat-num">${posts.data().count}</div><div class="admin-stat-label">Пост</div></div>
-        <div class="admin-stat"><div class="admin-stat-num">${comments.data().count}</div><div class="admin-stat-label">Сэтгэгдэл</div></div>
-        <div class="admin-stat"><div class="admin-stat-num">${movies.data().count}</div><div class="admin-stat-label">Нэмсэн кино</div></div>
-        <div class="admin-stat"><div class="admin-stat-num">${saved.data().count}</div><div class="admin-stat-label">Хадгалсан санаа</div></div>
-        <div class="admin-stat"><div class="admin-stat-num">${invites.data().count}</div><div class="admin-stat-label">Урилга</div></div>
-      </div>
-      ${(pendingSuggCount > 0 || pendingReportCount > 0) ? `
-        <div class="admin-note" style="display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;">
-          ${pendingSuggCount > 0 ? `<span style="cursor:pointer;" onclick="showAdminTab('suggestions')">🎬 <strong>${pendingSuggCount}</strong> хүлээгдэж буй кино санал →</span>` : ""}
-          ${pendingReportCount > 0 ? `<span style="cursor:pointer;" onclick="showAdminTab('reports')">🚩 <strong>${pendingReportCount}</strong> хүлээгдэж буй гомдол →</span>` : ""}
-        </div>` : ""}`;
-  } catch (e) {
-    el.innerHTML = `<div class="admin-empty">Ачаалахад алдаа гарлаа: ${escapeHtml(e.message)}<br><span style="font-size:12px">(Firestore count() aggregation дэмжигдэхгүй байж болзошгүй)</span></div>`;
-  }
+  const queries = [
+    ["Хэрэглэгч", () => db.collection("users").count().get()],
+    ["Пост", () => db.collection("posts").count().get()],
+    ["Сэтгэгдэл", () => db.collection("comments").count().get()],
+    ["Нэмсэн кино", () => db.collection("movies").count().get()],
+    ["Хадгалсан санаа", () => db.collection("saved").count().get()],
+    ["Урилга", () => db.collection("invites").count().get()],
+  ];
+  const results = await Promise.allSettled(queries.map(([, fn]) => fn()));
+  const [pendingSuggResult, pendingReportResult] = await Promise.allSettled([
+    db.collection("movieSuggestions").where("status", "==", "pending").count().get(),
+    db.collection("reports").where("status", "==", "pending").count().get(),
+  ]);
+  const statsHtml = queries.map(([label], i) => {
+    const r = results[i];
+    const val = r.status === "fulfilled" ? r.value.data().count : "-";
+    return `<div class="admin-stat"><div class="admin-stat-num">${val}</div><div class="admin-stat-label">${label}</div></div>`;
+  }).join("");
+  const pendingSuggCount = pendingSuggResult.status === "fulfilled" ? pendingSuggResult.value.data().count : 0;
+  const pendingReportCount = pendingReportResult.status === "fulfilled" ? pendingReportResult.value.data().count : 0;
+  const anyFailed = results.some(r => r.status === "rejected") || pendingSuggResult.status === "rejected" || pendingReportResult.status === "rejected";
+  el.innerHTML = `
+    <div class="admin-stats-grid">${statsHtml}</div>
+    ${anyFailed ? `<div class="admin-note" style="margin-top:16px;">⚠️ Зарим тоо ачаалагдсангүй (Firestore rules шинэчлэгдээгүй байж болзошгүй) — "-" гэж харагдаж байна.</div>` : ""}
+    ${(pendingSuggCount > 0 || pendingReportCount > 0) ? `
+      <div class="admin-note" style="display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;">
+        ${pendingSuggCount > 0 ? `<span style="cursor:pointer;" onclick="showAdminTab('suggestions')">🎬 <strong>${pendingSuggCount}</strong> хүлээгдэж буй кино санал →</span>` : ""}
+        ${pendingReportCount > 0 ? `<span style="cursor:pointer;" onclick="showAdminTab('reports')">🚩 <strong>${pendingReportCount}</strong> хүлээгдэж буй гомдол →</span>` : ""}
+      </div>` : ""}`;
 }
 
 // ---------- Invitations overview (read-only — senders own/manage their own invites) ----------

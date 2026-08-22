@@ -146,6 +146,14 @@ service cloud.firestore {
       allow delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
     }
 
+    // ---- banners/{bannerId} : admin-only ad/promo banners shown on the home page.
+    // No owner concept at all — only an admin may create/update/delete; every signed-in
+    // OR anonymous visitor may read (the public site renders active banners with no auth). ----
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // ---- invites/{inviteId} : Урилга feature. Sender must be signed in to create;
     // the doc id itself is the shareable secret (recipient never signs in), so anyone
     // holding the link may read it and write a response exactly once.

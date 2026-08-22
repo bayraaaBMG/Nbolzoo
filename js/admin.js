@@ -29,6 +29,7 @@ function showAdminTab(tab) {
   else if (tab === "movies") renderAdminMovies();
   else if (tab === "posts") renderAdminPosts();
   else if (tab === "users") renderAdminUsers();
+  else if (tab === "banners") renderAdminBanners();
   else if (tab === "analytics") renderAdminAnalytics();
 }
 
@@ -210,6 +211,127 @@ async function toggleUserBan(uid, banned) {
   await db.collection("users").doc(uid).update({ banned });
   showToast(banned ? "🚫 Хэрэглэгч хориглогдлоо" : "✅ Хориг арилгагдлаа");
   renderAdminUsers();
+}
+
+// ---------- Ad/promo banners (нүүр хуудасны дээд хэсэг) ----------
+const ADMIN_BANNER_PLACEMENTS = [{ id: "home-top", label: "Нүүр хуудасны дээд хэсэг" }];
+
+async function renderAdminBanners() {
+  const el = document.getElementById("admin-banners");
+  el.innerHTML = adminAddBannerFormHtml() + `<div id="adminBannersList"><div class="admin-loading">Ачаалж байна...</div></div>`;
+  try {
+    const snap = await db.collection("banners").orderBy("priority", "desc").get();
+    const list = snap.docs.map(d => ({ _dbId: d.id, ...d.data() }));
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById("adminBannersList").innerHTML = list.length
+      ? list.map(b => {
+          const expired = (b.startDate && b.startDate > today) || (b.endDate && b.endDate < today);
+          const statusLabel = !b.active ? '<span style="color:var(--text-lighter)">Идэвхгүй</span>'
+            : expired ? '<span style="color:#ef4444">Хугацаа дууссан/эхлээгүй</span>'
+            : '<span style="color:var(--success)">Идэвхтэй</span>';
+          return `<div class="admin-card">
+            <img src="${escapeHtml(b.imageUrl || "")}" alt="" style="width:90px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--primary-extra-soft);">
+            <div class="admin-card-main">
+              <strong>${escapeHtml(b.title || "(гарчиггүй)")}</strong> — ${statusLabel}
+              <div class="admin-card-meta">
+                Байршил: ${escapeHtml((ADMIN_BANNER_PLACEMENTS.find(p => p.id === b.placement) || {}).label || b.placement || "-")}
+                · Ач холбогдол: ${b.priority ?? 0}
+                · ${escapeHtml(b.startDate || "хугацаагүй")} – ${escapeHtml(b.endDate || "хугацаагүй")}
+              </div>
+            </div>
+            <div class="admin-card-actions">
+              <button class="btn btn-outline" type="button" onclick="adminToggleBannerActive('${b._dbId}', ${!b.active})">${b.active ? "Идэвхгүй болгох" : "Идэвхжүүлэх"}</button>
+              <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeleteBanner('${b._dbId}')">🗑 Устгах</button>
+            </div>
+          </div>`;
+        }).join("")
+      : `<div class="admin-empty">Одоогоор banner алга</div>`;
+  } catch (e) {
+    document.getElementById("adminBannersList").innerHTML = `<div class="admin-empty">Алдаа: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function adminAddBannerFormHtml() {
+  return `
+    <div class="admin-add-form">
+      <h4>+ Шинэ banner нэмэх</h4>
+      <div class="add-movie-grid">
+        <div class="form-group" style="grid-column:1/-1"><label>Гарчиг</label><input type="text" id="admBnrTitle" placeholder="Дотоод тэмдэглэл / alt текст"></div>
+        <div class="form-group" style="grid-column:1/-1"><label>Дарахад очих URL</label><input type="text" id="admBnrUrl" placeholder="https://..."></div>
+        <div class="form-group"><label>Эхлэх огноо</label><input type="date" id="admBnrStart"></div>
+        <div class="form-group"><label>Дуусах огноо</label><input type="date" id="admBnrEnd"></div>
+        <div class="form-group"><label>Байршил</label><select id="admBnrPlacement">${ADMIN_BANNER_PLACEMENTS.map(p => `<option value="${p.id}">${escapeHtml(p.label)}</option>`).join("")}</select></div>
+        <div class="form-group"><label>Ач холбогдол (том тоо → түрүүлж харагдана)</label><input type="number" id="admBnrPriority" value="0"></div>
+        <div class="form-group"><label>Зураг (desktop, өргөн)</label><input type="file" id="admBnrImageDesktop" accept="image/*"></div>
+        <div class="form-group"><label>Зураг (mobile, сонголтоор)</label><input type="file" id="admBnrImageMobile" accept="image/*"></div>
+        <div class="form-group" style="grid-column:1/-1"><label><input type="checkbox" id="admBnrActive" checked style="width:auto;display:inline-block;margin-right:6px;"> Идэвхтэй (шууд харагдана)</label></div>
+      </div>
+      <div id="admBnrStatus" style="min-height:18px;font-size:13px;margin-bottom:8px;"></div>
+      <button class="btn btn-primary" type="button" id="admBnrSaveBtn" onclick="adminAddBanner()">✓ Banner нэмэх</button>
+    </div>`;
+}
+
+async function adminAddBanner() {
+  const title = document.getElementById("admBnrTitle").value.trim();
+  const targetUrl = document.getElementById("admBnrUrl").value.trim();
+  const startDate = document.getElementById("admBnrStart").value || null;
+  const endDate = document.getElementById("admBnrEnd").value || null;
+  const placement = document.getElementById("admBnrPlacement").value;
+  const priority = parseInt(document.getElementById("admBnrPriority").value, 10) || 0;
+  const active = document.getElementById("admBnrActive").checked;
+  const desktopFile = document.getElementById("admBnrImageDesktop").files[0];
+  const mobileFile = document.getElementById("admBnrImageMobile").files[0];
+  const statusEl = document.getElementById("admBnrStatus");
+  const saveBtn = document.getElementById("admBnrSaveBtn");
+
+  if (!desktopFile) return showToast("⚠️ Desktop зураг заавал сонгоно уу");
+  if (startDate && endDate && startDate > endDate) return showToast("⚠️ Эхлэх огноо дуусах огнооноос хойш байж болохгүй");
+
+  saveBtn.disabled = true;
+  statusEl.textContent = "Байршуулж байна...";
+  try {
+    const stamp = Date.now();
+    const desktopBlob = await compressImage(desktopFile, 1920, 600, 0.85);
+    const imageUrl = await uploadBlobToStorage(`banners/${stamp}_desktop.jpg`, desktopBlob);
+    let mobileImageUrl = "";
+    if (mobileFile) {
+      mobileImageUrl = await uploadBlobToStorage(`banners/${stamp}_mobile.jpg`, await compressImage(mobileFile, 900, 900, 0.85));
+    }
+    await db.collection("banners").add({
+      title, targetUrl, startDate, endDate, placement, priority, active,
+      imageUrl, mobileImageUrl,
+      createdBy: currentUser.uid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    statusEl.textContent = "";
+    showToast("✅ Banner нэмэгдлээ");
+    renderAdminBanners();
+  } catch (e) {
+    statusEl.textContent = "⚠️ Алдаа гарлаа: " + (e.message || e.code || "Тодорхойгүй алдаа");
+    console.warn("adminAddBanner error:", e);
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
+
+async function adminToggleBannerActive(id, active) {
+  try {
+    await db.collection("banners").doc(id).update({ active });
+    renderAdminBanners();
+  } catch (e) {
+    showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
+  }
+}
+
+async function adminDeleteBanner(id) {
+  if (!confirm("Энэ banner-ийг устгах уу?")) return;
+  try {
+    await db.collection("banners").doc(id).delete();
+    showToast("🗑 Banner устгагдлаа");
+    renderAdminBanners();
+  } catch (e) {
+    showToast("⚠️ Устгахад алдаа гарлаа: " + (e.message || e.code || ""));
+  }
 }
 
 // ---------- Analytics ----------

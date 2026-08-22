@@ -32,6 +32,12 @@ service firebase.storage {
       allow write: if isSignedIn() && request.auth.uid == uid && isImage() && underSize(8);
     }
 
+    // Ad/promo banner images (desktop + mobile) — admin only, 5MB cap
+    match /banners/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() && isImage() && underSize(5);
+    }
+
     // Movie posters — admin only, 8MB cap
     match /movies/{movieId}/{fileName} {
       allow read: if true;

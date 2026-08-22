@@ -9,7 +9,7 @@ function checkAdminAccess() {
     return false;
   }
   if (!currentUser.isAdmin) {
-    gate.innerHTML = `<div class="admin-denied">⛔ Танд админ эрх байхгүй байна.</div>`;
+    gate.innerHTML = `<div class="admin-denied">⛔ Танд админ эрх байхгүй байна.<br><a onclick="navigate('home')" style="cursor:pointer;text-decoration:underline;font-size:14px;">← Нүүр хуудас руу буцах</a></div>`;
     gate.style.display = "block"; panel.style.display = "none";
     return false;
   }
@@ -19,19 +19,45 @@ function checkAdminAccess() {
 
 function initAdminDashboard() {
   if (!checkAdminAccess()) return;
-  showAdminTab("suggestions");
+  showAdminTab("overview");
 }
 
 function showAdminTab(tab) {
   document.querySelectorAll(".admin-tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
   document.querySelectorAll(".admin-tab-content").forEach(c => c.style.display = c.id === "admin-" + tab ? "block" : "none");
-  if (tab === "suggestions") renderAdminSuggestions();
-  else if (tab === "movies") renderAdminMovies();
-  else if (tab === "posts") renderAdminPosts();
+  if (tab === "overview") renderAdminOverview();
   else if (tab === "users") renderAdminUsers();
+  else if (tab === "posts") renderAdminPosts();
+  else if (tab === "comments") renderAdminComments();
+  else if (tab === "reports") renderAdminReports();
+  else if (tab === "suggestions") renderAdminSuggestions();
   else if (tab === "banners") renderAdminBanners();
-  else if (tab === "analytics") renderAdminAnalytics();
+  else if (tab === "invites") renderAdminInvites();
+  else if (tab === "movies") renderAdminMovies();
+  else if (tab === "activity") renderAdminActivity();
 }
+
+// Every moderation/write action funnels through here so the Activity log tab has a
+// trustworthy audit trail. Logging failure must never block the actual action, so this
+// is fire-and-forget with its own try/catch — callers don't (and shouldn't) await it.
+async function logAdminAction(action, targetId, extra) {
+  try {
+    await db.collection("adminLog").add({
+      action, targetId: targetId || "", extra: extra || "",
+      actorUid: currentUser.uid, actorName: currentUser.name,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  } catch (e) { console.warn("logAdminAction failed:", e); }
+}
+const ADMIN_ACTION_LABELS = {
+  suggestion_approve: "Кино санал зөвшөөрсөн", suggestion_reject: "Кино санал татгалзсан",
+  movie_add: "Кино нэмсэн", movie_delete: "Кино устгасан",
+  post_hide: "Пост нуусан", post_unhide: "Пост дахин харуулсан", post_delete: "Пост устгасан",
+  comment_hide: "Сэтгэгдэл нуусан", comment_unhide: "Сэтгэгдэл дахин харуулсан", comment_delete: "Сэтгэгдэл устгасан",
+  user_ban: "Хэрэглэгч хориглосон", user_unban: "Хэрэглэгчийн хориг арилгасан",
+  banner_add: "Banner нэмсэн", banner_toggle: "Banner идэвх өөрчилсөн", banner_delete: "Banner устгасан",
+  report_hide: "Гомдлыг шийдэж контент нуусан", report_delete: "Гомдлыг шийдэж контент устгасан", report_dismiss: "Гомдлыг татгалзсан",
+};
 
 // ---------- Кино саналууд (movieSuggestions) ----------
 async function renderAdminSuggestions() {
@@ -70,6 +96,7 @@ async function approveSuggestion(id) {
     movieData.trending = false;
     await db.collection("movies").add(movieData);
     await ref.update({ status: "approved" });
+    logAdminAction("suggestion_approve", id, s.title);
     showToast("✅ Кино каталогт нэмэгдлээ");
     renderAdminSuggestions();
   } catch (e) {
@@ -80,6 +107,7 @@ async function approveSuggestion(id) {
 async function rejectSuggestion(id) {
   try {
     await db.collection("movieSuggestions").doc(id).update({ status: "rejected" });
+    logAdminAction("suggestion_reject", id);
     showToast("Санал татгалзагдлаа");
     renderAdminSuggestions();
   } catch (e) {
@@ -142,13 +170,14 @@ async function adminAddMovieDirect() {
     dateAdded: new Date().toISOString().slice(0, 10),
   };
   const dbId = await saveMovieToFirebase(movie);
-  if (dbId) { showToast("✅ Нэмэгдлээ"); renderAdminMovies(); }
+  if (dbId) { logAdminAction("movie_add", dbId, title); showToast("✅ Нэмэгдлээ"); renderAdminMovies(); }
   else showToast("⚠️ Алдаа гарлаа");
 }
 
 async function adminDeleteMovieRow(dbId) {
   if (!confirm("Устгах уу?")) return;
   await deleteMovieFromFirebase(dbId);
+  logAdminAction("movie_delete", dbId);
   showToast("🗑 Устгагдлаа");
   renderAdminMovies();
 }
@@ -163,10 +192,11 @@ async function renderAdminPosts() {
     el.innerHTML = snap.docs.map(d => {
       const p = d.data();
       return `<div class="admin-card">
-        <div class="admin-card-main"><strong>${escapeHtml(p.authorName)}</strong>: ${escapeHtml((p.content||"").slice(0,120))}
+        <div class="admin-card-main"><strong>${escapeHtml(p.authorName)}</strong>${p.hidden ? ' <span style="color:var(--text-lighter)">(нуугдсан)</span>' : ''}: ${escapeHtml((p.content||"").slice(0,120))}
           <div class="admin-card-meta">❤️ ${p.likeCount||0} · 💬 ${p.commentCount||0}</div>
         </div>
         <div class="admin-card-actions">
+          <button class="btn btn-outline" type="button" onclick="adminTogglePostHidden('${d.id}', ${!p.hidden})">${p.hidden ? "Харуулах" : "Нуух"}</button>
           <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeletePost('${d.id}')">🗑 Устгах</button>
         </div>
       </div>`;
@@ -176,11 +206,125 @@ async function renderAdminPosts() {
   }
 }
 
+async function adminTogglePostHidden(id, hidden) {
+  try {
+    await db.collection("posts").doc(id).update({ hidden });
+    logAdminAction(hidden ? "post_hide" : "post_unhide", id);
+    renderAdminPosts();
+  } catch (e) {
+    showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
+  }
+}
+
 async function adminDeletePost(id) {
   if (!confirm("Энэ постыг устгах уу?")) return;
-  await db.collection("posts").doc(id).delete();
-  showToast("🗑 Пост устгагдлаа");
-  renderAdminPosts();
+  try {
+    await db.collection("posts").doc(id).delete();
+    logAdminAction("post_delete", id);
+    showToast("🗑 Пост устгагдлаа");
+    renderAdminPosts();
+  } catch (e) {
+    showToast("⚠️ Устгахад алдаа гарлаа: " + (e.message || e.code || ""));
+  }
+}
+
+// ---------- Comment moderation ----------
+async function renderAdminComments() {
+  const el = document.getElementById("admin-comments");
+  el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>`;
+  try {
+    const snap = await db.collection("comments").orderBy("createdAt", "desc").limit(50).get();
+    if (snap.empty) { el.innerHTML = `<div class="admin-empty">Сэтгэгдэл алга</div>`; return; }
+    el.innerHTML = snap.docs.map(d => {
+      const c = d.data();
+      return `<div class="admin-card">
+        <div class="admin-card-main"><strong>${escapeHtml(c.authorName||"?")}</strong>${c.hidden ? ' <span style="color:var(--text-lighter)">(нуугдсан)</span>' : ''}: ${escapeHtml((c.text||"").slice(0,140))}
+          <div class="admin-card-meta">Пост: ${escapeHtml(c.postId||"-")}</div>
+        </div>
+        <div class="admin-card-actions">
+          <button class="btn btn-outline" type="button" onclick="adminToggleCommentHidden('${d.id}', ${!c.hidden})">${c.hidden ? "Харуулах" : "Нуух"}</button>
+          <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeleteComment('${d.id}','${c.postId||""}')">🗑 Устгах</button>
+        </div>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    el.innerHTML = `<div class="admin-empty">Алдаа: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function adminToggleCommentHidden(id, hidden) {
+  try {
+    await db.collection("comments").doc(id).update({ hidden });
+    logAdminAction(hidden ? "comment_hide" : "comment_unhide", id);
+    renderAdminComments();
+  } catch (e) {
+    showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
+  }
+}
+
+async function adminDeleteComment(id, postId) {
+  if (!confirm("Энэ сэтгэгдлийг устгах уу?")) return;
+  try {
+    await db.collection("comments").doc(id).delete();
+    if (postId) await db.collection("posts").doc(postId).update({ commentCount: firebase.firestore.FieldValue.increment(-1) });
+    logAdminAction("comment_delete", id);
+    showToast("🗑 Сэтгэгдэл устгагдлаа");
+    renderAdminComments();
+  } catch (e) {
+    showToast("⚠️ Устгахад алдаа гарлаа: " + (e.message || e.code || ""));
+  }
+}
+
+// ---------- Reports / moderation queue ----------
+const ADMIN_REPORT_STATUS_LABELS = { pending: "Хүлээгдэж буй", resolved: "Шийдвэрлэсэн", dismissed: "Татгалзсан" };
+
+async function renderAdminReports() {
+  const el = document.getElementById("admin-reports");
+  el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>`;
+  try {
+    // No orderBy alongside the equality filter — avoids needing a composite index (report
+    // volume is always small enough to sort client-side, same reasoning as banners).
+    const snap = await db.collection("reports").where("status", "==", "pending").get();
+    const list = snap.docs.map(d => ({ _dbId: d.id, ...d.data() }))
+      .sort((a, b) => (b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0) - (a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0));
+    if (!list.length) { el.innerHTML = `<div class="admin-empty">Хүлээгдэж буй гомдол алга</div>`; return; }
+    el.innerHTML = list.map(r => `
+      <div class="admin-card">
+        <div class="admin-card-main">
+          <strong>${r.targetType === "post" ? "📝 Пост" : "💬 Сэтгэгдэл"}</strong> — мэдэгдсэн: ${escapeHtml(r.reporterName || "?")}
+          <div class="admin-card-desc">"${escapeHtml(r.contentPreview || "(агуулга алга/устгагдсан)")}"</div>
+          ${r.reason ? `<div class="admin-card-meta">Шалтгаан: ${escapeHtml(r.reason)}</div>` : ""}
+        </div>
+        <div class="admin-card-actions">
+          <button class="btn btn-outline" type="button" onclick="adminResolveReport('${r._dbId}','${r.targetType}','${r.targetId}',${r.postId ? `'${r.postId}'` : "null"},'hide')">Нуух</button>
+          <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminResolveReport('${r._dbId}','${r.targetType}','${r.targetId}',${r.postId ? `'${r.postId}'` : "null"},'delete')">🗑 Устгах</button>
+          <button class="btn btn-outline" type="button" onclick="adminResolveReport('${r._dbId}','${r.targetType}','${r.targetId}',${r.postId ? `'${r.postId}'` : "null"},'dismiss')">Татгалзах</button>
+        </div>
+      </div>`).join("");
+  } catch (e) {
+    el.innerHTML = `<div class="admin-empty">Алдаа: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function adminResolveReport(reportId, targetType, targetId, postId, action) {
+  try {
+    if (action === "hide") {
+      await db.collection(targetType === "post" ? "posts" : "comments").doc(targetId).update({ hidden: true });
+    } else if (action === "delete") {
+      await db.collection(targetType === "post" ? "posts" : "comments").doc(targetId).delete();
+      if (targetType === "comment" && postId) await db.collection("posts").doc(postId).update({ commentCount: firebase.firestore.FieldValue.increment(-1) });
+    }
+    await db.collection("reports").doc(reportId).update({
+      status: action === "dismiss" ? "dismissed" : "resolved",
+      resolvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      resolvedBy: currentUser.uid,
+    });
+    logAdminAction("report_" + action, reportId, targetType + ":" + targetId);
+    showToast("✅ Шийдвэрлэгдлээ");
+    renderAdminReports();
+  } catch (e) {
+    showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
+  }
 }
 
 // ---------- User management ----------
@@ -208,9 +352,14 @@ async function renderAdminUsers() {
 }
 
 async function toggleUserBan(uid, banned) {
-  await db.collection("users").doc(uid).update({ banned });
-  showToast(banned ? "🚫 Хэрэглэгч хориглогдлоо" : "✅ Хориг арилгагдлаа");
-  renderAdminUsers();
+  try {
+    await db.collection("users").doc(uid).update({ banned });
+    logAdminAction(banned ? "user_ban" : "user_unban", uid);
+    showToast(banned ? "🚫 Хэрэглэгч түдгэлзүүлэгдлээ" : "✅ Хориг арилгагдлаа");
+    renderAdminUsers();
+  } catch (e) {
+    showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
+  }
 }
 
 // ---------- Ad/promo banners (нүүр хуудасны дээд хэсэг) ----------
@@ -304,6 +453,7 @@ async function adminAddBanner() {
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
     statusEl.textContent = "";
+    logAdminAction("banner_add", stamp + "", title);
     showToast("✅ Banner нэмэгдлээ");
     renderAdminBanners();
   } catch (e) {
@@ -317,6 +467,7 @@ async function adminAddBanner() {
 async function adminToggleBannerActive(id, active) {
   try {
     await db.collection("banners").doc(id).update({ active });
+    logAdminAction("banner_toggle", id, active ? "active" : "inactive");
     renderAdminBanners();
   } catch (e) {
     showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
@@ -327,6 +478,7 @@ async function adminDeleteBanner(id) {
   if (!confirm("Энэ banner-ийг устгах уу?")) return;
   try {
     await db.collection("banners").doc(id).delete();
+    logAdminAction("banner_delete", id);
     showToast("🗑 Banner устгагдлаа");
     renderAdminBanners();
   } catch (e) {
@@ -334,18 +486,23 @@ async function adminDeleteBanner(id) {
   }
 }
 
-// ---------- Analytics ----------
-async function renderAdminAnalytics() {
-  const el = document.getElementById("admin-analytics");
+// ---------- Overview (dashboard home) ----------
+async function renderAdminOverview() {
+  const el = document.getElementById("admin-overview");
   el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>`;
   try {
-    const [users, posts, comments, movies, saved] = await Promise.all([
+    const [users, posts, comments, movies, saved, invites, pendingSuggestions, pendingReports] = await Promise.all([
       db.collection("users").count().get(),
       db.collection("posts").count().get(),
       db.collection("comments").count().get(),
       db.collection("movies").count().get(),
       db.collection("saved").count().get(),
+      db.collection("invites").count().get(),
+      db.collection("movieSuggestions").where("status", "==", "pending").count().get(),
+      db.collection("reports").where("status", "==", "pending").count().get(),
     ]);
+    const pendingSuggCount = pendingSuggestions.data().count;
+    const pendingReportCount = pendingReports.data().count;
     el.innerHTML = `
       <div class="admin-stats-grid">
         <div class="admin-stat"><div class="admin-stat-num">${users.data().count}</div><div class="admin-stat-label">Хэрэглэгч</div></div>
@@ -353,8 +510,57 @@ async function renderAdminAnalytics() {
         <div class="admin-stat"><div class="admin-stat-num">${comments.data().count}</div><div class="admin-stat-label">Сэтгэгдэл</div></div>
         <div class="admin-stat"><div class="admin-stat-num">${movies.data().count}</div><div class="admin-stat-label">Нэмсэн кино</div></div>
         <div class="admin-stat"><div class="admin-stat-num">${saved.data().count}</div><div class="admin-stat-label">Хадгалсан санаа</div></div>
-      </div>`;
+        <div class="admin-stat"><div class="admin-stat-num">${invites.data().count}</div><div class="admin-stat-label">Урилга</div></div>
+      </div>
+      ${(pendingSuggCount > 0 || pendingReportCount > 0) ? `
+        <div class="admin-note" style="display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;">
+          ${pendingSuggCount > 0 ? `<span style="cursor:pointer;" onclick="showAdminTab('suggestions')">🎬 <strong>${pendingSuggCount}</strong> хүлээгдэж буй кино санал →</span>` : ""}
+          ${pendingReportCount > 0 ? `<span style="cursor:pointer;" onclick="showAdminTab('reports')">🚩 <strong>${pendingReportCount}</strong> хүлээгдэж буй гомдол →</span>` : ""}
+        </div>` : ""}`;
   } catch (e) {
-    el.innerHTML = `<div class="admin-empty">Analytics ачаалахад алдаа гарлаа: ${escapeHtml(e.message)}<br><span style="font-size:12px">(Firestore count() aggregation дэмжигдэхгүй байж болзошгүй)</span></div>`;
+    el.innerHTML = `<div class="admin-empty">Ачаалахад алдаа гарлаа: ${escapeHtml(e.message)}<br><span style="font-size:12px">(Firestore count() aggregation дэмжигдэхгүй байж болзошгүй)</span></div>`;
+  }
+}
+
+// ---------- Invitations overview (read-only — senders own/manage their own invites) ----------
+async function renderAdminInvites() {
+  const el = document.getElementById("admin-invites");
+  el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>`;
+  try {
+    const snap = await db.collection("invites").orderBy("createdAt", "desc").limit(50).get();
+    if (snap.empty) { el.innerHTML = `<div class="admin-empty">Урилга алга</div>`; return; }
+    el.innerHTML = `<div class="admin-note">Зөвхөн харах горим — урилгыг зөвхөн үүсгэсэн эзэн нь устгах эрхтэй.</div>` +
+      snap.docs.map(d => {
+        const iv = d.data();
+        return `<div class="admin-card">
+          <div class="admin-card-main">
+            <strong>${escapeHtml(iv.type || "?")}</strong> — ${escapeHtml(iv.senderName || "?")}
+            <div class="admin-card-meta">Төлөв: ${escapeHtml(iv.status || "-")} · ${timeAgo(iv.createdAt)}</div>
+          </div>
+        </div>`;
+      }).join("");
+  } catch (e) {
+    el.innerHTML = `<div class="admin-empty">Алдаа: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+// ---------- Activity log (append-only audit trail of admin actions) ----------
+async function renderAdminActivity() {
+  const el = document.getElementById("admin-activity");
+  el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>`;
+  try {
+    const snap = await db.collection("adminLog").orderBy("createdAt", "desc").limit(100).get();
+    if (snap.empty) { el.innerHTML = `<div class="admin-empty">Үйл ажиллагааны түүх алга</div>`; return; }
+    el.innerHTML = snap.docs.map(d => {
+      const l = d.data();
+      return `<div class="admin-card">
+        <div class="admin-card-main">
+          <strong>${escapeHtml(l.actorName || "?")}</strong> — ${escapeHtml(ADMIN_ACTION_LABELS[l.action] || l.action)}
+          <div class="admin-card-meta">${l.extra ? escapeHtml(l.extra) + " · " : ""}${l.targetId ? "ID: " + escapeHtml(l.targetId) + " · " : ""}${timeAgo(l.createdAt)}</div>
+        </div>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    el.innerHTML = `<div class="admin-empty">Алдаа: ${escapeHtml(e.message)}</div>`;
   }
 }

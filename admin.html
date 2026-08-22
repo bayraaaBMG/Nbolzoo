@@ -42,7 +42,7 @@
       <li><a class="nav-link" data-page="saved" onclick="navigate('saved')">❤️ Хадгалсан</a></li>
       <li><a class="nav-link" data-page="urilga" onclick="navigate('urilga')">💌 Урилга</a></li>
       <li><a class="nav-link" data-page="games" onclick="navigate('games')">🎮 Тоглоом</a></li>
-      <li><a class="nav-link active" id="navAdminLink" data-page="admin" onclick="navigate('admin')">⚙️ Админ</a></li>
+      <li><a class="nav-link active" id="navAdminLink" data-page="admin" onclick="navigate('admin')" style="display:none;">⚙️ Админ</a></li>
     </ul>
     <div class="nav-actions">
       <div id="navAuthButtons">
@@ -96,21 +96,31 @@
     <div class="container">
       <h1 style="margin-bottom:20px;">⚙️ Админ удирдлагын самбар</h1>
       <div id="adminGate"></div>
-      <div id="adminPanel" style="display:none;">
-        <div class="admin-tabs">
-          <div class="admin-tab active" data-tab="suggestions" onclick="showAdminTab('suggestions')">🎬 Кино саналууд</div>
-          <div class="admin-tab" data-tab="movies" onclick="showAdminTab('movies')">🎞 Кино каталог</div>
-          <div class="admin-tab" data-tab="posts" onclick="showAdminTab('posts')">👥 Нийгэмлэг</div>
+      <div id="adminPanel" class="admin-shell" style="display:none;">
+        <nav class="admin-tabs">
+          <div class="admin-tab active" data-tab="overview" onclick="showAdminTab('overview')">📊 Тойм</div>
           <div class="admin-tab" data-tab="users" onclick="showAdminTab('users')">🧑‍🤝‍🧑 Хэрэглэгчид</div>
+          <div class="admin-tab" data-tab="posts" onclick="showAdminTab('posts')">📝 Нийтлэлүүд</div>
+          <div class="admin-tab" data-tab="comments" onclick="showAdminTab('comments')">💬 Сэтгэгдэл</div>
+          <div class="admin-tab" data-tab="reports" onclick="showAdminTab('reports')">🚩 Гомдол/Хяналт</div>
+          <div class="admin-tab" data-tab="suggestions" onclick="showAdminTab('suggestions')">🎬 Кино саналууд</div>
           <div class="admin-tab" data-tab="banners" onclick="showAdminTab('banners')">📢 Banner</div>
-          <div class="admin-tab" data-tab="analytics" onclick="showAdminTab('analytics')">📊 Analytics</div>
+          <div class="admin-tab" data-tab="invites" onclick="showAdminTab('invites')">💌 Урилгууд</div>
+          <div class="admin-tab" data-tab="movies" onclick="showAdminTab('movies')">🎞 Контент (кино)</div>
+          <div class="admin-tab" data-tab="activity" onclick="showAdminTab('activity')">📜 Түүх</div>
+        </nav>
+        <div class="admin-main">
+          <div class="admin-tab-content" id="admin-overview"></div>
+          <div class="admin-tab-content" id="admin-users" style="display:none;"></div>
+          <div class="admin-tab-content" id="admin-posts" style="display:none;"></div>
+          <div class="admin-tab-content" id="admin-comments" style="display:none;"></div>
+          <div class="admin-tab-content" id="admin-reports" style="display:none;"></div>
+          <div class="admin-tab-content" id="admin-suggestions" style="display:none;"></div>
+          <div class="admin-tab-content" id="admin-banners" style="display:none;"></div>
+          <div class="admin-tab-content" id="admin-invites" style="display:none;"></div>
+          <div class="admin-tab-content" id="admin-movies" style="display:none;"></div>
+          <div class="admin-tab-content" id="admin-activity" style="display:none;"></div>
         </div>
-        <div class="admin-tab-content" id="admin-suggestions"></div>
-        <div class="admin-tab-content" id="admin-movies" style="display:none;"></div>
-        <div class="admin-tab-content" id="admin-posts" style="display:none;"></div>
-        <div class="admin-tab-content" id="admin-users" style="display:none;"></div>
-        <div class="admin-tab-content" id="admin-banners" style="display:none;"></div>
-        <div class="admin-tab-content" id="admin-analytics" style="display:none;"></div>
       </div>
     </div>
   </div>

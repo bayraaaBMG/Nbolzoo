@@ -5,6 +5,14 @@ service cloud.firestore {
     function isSignedIn() { return request.auth != null; }
     function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
     function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    // A suspended user's own users/{uid} doc has banned==true (set only by an admin, see the
+    // users/{uid} update rule below) — blocks new posts/comments at the rules layer, not just
+    // by hiding the UI button, so a suspended user can't route around it by calling Firestore directly.
+    function isBanned() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.banned == true;
+    }
 
     // ---- users/{uid} : public profile ----
     match /users/{uid} {
@@ -17,9 +25,10 @@ service cloud.firestore {
     // ---- posts/{postId} : community feed ----
     match /posts/{postId} {
       allow read: if true;
-      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-      // Owner can edit their own post; anyone signed-in may update ONLY likeCount/commentCount
-      // (those are maintained via transactions from toggleLike/addComment), author/content stay immutable for non-owners.
+      allow create: if isSignedIn() && !isBanned() && request.resource.data.authorId == request.auth.uid;
+      // Owner can edit their own post; admin may additionally toggle moderation state (hidden);
+      // anyone signed-in may update ONLY likeCount/commentCount (maintained via transactions
+      // from toggleLike/addComment) — author/content/hidden stay immutable for non-owner non-admins.
       allow update: if isSignedIn() && (
         resource.data.authorId == request.auth.uid ||
         isAdmin() ||
@@ -31,8 +40,10 @@ service cloud.firestore {
     // ---- comments/{commentId} ----
     match /comments/{commentId} {
       allow read: if true;
-      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-      allow update: if false;
+      allow create: if isSignedIn() && !isBanned() && request.resource.data.authorId == request.auth.uid;
+      // Content itself is immutable even for the author (no silent edits) — only an admin may
+      // toggle the `hidden` moderation flag, and ONLY that field.
+      allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hidden']);
       allow delete: if isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
     }
 
@@ -144,6 +155,28 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
       allow update: if false;
       allow delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // ---- reports/{reportId} : user-flagged posts/comments, feeding the admin moderation
+    // queue. Any signed-in user may file one about someone else's content; only an admin may
+    // read/triage/resolve them (reports are moderation-internal, not a public feed). ----
+    match /reports/{reportId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn()
+        && request.resource.data.reporterId == request.auth.uid
+        && request.resource.data.status == 'pending';
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ---- adminLog/{logId} : append-only audit trail of admin moderation actions (who did
+    // what, when) shown in the dashboard's Activity log. Admin-write, admin-read, never
+    // editable/deletable — that's what makes it a trustworthy audit trail. ----
+    match /adminLog/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && request.resource.data.actorUid == request.auth.uid;
+      allow update: if false;
+      allow delete: if false;
     }
 
     // ---- banners/{bannerId} : admin-only ad/promo banners shown on the home page.

@@ -19,11 +19,13 @@ const POST_FEELINGS = ["😊","😍","🥰","😂","🥳","😢","😴","🤔"];
 function renderPosts() {
   const el = document.getElementById("postsList");
   if (!el) return;
-  if (!posts.length) {
+  // Admin-hidden posts (moderation) never show in the public feed, even to their own author.
+  const visible = posts.filter(p => !p.hidden);
+  if (!visible.length) {
     el.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text-light);">Одоохондоо нийтлэл алга. Эхний санаагаа хуваалцаарай! 💬</div>`;
     return;
   }
-  el.innerHTML = posts.map(p => `
+  el.innerHTML = visible.map(p => `
     <div class="post">
       <div class="post-header">
         <div class="avatar">${p.authorPhoto ? `<img src="${escapeHtml(p.authorPhoto)}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : escapeHtml((p.authorName||"?").charAt(0))}</div>
@@ -41,6 +43,7 @@ function renderPosts() {
         </div>
         <div class="post-action" onclick="toggleComments('${p.id}', this)">💬 <span id="cmt-count-${p.id}">${p.commentCount||0}</span></div>
         <div class="post-action" onclick="sharePost('${p.id}')">🔗</div>
+        ${(currentUser && currentUser.uid !== p.authorId) ? `<div class="post-action" onclick="openReportModal('post','${p.id}','${p.authorId}')" title="Мэдэгдэх">🚩</div>` : ""}
         ${(currentUser && (currentUser.uid===p.authorId || currentUser.isAdmin)) ? `<div class="post-action" onclick="deletePost('${p.id}')">🗑</div>` : ""}
       </div>
       <div class="comments-section" id="comments-${p.id}" style="display:none;"></div>
@@ -77,7 +80,8 @@ function subscribeToComments(postId) {
 function renderComments(postId) {
   const section = document.getElementById(`comments-${postId}`);
   if (!section) return;
-  const cmts = commentsCache[postId] || [];
+  // Admin-hidden comments (moderation) never show in the public thread.
+  const cmts = (commentsCache[postId] || []).filter(c => !c.hidden);
   section.innerHTML = `
     ${cmts.map(c => `
       <div class="comment-item">
@@ -85,7 +89,10 @@ function renderComments(postId) {
         <div class="comment-body">
           <div class="comment-header-row">
             <div class="comment-author">${escapeHtml(c.authorName)}</div>
-            ${(currentUser && (currentUser.uid===c.authorId || currentUser.isAdmin)) ? `<span class="comment-delete" onclick="deleteComment('${c.id}','${postId}')" title="Устгах">🗑</span>` : ""}
+            <div style="display:flex;gap:6px;">
+              ${(currentUser && currentUser.uid !== c.authorId) ? `<span class="comment-delete" onclick="openReportModal('comment','${c.id}','${c.authorId}')" title="Мэдэгдэх">🚩</span>` : ""}
+              ${(currentUser && (currentUser.uid===c.authorId || currentUser.isAdmin)) ? `<span class="comment-delete" onclick="deleteComment('${c.id}','${postId}')" title="Устгах">🗑</span>` : ""}
+            </div>
           </div>
           <div class="comment-text">${escapeHtml(c.text)}</div>
           <div class="comment-time">${timeAgo(c.createdAt)}</div>
@@ -102,6 +109,7 @@ function renderComments(postId) {
 
 async function addComment(postId) {
   if (!currentUser) return showToast("⚠️ Эхлээд нэвтэрнэ үү");
+  if (currentUser.banned) return showToast("⛔ Таны эрх түдгэлзүүлэгдсэн тул сэтгэгдэл бичих боломжгүй");
   const input = document.getElementById(`cmt-input-${postId}`);
   const text = input?.value.trim();
   if (!text) return;
@@ -255,6 +263,7 @@ function resetPostAttachments() {
 
 async function submitPost() {
   if (!currentUser) { showToast("⚠️ Нийтлэл бичихийн тулд эхлээд нэвтэрнэ үү"); openAuth("login"); return; }
+  if (currentUser.banned) return showToast("⛔ Таны эрх түдгэлзүүлэгдсэн тул нийтлэл нэмэх боломжгүй");
   const input = document.getElementById("newPost");
   const content = input.value.trim();
   if (!content && !pendingPostImage) return showToast("Юу бичих юм?");
@@ -304,6 +313,58 @@ async function deletePost(id) {
 function sharePost(id) {
   const url = `${location.origin}${location.pathname}#post-${id}`;
   if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => showToast("🔗 Холбоос хуулагдлаа!"));
+}
+
+// ---------- Report / flag content (feeds the admin moderation queue) ----------
+function openReportModal(targetType, targetId, targetAuthorId) {
+  if (!currentUser) return openAuth("login");
+  document.getElementById("modalContent").innerHTML = `
+    <div class="modal-header">
+      <h3>🚩 Мэдэгдэх</h3>
+      <button class="modal-close" onclick="closeModal()" type="button">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-light);font-size:13px;margin-bottom:12px;">Энэ контент дүрэм зөрчиж байна гэж админд мэдэгдэх гэж байна.</p>
+      <div class="form-group"><label>Шалтгаан (сонголтоор)</label><textarea id="reportReasonInput" rows="3" placeholder="Юу болсныг тайлбарлана уу..."></textarea></div>
+      <div id="reportModalStatus" style="min-height:18px;font-size:13px;margin-bottom:8px;"></div>
+      <button class="btn btn-primary" type="button" id="reportSubmitBtn" style="width:100%" onclick="submitReport('${targetType}','${targetId}','${targetAuthorId}')">Мэдэгдэл илгээх</button>
+    </div>`;
+  document.getElementById("modal").classList.add("show");
+}
+
+async function submitReport(targetType, targetId, targetAuthorId) {
+  const reasonInput = document.getElementById("reportReasonInput");
+  const reason = reasonInput ? reasonInput.value.trim() : "";
+  const statusEl = document.getElementById("reportModalStatus");
+  const btn = document.getElementById("reportSubmitBtn");
+  if (btn) btn.disabled = true;
+  if (statusEl) statusEl.textContent = "Илгээж байна...";
+  try {
+    let contentPreview = "", postId = null;
+    if (targetType === "post") {
+      const p = posts.find(x => x.id === targetId);
+      contentPreview = ((p && p.content) || "").slice(0, 140);
+    } else {
+      for (const pid in commentsCache) {
+        const c = (commentsCache[pid] || []).find(x => x.id === targetId);
+        if (c) { contentPreview = (c.text || "").slice(0, 140); postId = pid; break; }
+      }
+    }
+    await db.collection("reports").add({
+      targetType, targetId, targetAuthorId: targetAuthorId || "", postId,
+      contentPreview, reason,
+      reporterId: currentUser.uid, reporterName: currentUser.name,
+      status: "pending",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    closeModal();
+    showToast("✅ Мэдэгдэл илгээгдлээ. Баярлалаа!");
+  } catch (e) {
+    if (statusEl) statusEl.textContent = "⚠️ Алдаа гарлаа: " + (e.message || e.code || "");
+    console.warn("submitReport error:", e);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 subscribeToPosts();

@@ -55,6 +55,7 @@ const ADMIN_ACTION_LABELS = {
   post_hide: "Пост нуусан", post_unhide: "Пост дахин харуулсан", post_delete: "Пост устгасан",
   comment_hide: "Сэтгэгдэл нуусан", comment_unhide: "Сэтгэгдэл дахин харуулсан", comment_delete: "Сэтгэгдэл устгасан",
   user_ban: "Хэрэглэгч хориглосон", user_unban: "Хэрэглэгчийн хориг арилгасан",
+  admin_grant: "Admin эрх олгосон", admin_revoke: "Admin эрх хассан",
   banner_add: "Banner нэмсэн", banner_toggle: "Banner идэвх өөрчилсөн", banner_delete: "Banner устгасан",
   report_hide: "Гомдлыг шийдэж контент нуусан", report_delete: "Гомдлыг шийдэж контент устгасан", report_dismiss: "Гомдлыг татгалзсан",
 };
@@ -327,25 +328,46 @@ async function adminResolveReport(reportId, targetType, targetId, postId, action
   }
 }
 
-// ---------- User management ----------
+// ---------- User management (+ owner-only admin grant/revoke) ----------
 async function renderAdminUsers() {
   const el = document.getElementById("admin-users");
   el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>`;
+  const isOwner = currentUser.adminRole === "owner";
   try {
-    const snap = await db.collection("users").orderBy("createdAt", "desc").limit(100).get();
-    const rows = snap.docs.map(d => {
+    const [usersSnap, adminsSnap] = await Promise.all([
+      db.collection("users").orderBy("createdAt", "desc").limit(100).get(),
+      isOwner ? db.collection("admins").get() : Promise.resolve(null), // only the owner needs to know who else is admin (to show grant/revoke buttons)
+    ]);
+    const adminMap = {};
+    if (adminsSnap) adminsSnap.docs.forEach(d => { adminMap[d.id] = d.data(); });
+    const rows = usersSnap.docs.map(d => {
       const u = d.data();
+      const adminInfo = adminMap[d.id];
+      const isOwnerRow = adminInfo && adminInfo.role === "owner";
+      let roleBadge = "";
+      if (isOwnerRow) roleBadge = ' <span style="color:var(--gold)">👑 Owner</span>';
+      else if (adminInfo) roleBadge = ' <span style="color:var(--primary)">🛡️ Admin</span>';
+      let adminBtn = "";
+      if (isOwner && !isOwnerRow) {
+        adminBtn = adminInfo
+          ? `<button class="btn btn-outline" type="button" onclick="adminRevokeAdmin('${d.id}')">🛡️ Admin эрх хасах</button>`
+          : `<button class="btn btn-outline" type="button" onclick="adminGrantAdmin('${d.id}')">🛡️ Admin болгох</button>`;
+      }
       return `<div class="admin-card">
         <div class="admin-card-main">
-          <strong>${escapeHtml(u.name)}</strong> ${u.banned ? '<span style="color:#ef4444">(хориглосон)</span>' : ''}
+          <strong>${escapeHtml(u.name)}</strong>${roleBadge} ${u.banned ? '<span style="color:#ef4444">(хориглосон)</span>' : ''}
           <div class="admin-card-meta">${escapeHtml(u.email||"")} · uid: ${d.id}</div>
         </div>
         <div class="admin-card-actions">
-          <button class="btn btn-outline" type="button" onclick="toggleUserBan('${d.id}', ${!u.banned})">${u.banned ? '✓ Хориг арилгах' : '🚫 Хориглох'}</button>
+          ${!isOwnerRow ? `<button class="btn btn-outline" type="button" onclick="toggleUserBan('${d.id}', ${!u.banned})">${u.banned ? '✓ Хориг арилгах' : '🚫 Хориглох'}</button>` : ''}
+          ${adminBtn}
         </div>
       </div>`;
     }).join("");
-    el.innerHTML = `<div class="admin-note">Шинэ админ нэмэхийг зөвхөн Firebase Console-с <code>admins/{uid}</code> баримт үүсгэж хийнэ (аюулгүй байдлын үүднээс dashboard-оос боломжгүй).</div>` + rows;
+    const note = isOwner
+      ? `<div class="admin-note">Та үндсэн Owner тул хэрэглэгчид admin эрх олгох/хасах боломжтой. Owner эрхийг хэн ч (өөрөө оролцоод) хасах боломжгүй.</div>`
+      : `<div class="admin-note">Шинэ admin нэмэх/хасах эрх зөвхөн үндсэн Owner-д байна.</div>`;
+    el.innerHTML = note + rows;
   } catch (e) {
     el.innerHTML = `<div class="admin-empty">Алдаа: ${escapeHtml(e.message)}</div>`;
   }
@@ -356,6 +378,37 @@ async function toggleUserBan(uid, banned) {
     await db.collection("users").doc(uid).update({ banned });
     logAdminAction(banned ? "user_ban" : "user_unban", uid);
     showToast(banned ? "🚫 Хэрэглэгч түдгэлзүүлэгдлээ" : "✅ Хориг арилгагдлаа");
+    renderAdminUsers();
+  } catch (e) {
+    showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
+  }
+}
+
+async function adminGrantAdmin(uid) {
+  if (currentUser.adminRole !== "owner") return showToast("⚠️ Зөвхөн Owner шинэ admin нэмэх боломжтой");
+  if (!confirm("Энэ хэрэглэгчид admin эрх олгох уу?")) return;
+  try {
+    const userSnap = await db.collection("users").doc(uid).get();
+    const u = userSnap.exists ? userSnap.data() : {};
+    await db.collection("admins").doc(uid).set({
+      email: u.email || "", name: u.name || "", role: "admin",
+      addedBy: currentUser.uid, addedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    logAdminAction("admin_grant", uid, u.name || "");
+    showToast("✅ Admin эрх олгогдлоо");
+    renderAdminUsers();
+  } catch (e) {
+    showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
+  }
+}
+
+async function adminRevokeAdmin(uid) {
+  if (currentUser.adminRole !== "owner") return showToast("⚠️ Зөвхөн Owner admin эрх хасах боломжтой");
+  if (!confirm("Энэ хэрэглэгчийн admin эрхийг хасах уу?")) return;
+  try {
+    await db.collection("admins").doc(uid).delete();
+    logAdminAction("admin_revoke", uid);
+    showToast("✅ Admin эрх хасагдлаа");
     renderAdminUsers();
   } catch (e) {
     showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));

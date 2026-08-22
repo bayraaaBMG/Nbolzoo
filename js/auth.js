@@ -1,5 +1,12 @@
 // ===== БОДИТ FIREBASE AUTHENTICATION (Google + Email) =====
-let currentUser = null; // { uid, name, email, photoURL, isAdmin }
+let currentUser = null; // { uid, name, email, photoURL, isAdmin, adminRole: 'owner'|'admin'|null }
+
+// Цорын ганц үндсэн Owner эрхтэй account. Энэ Gmail-аар нэвтрэхэд admins/{uid}-ийг
+// "owner" эрхтэйгээр автоматаар үүсгэнэ (ensureUserProfile-д). Firestore rules
+// (firestore.rules-ийн isOwnerEmail()) яг ижил утгыг Firebase Auth ID token-ий
+// имэйл claim-аар шалгадаг тул энэ бол зөвхөн frontend шалгалт биш — хоёр талдаа
+// адилхан байлгах ёстой.
+const OWNER_EMAIL = "bbayraaa20@gmail.com";
 
 function openAuth(type) {
   document.getElementById("authModalContent").innerHTML = `
@@ -123,6 +130,28 @@ async function ensureUserProfile(fbUser, provider, nameOverride) {
       photoURL: fbUser.photoURL || snap.data().photoURL || "",
     });
   }
+  await ensureOwnerAdmin(fbUser, name);
+}
+
+// Хатуу кодлогдсон Owner Gmail-аар нэвтэрсэн бол admins/{uid}-ийг "owner" эрхтэйгээр
+// нэг л удаа (идэмпотент) автоматаар үүсгэнэ. Бусад хэрэглэгчид энэ функц юу ч хийхгүй.
+// Бичихэд алдаа гарвал (rules эсвэл сүлжээ) чимээгүйхэн log хийгээд login-г саадгүй
+// үргэлжлүүлнэ — Owner bootstrap асуудал login flow-г бүхэлд нь эвдэж болохгүй.
+async function ensureOwnerAdmin(fbUser, name) {
+  if (!fbUser.email || fbUser.email.toLowerCase() !== OWNER_EMAIL) return;
+  try {
+    const adminRef = db.collection("admins").doc(fbUser.uid);
+    const adminSnap = await adminRef.get();
+    if (!adminSnap.exists) {
+      await adminRef.set({
+        email: fbUser.email, name: name || fbUser.email.split("@")[0],
+        role: "owner", addedBy: "self",
+        addedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+  } catch (e) {
+    console.warn("ensureOwnerAdmin failed:", e);
+  }
 }
 
 function updateAuthUI(user) {
@@ -228,13 +257,14 @@ async function saveProfile() {
 if (auth) {
   auth.onAuthStateChanged(async (fbUser) => {
     if (fbUser) {
-      let profile = { name: fbUser.displayName || fbUser.email?.split("@")[0] || "Хэрэглэгч", email: fbUser.email, photoURL: fbUser.photoURL, isAdmin: false };
+      let profile = { name: fbUser.displayName || fbUser.email?.split("@")[0] || "Хэрэглэгч", email: fbUser.email, photoURL: fbUser.photoURL, isAdmin: false, adminRole: null };
       if (db) {
         try {
           const snap = await db.collection("users").doc(fbUser.uid).get();
           if (snap.exists) profile = { ...profile, ...snap.data() };
           const adminSnap = await db.collection("admins").doc(fbUser.uid).get();
           profile.isAdmin = adminSnap.exists;
+          profile.adminRole = adminSnap.exists ? (adminSnap.data().role || "admin") : null;
         } catch (e) { console.warn("profile load error:", e); }
       }
       currentUser = { uid: fbUser.uid, ...profile };

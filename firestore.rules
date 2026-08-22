@@ -5,6 +5,12 @@ service cloud.firestore {
     function isSignedIn() { return request.auth != null; }
     function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
     function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    // The single hardcoded root account. Verified via the Firebase Auth ID token's email
+    // claim, which Firebase itself issues/verifies server-side — this is NOT a spoofable
+    // frontend-only check. Used ONLY to bootstrap the very first admins/{uid} doc (see
+    // below) — every ongoing permission check after that is UID-based via admins/{uid},
+    // exactly like any other admin. Keep this string in sync with OWNER_EMAIL in js/auth.js.
+    function isOwnerEmail() { return isSignedIn() && request.auth.token.email == 'bbayraaa20@gmail.com'; }
     // A suspended user's own users/{uid} doc has banned==true (set only by an admin, see the
     // users/{uid} update rule below) — blocks new posts/comments at the rules layer, not just
     // by hiding the UI button, so a suspended user can't route around it by calling Firestore directly.
@@ -18,8 +24,11 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if true;
       allow create: if isOwner(uid);
-      allow update: if isOwner(uid) || isAdmin();
-      allow delete: if isAdmin();
+      // Admins may edit any profile (moderation) EXCEPT they may never ban/suspend the root
+      // owner account — protects it from being blocked by a compromised or careless admin.
+      allow update: if isOwner(uid) || (isAdmin() &&
+        !(resource.data.email == 'bbayraaa20@gmail.com' && request.resource.data.banned == true));
+      allow delete: if isAdmin() && resource.data.email != 'bbayraaa20@gmail.com';
     }
 
     // ---- posts/{postId} : community feed ----
@@ -92,10 +101,21 @@ service cloud.firestore {
       allow delete: if isSignedIn() && (resource.data.submittedBy == request.auth.uid || isAdmin());
     }
 
-    // ---- admins/{uid} : existence = is admin. Only settable from Firebase Console / CLI. ----
+    // ---- admins/{uid} : existence = is admin. doc shape {email, name, role: 'owner'|'admin',
+    // addedBy, addedAt}. Exactly one 'owner' doc may ever exist (the hardcoded root account,
+    // self-provisioned on first login via js/auth.js's ensureUserProfile — see isOwnerEmail()
+    // above), and it can never be deleted through the app by anyone, including itself — that's
+    // what makes it impossible for the root account to be locked out or demoted. Any admin
+    // (owner or regular) may grant/revoke a REGULAR admin's rights; only 'admin' role docs
+    // (never 'owner') can ever be created via the isAdmin() branch below. ----
     match /admins/{uid} {
       allow read: if isSignedIn();
-      allow write: if false;
+      allow create: if isSignedIn() && (
+        (request.auth.uid == uid && isOwnerEmail() && request.resource.data.role == 'owner')
+        || (isAdmin() && request.resource.data.role == 'admin' && request.resource.data.addedBy == request.auth.uid)
+      );
+      allow update: if false; // role changes are always delete+recreate, never an in-place edit
+      allow delete: if isAdmin() && resource.data.role != 'owner';
     }
 
     // ---- coupleInvites/{code} : short pairing code, doc id IS the code (like invites, secret-by-id).

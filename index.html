@@ -6,14 +6,14 @@
 <title>NBolzoo - Монголын анхны болзооны санааны платформ</title>
 <!-- OG Meta Tags - Social Share -->
 <meta property="og:title" content="NBolzoo - Монголын анхны болзооны санааны платформ">
-<meta property="og:description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
+<meta property="og:description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 187 санаа, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
 <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Gorkhi-Terelj_National_Park.jpg/640px-Gorkhi-Terelj_National_Park.jpg">
 <meta property="og:url" content="https://nbolzoo.vercel.app/index.html">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="NBolzoo - Монголын анхны болзооны санааны платформ">
-<meta name="twitter:description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
-<meta name="description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 189 санаа, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
+<meta name="twitter:description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 187 санаа, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
+<meta name="description" content="Монголын анхны болзооны санааны платформ. УБ-д 365, 21 аймагт 187 санаа, бэлгийн санаа, мэргэжилтэн зөвлөгөө.">
 <link rel="canonical" href="https://nbolzoo.vercel.app/index.html">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
@@ -36,7 +36,7 @@
       <img src="logo.svg" alt="NBolzoo" class="logo-icon" width="42" height="42">
       <div>
         <span class="logo-text">NBolzoo</span>
-        <span class="logo-tagline">.mn · 554 санаа</span>
+        <span class="logo-tagline">.mn · 552 санаа</span>
       </div>
     </div>
     <ul class="nav-menu">
@@ -77,7 +77,7 @@
       <img src="logo.svg" alt="NBolzoo" class="logo-icon" style="width:34px;height:34px;" width="34" height="34">
       <span class="logo-text" style="font-size:18px;">NBolzoo</span>
     </div>
-    <button type="button" class="mobile-nav-close" onclick="closeMobileMenu()">✕</button>
+    <button type="button" class="mobile-nav-close" onclick="closeMobileMenu()" aria-label="Цэс хаах">✕</button>
   </div>
   <div class="mobile-nav-items">
     <a onclick="navigate('home');closeMobileMenu()">🏠 Нүүр</a>
@@ -105,7 +105,7 @@
     <section class="hero">
       <div class="hero-content">
         <h1>Өнөөдөр хамт хаашаа явах вэ? 💕</h1>
-        <p>Монголын анхны болзооны санааны платформ — УБ-д 365 санаа + 21 аймагт 189 санаа</p>
+        <p>Монголын анхны болзооны санааны платформ — УБ-д 365 санаа + 21 аймагт 187 санаа</p>
         <div class="search-box">
           <input type="text" placeholder="Жишээ: Зайсан, кафе, төсөв 50,000₮" id="searchInput" aria-label="Болзооны санаа хайх" onkeypress="if(event.key==='Enter')performSearch()"/>
           <button class="btn btn-accent" onclick="performSearch()" type="button">Хайх</button>
@@ -175,7 +175,7 @@
         <img src="logo.svg" alt="NBolzoo" class="logo-icon" width="42" height="42">
         <span class="logo-text">NBolzoo</span>
       </div>
-      <p>Монголын анхны болзооны санааны платформ. УБ-д 365 санаа + 21 аймагт 189 санаа.</p>
+      <p>Монголын анхны болзооны санааны платформ. УБ-д 365 санаа + 21 аймагт 187 санаа.</p>
     </div>
     <div class="footer-col">
       <h4>Санаанууд</h4>
@@ -193,16 +193,16 @@
     <div class="footer-col">
       <h4>Холбоо барих</h4>
       <a href="mailto:info@nbolzoo.mn">📧 info@nbolzoo.mn</a>
-      <a>📱 Instagram: @nbolzoo</a>
-      <a>💬 Facebook: NBolzoo</a>
+      <span class="footer-static">📱 Instagram: @nbolzoo</span>
+      <span class="footer-static">💬 Facebook: NBolzoo</span>
     </div>
   </div>
   <div class="footer-bottom">
     <span>© 2026 NBolzoo.mn · Монголын хайрын платформ 💕</span>
     <div class="footer-social">
-      <a title="Instagram">📷</a>
-      <a title="Facebook">📘</a>
-      <a title="TikTok">🎵</a>
+      <span class="footer-social-icon" title="Instagram">📷</span>
+      <span class="footer-social-icon" title="Facebook">📘</span>
+      <span class="footer-social-icon" title="TikTok">🎵</span>
     </div>
   </div>
 </footer>

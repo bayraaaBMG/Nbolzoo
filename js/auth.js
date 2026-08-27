@@ -166,12 +166,12 @@ function updateAuthUI(user) {
     if (userInfo) userInfo.style.display = "flex";
     if (avatar) {
       if (user.photoURL) {
-        avatar.innerHTML = `<img src="${user.photoURL}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+        avatar.innerHTML = `<img src="${escapeHtml(user.photoURL)}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
       } else {
         avatar.textContent = (user.name || "?").charAt(0).toUpperCase();
       }
     }
-    if (mobileAuth) mobileAuth.innerHTML = `<div style="padding:8px 4px; font-size:14px; color:var(--text);">👋 Сайн байна уу, <strong>${user.name}</strong></div><button class="btn btn-ghost" style="width:100%" type="button" onclick="logoutUser()">Гарах</button>`;
+    if (mobileAuth) mobileAuth.innerHTML = `<div style="padding:8px 4px; font-size:14px; color:var(--text);">👋 Сайн байна уу, <strong>${escapeHtml(user.name)}</strong></div><button class="btn btn-ghost" style="width:100%" type="button" onclick="logoutUser()">Гарах</button>`;
     if (adminLink) adminLink.style.display = user.isAdmin ? "" : "none";
   } else {
     if (authButtons) authButtons.style.display = "";
@@ -218,7 +218,7 @@ function openProfileModal() {
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
       <h3>👤 Миний профайл</h3>
-      <button class="modal-close" onclick="closeModal()" type="button">×</button>
+      <button class="modal-close" onclick="closeModal()" type="button" aria-label="Хаах">×</button>
     </div>
     <div class="modal-body">
       <div style="text-align:center;margin-bottom:16px;">

@@ -4681,21 +4681,16 @@ const aimags = [
       {name: "Уран дөш уул", desc: "Уран тогоо гэдэг нэрээр ч алдартай, 1686м устсан галт уул", emoji: "⛰"},
       {name: "Хутаг өндөр", desc: "Сэлэнгэ мөрөн урсдаг, түүхт сум", emoji: "🪨"},
       {name: "Сэлэнгэ гол", desc: "Монголын хамгийн усархаг мөрөн", emoji: "🌊"},
-      {name: "Эрдэнэт хот", desc: "1994 оноос хойш Орхон аймагт хамаарах тул баталгаажуулж байна", emoji: "🏘"},
-      {name: "Амарбаясгалант хийд", desc: "Бодит байдал дээр Сэлэнгэ аймагт байдаг тул баталгаажуулж байна", emoji: "🏛"},
-      {name: "Хяргас нуур", desc: "Бодит байдал дээр Увс аймагт байдаг тул баталгаажуулж байна", emoji: "💧"},
       {name: "Хантай уул", desc: "Хангайн салбар, 2000м-ээс өндөр уул", emoji: "🦌"},
       {name: "Бөмбөгөр модот", desc: "Тодорхой мэдээлэл олдоогүй тул баталгаажуулж байна", emoji: "🌳"}
     ],
     dates: [
-      {emoji: "🏛", title: "Амарбаясгалант хийд аялал", desc: "Бурханы өмнө залбирах, түүх сонсох", price: "Төсөв: Өндөр", mapQuery: null, feeling: "Сэтгэл санаа тайвширсан, оюун санаагаар нэгдсэн мэдрэмж. Хайр гэж юу болохыг шинэ өнцгөөс ойлгоно."},
       {emoji: "🌲", title: "Эг тарвагатайн ойд алхах", desc: "Сибирийн нарсан ойд хосоор", price: "Төсөв: Дунд", mapQuery: "Эг тарвагатайн ой, Булган аймаг, Монгол улс", feeling: "Цэвэр агаар, ой модны үнэр стрессийг бууруулна. Хосын ярилцлага илүү тайван, гүн болно."},
       {emoji: "🌊", title: "Сэлэнгэ голын эрэгт пикник", desc: "Голын усанд хоол идэх", price: "Төсөв: Дунд", mapQuery: "Сэлэнгэ гол, Булган аймаг, Монгол улс", feeling: "Тайван, дотносох. Голын усыг ширтэх нь хосын чимээгүй ойлголцлыг бий болгоно."},
       {emoji: "🐎", title: "Морьтой ойн аялал", desc: "Уран дөшийн ойгоор морь унах", price: "Төсөв: Өндөр", mapQuery: null, feeling: "Адал явдалт, хосоо илүү бат бөх найз гэж мэдрэх. Морь унахад инээх, тусалж яваа байх таатай."},
       {emoji: "📿", title: "Хутаг өндрийн дурсгал", desc: "Эртний хадан зураг үзэх", price: "Төсөв: Дунд", mapQuery: "Хутаг өндөр, Булган аймаг, Монгол улс", feeling: "Түүх соёлд гүнзгийрэх. Хосоо илүү боловсролтой, гүн гүнзгий хүн гэж дэмжих."},
       {emoji: "🌅", title: "Уран дөш уулын нар жаргалт", desc: "Уулын орой хүртэл явж нар жаргахыг үзэх", price: "Төсөв: Дунд", mapQuery: "Уран дөш уул, Булган аймаг, Монгол улс", feeling: "Романтик, мартагдашгүй мөч. Уулан дээр нар жаргахыг харах нь хайрын хамгийн гоё дурсамж."},
       {emoji: "🦌", title: "Хантай ойд согоо ажиглах", desc: "Чимээгүй сууж зэрлэг ан үзэх", price: "Төсөв: Өндөр", mapQuery: "Хантай уул, Булган аймаг, Монгол улс", feeling: "Тэвчээр, өдрийн нандин мөч. Чимээгүй хамтдаа байх нь үг хэлэхгүй ч гүнзгий ойлголцол."},
-      {emoji: "🍴", title: "Эрдэнэт хотод ресторанд", desc: "Эрдэнэт хотын шилдэг ресторан", price: "Төсөв: Дунд", mapQuery: null, feeling: "Хот, хөдөөгийн хослолтой амралт. Шинэ хотыг хамтдаа судлах сэргэг мэдрэмж."},
       {emoji: "🛶", title: "Сэлэнгэ голд завинд сууж", desc: "Голын усаар жижиг аялал", price: "Төсөв: Өндөр", mapQuery: "Сэлэнгэ гол, Булган аймаг, Монгол улс", feeling: "Тайван, чухал ярилцлага хийх төгс орчин. Хосуудын ирээдүйг ярилцах боломж."}
     ]
   },
@@ -5164,7 +5159,7 @@ function renderAimagDetail(id) {
         <p class="history-text">${a.history}</p>
       </div>
       <div class="aimag-section">
-        <h3>✨ ${a.name}-н онцлох 9 газар</h3>
+        <h3>✨ ${a.name}-н онцлох ${a.wonders.length} газар</h3>
         <p style="color:var(--text-light); font-size:13px; margin-bottom:12px;">💡 Газар бүр дээр дарж нэрийн гарал, түүх, юу үзэхийг харна уу</p>
         <div class="wonders-grid">
           ${a.wonders.map((w, wi) => {
@@ -5187,7 +5182,7 @@ function renderAimagDetail(id) {
         </div>
       </div>
       <div class="aimag-section">
-        <h3>💕 ${a.name}-д хийх 9 болзоо</h3>
+        <h3>💕 ${a.name}-д хийх ${a.dates.length} болзоо</h3>
         <div class="cards-grid" style="margin-top: 12px;">
           ${a.dates.map((d, idx) => `
             <div class="card" onclick="openAimagDateModal(${a.id}, ${idx})">
@@ -5231,7 +5226,7 @@ function openWonderModal(aimagId, wonderIdx) {
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
       <h2 style="font-size: 22px;">${w.emoji} ${w.name}</h2>
-      <button type="button" class="modal-close" onclick="closeModal()">×</button>
+      <button type="button" class="modal-close" onclick="closeModal()" aria-label="Хаах">×</button>
     </div>
     <div class="modal-body">
       ${(wonderTypeImgDB[type]) ? (() => {
@@ -5366,7 +5361,7 @@ function openAimagDateModal(aimagId, dateIdx) {
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
       <h2 style="font-size: 20px;">${d.emoji} ${d.title}</h2>
-      <button class="modal-close" onclick="closeModal()" type="button">×</button>
+      <button class="modal-close" onclick="closeModal()" type="button" aria-label="Хаах">×</button>
     </div>
     <div class="modal-body">
       <div class="modal-image" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));position:relative;overflow:hidden;padding:0;">

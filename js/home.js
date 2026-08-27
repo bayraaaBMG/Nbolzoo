@@ -38,10 +38,13 @@ function renderHomeBanner(b) {
 function updateHeroStats() {
   const freeCount = allUbIdeas.filter(i => i.price === 0).length;
   const statNums = document.querySelectorAll(".hero-stat-num");
-  if(statNums[0]) statNums[0].textContent = allUbIdeas.length + (aimagsClean.length * 9);
+  // aimag-тутамд яг 9 санаа байна гэж таамаглахгүй, бодит dates массивын уртыг нийлбэрлэнэ —
+  // ямар нэг аймгийн дата өөрчлөгдвөл (нэмэгдэх/хасагдах) UI дээрх тоо автоматаар зөв харагдана.
+  const totalAimagIdeas = aimagsClean.reduce((sum, a) => sum + (a.dates ? a.dates.length : 0), 0);
+  if(statNums[0]) statNums[0].textContent = allUbIdeas.length + totalAimagIdeas;
   if(statNums[1]) statNums[1].textContent = allUbIdeas.length;
   if(statNums[2]) statNums[2].textContent = aimagsClean.length;
-  if(statNums[3]) statNums[3].textContent = aimagsClean.length * 9;
+  if(statNums[3]) statNums[3].textContent = totalAimagIdeas;
 }
 
 function getDayOfYear() {

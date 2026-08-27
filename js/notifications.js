@@ -47,7 +47,7 @@ function renderNotifList() {
   }
   dd.innerHTML = notifItems.map(n => `
     <div class="notif-item ${n.read?'':'unread'}" onclick="openNotif('${n.id}')">
-      <div class="notif-msg">${n.message}</div>
+      <div class="notif-msg">${escapeHtml(n.message)}</div>
       <div class="notif-time">${timeAgo(n.createdAt)}</div>
     </div>
   `).join("");

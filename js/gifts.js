@@ -593,7 +593,7 @@ function openGiftModal(idx) {
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
       <h3>${g.emoji} ${g.title}</h3>
-      <button class="modal-close" onclick="closeModal()" type="button">✕</button>
+      <button class="modal-close" onclick="closeModal()" type="button" aria-label="Хаах">✕</button>
     </div>
     <div class="modal-body">
       <div style="height:120px; background:linear-gradient(135deg,var(--primary-soft),var(--accent-soft)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:56px; margin-bottom:16px;">${g.emoji}</div>

@@ -202,7 +202,7 @@ async function openCouplePublicProfile(coupleId) {
     document.getElementById("modalContent").innerHTML = `
       <div class="modal-header">
         <h3>💑 ${escapeHtml(coupleDisplayName(couple))}</h3>
-        <button class="modal-close" onclick="closeModal()" type="button">×</button>
+        <button class="modal-close" onclick="closeModal()" type="button" aria-label="Хаах">×</button>
       </div>
       <div class="modal-body">
         <div style="text-align:center;margin-bottom:16px;">
@@ -305,7 +305,7 @@ function renderCoupleModal() {
     el.innerHTML = `
       <div class="modal-header">
         <h3>💑 Хосын дурсамж</h3>
-        <button class="modal-close" onclick="closeModal()" type="button">×</button>
+        <button class="modal-close" onclick="closeModal()" type="button" aria-label="Хаах">×</button>
       </div>
       <div class="modal-body">
         <p style="color:var(--text-light);margin-bottom:16px;">Хосоо холбож, анхны уулзалт, дурсамж, төрсөн өдрөө хамтдаа хадгалаарай.</p>
@@ -332,12 +332,12 @@ function renderCoupleModal() {
   el.innerHTML = `
     <div class="modal-header">
       <h3>💑 ${escapeHtml(partnerName)}-тай хамт</h3>
-      <button class="modal-close" onclick="closeModal()" type="button">×</button>
+      <button class="modal-close" onclick="closeModal()" type="button" aria-label="Хаах">×</button>
     </div>
     <div class="modal-body">
       ${reminder ? `<div style="background:var(--primary-soft);border-radius:12px;padding:14px;margin-bottom:16px;">
-        <div style="font-weight:600;margin-bottom:4px;">${reminder.message}</div>
-        <div style="font-size:13px;color:var(--text-light);">💡 Санал: ${reminder.idea}</div>
+        <div style="font-weight:600;margin-bottom:4px;">${escapeHtml(reminder.message)}</div>
+        <div style="font-size:13px;color:var(--text-light);">💡 Санал: ${escapeHtml(reminder.idea)}</div>
       </div>` : ''}
       <div class="form-group">
         <label>Анх уулзсан өдөр</label>

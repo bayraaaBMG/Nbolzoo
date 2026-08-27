@@ -485,7 +485,7 @@ function openReportModal(targetType, targetId, targetAuthorId) {
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
       <h3>🚩 Мэдэгдэх</h3>
-      <button class="modal-close" onclick="closeModal()" type="button">×</button>
+      <button class="modal-close" onclick="closeModal()" type="button" aria-label="Хаах">×</button>
     </div>
     <div class="modal-body">
       <p style="color:var(--text-light);font-size:13px;margin-bottom:12px;">Энэ контент дүрэм зөрчиж байна гэж админд мэдэгдэх гэж байна.</p>
@@ -572,7 +572,7 @@ function renderUserProfileModal(uid, u, userPosts, followersCount, followingCoun
   el.innerHTML = `
     <div class="modal-header">
       <h3>👤 ${escapeHtml(u.name || "?")}</h3>
-      <button class="modal-close" onclick="closeModal()" type="button">×</button>
+      <button class="modal-close" onclick="closeModal()" type="button" aria-label="Хаах">×</button>
     </div>
     <div class="modal-body">
       <div style="text-align:center;margin-bottom:14px;">

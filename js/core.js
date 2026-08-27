@@ -823,7 +823,7 @@ function openIdeaModal(id) {
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
       <h2 style="font-size: 20px;">${idea.title}</h2>
-      <button class="modal-close" onclick="closeModal()" type="button">×</button>
+      <button class="modal-close" onclick="closeModal()" type="button" aria-label="Хаах">×</button>
     </div>
     <div class="modal-body">
       ${imgHtml}
@@ -863,7 +863,7 @@ function openBookingModal(ideaId, customTitle) {
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
       <h3>📅 Захиалга — ${title}</h3>
-      <button class="modal-close" onclick="closeModal()" type="button">×</button>
+      <button class="modal-close" onclick="closeModal()" type="button" aria-label="Хаах">×</button>
     </div>
     <div class="modal-body">
       <p style="color:var(--text-light);font-size:13px;margin-bottom:16px;">Доорх мэдээллийг бөглөснөөр манай баг 24 цагийн дотор холбоо барина.</p>
@@ -894,7 +894,7 @@ function submitBooking(title) {
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
       <h3>✅ Захиалга амжилттай</h3>
-      <button class="modal-close" onclick="closeModal()" type="button">×</button>
+      <button class="modal-close" onclick="closeModal()" type="button" aria-label="Хаах">×</button>
     </div>
     <div class="modal-body">
       <div class="booking-success">
@@ -1018,7 +1018,7 @@ function showToast(message) {
   if(existing) existing.remove();
   const t = document.createElement("div");
   t.className = "toast";
-  t.innerHTML = message;
+  t.textContent = message;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 3500);
 }

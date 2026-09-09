@@ -23,6 +23,7 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
+  overflow-wrap: break-word;
 }
 
 .header {
@@ -1271,7 +1272,7 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 .notif-dropdown {
-  position: absolute; top: 34px; right: 0; width: 300px; max-height: 360px; overflow-y: auto;
+  position: absolute; top: 34px; right: 0; width: min(300px, calc(100vw - 32px)); max-height: 360px; overflow-y: auto;
   background: #fff; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.18); z-index: 200;
 }
 .notif-item { padding: 12px 14px; border-bottom: 1px solid var(--primary-extra-soft); cursor: pointer; }

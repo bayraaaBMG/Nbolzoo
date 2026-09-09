@@ -390,7 +390,7 @@ function renderCoupleModal() {
                 <div style="font-size:12px;color:var(--text-light);">${m.date && m.date.toDate ? m.date.toDate().toLocaleDateString('mn-MN') : ''}</div>
                 ${m.note ? `<div style="font-size:13px;margin-top:4px;">${escapeHtml(m.note)}</div>` : ''}
               </div>
-              <button type="button" onclick="deleteCoupleMemory('${m.id}')" style="border:none;background:none;cursor:pointer;color:var(--text-light);">✕</button>
+              <button type="button" onclick="deleteCoupleMemory('${m.id}')" aria-label="Дурсамж устгах" style="border:none;background:none;cursor:pointer;color:var(--text-light);">✕</button>
             </div>
           `).join('') : '<div class="empty-state">Дурсамж алга байна. Эхнийхээ нэмээрэй!</div>'}
         </div>

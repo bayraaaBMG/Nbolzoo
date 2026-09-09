@@ -5041,7 +5041,6 @@ function renderAimagDetail(id) {
                 <div class="card-feeling">💝 ${d.feeling.substring(0, 80)}...</div>
                 <div class="card-footer">
                   <span class="card-price">${d.price}</span>
-                  <span class="card-likes">🤍 ${Math.floor(Math.random()*500)+100}</span>
                 </div>
               </div>
             </div>

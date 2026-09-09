@@ -582,7 +582,7 @@ function copyRoomCode() {
   if (!currentRoom) return;
   const url = `${location.origin}${location.pathname}`;
   const text = `NBolzoo тоглоомд нэгдээрэй! Код: ${currentRoom.code}\n${url}`;
-  if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => showToast("🔗 Хуулагдлаа!"));
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => showToast("🔗 Хуулагдлаа!")).catch(() => showToast("⚠️ Хуулж чадсангүй"));
 }
 
 // ================= ROOM ДОТООД ХАРАГДАЦ =================

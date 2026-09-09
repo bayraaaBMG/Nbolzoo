@@ -244,7 +244,7 @@ function invBuilderRenderPhotoGrid() {
     <div class="inv-photo-item">
       <div class="inv-photo-thumb-wrap">
         <img src="${p.previewUrl || p.thumbUrl || p.url}" alt="">
-        <button type="button" class="inv-photo-remove" onclick="invBuilderRemovePhoto(${i})" title="Устгах">✕</button>
+        <button type="button" class="inv-photo-remove" onclick="invBuilderRemovePhoto(${i})" title="Устгах" aria-label="Зураг устгах">✕</button>
         ${p.status === "uploading" ? `<div class="inv-photo-status inv-photo-uploading">⏳</div>` : ""}
         ${p.status === "error" ? `<div class="inv-photo-status inv-photo-error-badge">⚠️</div>` : ""}
       </div>

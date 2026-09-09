@@ -477,6 +477,7 @@ body {
 .post-action {
   display: flex; align-items: center; gap: 6px;
   color: var(--text-light); cursor: pointer; font-size: 13px;
+  padding: 6px 4px; min-height: 32px;
 }
 
 .post-action:hover { color: var(--primary); }

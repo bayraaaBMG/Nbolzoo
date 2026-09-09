@@ -389,7 +389,7 @@ function copyInviteLink() {
   const input = document.getElementById("inviteLinkInput");
   if (!input) return;
   input.select();
-  if (navigator.clipboard) navigator.clipboard.writeText(input.value).then(() => showToast("🔗 Холбоос хуулагдлаа!"));
+  if (navigator.clipboard) navigator.clipboard.writeText(input.value).then(() => showToast("🔗 Холбоос хуулагдлаа!")).catch(() => showToast("⚠️ Холбоос хуулж чадсангүй"));
 }
 
 // ---------- Илгээгчийн "Миний урилгууд" жагсаалт (хариулт хараагаад) ----------

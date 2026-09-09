@@ -104,17 +104,17 @@ function renderPosts() {
       ${p.imageUrl ? `<img src="${escapeHtml(p.imageUrl)}" loading="lazy" alt="" class="post-photo" onerror="this.remove()">` : (p.emoji ? `<div class="post-image">${p.emoji}</div>` : "")}
       ${p.budget ? `<div class="post-budget-tag">💸 ${escapeHtml(p.budget)}</div>` : ""}
       <div class="post-actions">
-        <div class="post-action ${userPostLikes.has(p.id)?'liked':''}" onclick="togglePostLike('${p.id}')">
+        <div class="post-action ${userPostLikes.has(p.id)?'liked':''}" onclick="togglePostLike('${p.id}')" role="button" tabindex="0" aria-label="Таалагдсан">
           ${userPostLikes.has(p.id)?'❤️':'🤍'} <span>${p.likeCount||0}</span>
         </div>
-        <div class="post-action ${userHelpfulVotes.has(p.id)?'liked':''}" onclick="toggleHelpful('${p.id}')" title="Хэрэгтэй зөвлөгөө">
+        <div class="post-action ${userHelpfulVotes.has(p.id)?'liked':''}" onclick="toggleHelpful('${p.id}')" title="Хэрэгтэй зөвлөгөө" role="button" tabindex="0" aria-label="Хэрэгтэй зөвлөгөө">
           👍 <span>${p.helpfulCount||0}</span>
         </div>
-        <div class="post-action" onclick="toggleComments('${p.id}', this)">💬 <span id="cmt-count-${p.id}">${p.commentCount||0}</span></div>
-        <div class="post-action ${savedPostsSet.has(p.id)?'liked':''}" onclick="toggleSavePost('${p.id}')" title="Хадгалах">${savedPostsSet.has(p.id) ? "🔖" : "📑"}</div>
-        <div class="post-action" onclick="sharePost('${p.id}')">🔗</div>
-        ${(currentUser && !isOwn) ? `<div class="post-action" onclick="openReportModal('post','${p.id}','${p.authorId}')" title="Мэдэгдэх">🚩</div>` : ""}
-        ${(currentUser && (isOwn || currentUser.isAdmin)) ? `<div class="post-action" onclick="deletePost('${p.id}')">🗑</div>` : ""}
+        <div class="post-action" onclick="toggleComments('${p.id}', this)" role="button" tabindex="0" aria-label="Сэтгэгдэл харах">💬 <span id="cmt-count-${p.id}">${p.commentCount||0}</span></div>
+        <div class="post-action ${savedPostsSet.has(p.id)?'liked':''}" onclick="toggleSavePost('${p.id}')" title="Хадгалах" role="button" tabindex="0" aria-label="Хадгалах">${savedPostsSet.has(p.id) ? "🔖" : "📑"}</div>
+        <div class="post-action" onclick="sharePost('${p.id}')" role="button" tabindex="0" aria-label="Хуваалцах">🔗</div>
+        ${(currentUser && !isOwn) ? `<div class="post-action" onclick="openReportModal('post','${p.id}','${p.authorId}')" title="Мэдэгдэх" role="button" tabindex="0" aria-label="Мэдэгдэх">🚩</div>` : ""}
+        ${(currentUser && (isOwn || currentUser.isAdmin)) ? `<div class="post-action" onclick="deletePost('${p.id}')" role="button" tabindex="0" aria-label="Устгах">🗑</div>` : ""}
       </div>
       <div class="comments-section" id="comments-${p.id}" style="display:none;"></div>
     </div>`;
@@ -476,7 +476,7 @@ async function deletePost(id) {
 
 function sharePost(id) {
   const url = `${location.origin}${location.pathname}#post-${id}`;
-  if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => showToast("🔗 Холбоос хуулагдлаа!"));
+  if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => showToast("🔗 Холбоос хуулагдлаа!")).catch(() => showToast("⚠️ Холбоос хуулж чадсангүй"));
 }
 
 // ---------- Report / flag content (feeds the admin moderation queue) ----------

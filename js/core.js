@@ -799,7 +799,7 @@ function renderCard(idea) {
         <div class="card-feeling">💝 ${idea.feeling.substring(0, 80)}...</div>
         <div class="card-footer">
           <span class="card-price">${idea.priceText}</span>
-          <span class="card-likes ${isLiked?'liked':''}" onclick="event.stopPropagation();toggleLike(${idea.id})">
+          <span class="card-likes ${isLiked?'liked':''}" onclick="event.stopPropagation();toggleLike(${idea.id})" role="button" tabindex="0" aria-label="Таалагдсан">
             ${isLiked?'❤️':'🤍'} ${idea.likes + (isLiked?1:0)}
           </span>
         </div>
@@ -920,7 +920,7 @@ function shareIdea(title, id) {
   if(navigator.share) {
     navigator.share({title: 'NBolzoo', text: title, url}).catch(()=>{});
   } else if(navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => showToast("🔗 Холбоос хуулагдлаа!")).catch(()=>{});
+    navigator.clipboard.writeText(text).then(() => showToast("🔗 Холбоос хуулагдлаа!")).catch(() => showToast("⚠️ Холбоос хуулж чадсангүй"));
   } else {
     const ta = document.createElement("textarea");
     ta.value = text; document.body.appendChild(ta);
@@ -1097,4 +1097,16 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js").catch(() => {});
   });
 }
+
+// Кино/нийгэмлэг зэрэг хуудсуудад товч бус (div/span) дээр role="button" tabindex="0"
+// ашигласан icon-only интерактив элементүүдийг гар (Enter/Space) дээрээс идэвхжүүлдэг
+// нэгдсэн handler — browser div дээр role="button" тавихад л автоматаар Space дарахад
+// дарагдахгүй тул үүнийг тусад нь нэмэх шаардлагатай.
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const el = e.target.closest('[role="button"]');
+  if (!el || el.tabIndex < 0) return;
+  e.preventDefault();
+  el.click();
+});
 

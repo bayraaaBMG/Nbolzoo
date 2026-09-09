@@ -1098,6 +1098,12 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+// Footer copyright он жил жил бүр гараар засах шаардлагагүй байхын тулд динамик болгов.
+(function () {
+  const el = document.getElementById("footerYear");
+  if (el) el.textContent = `© ${new Date().getFullYear()} NBolzoo.mn · Монголын хайрын платформ 💕`;
+})();
+
 // Кино/нийгэмлэг зэрэг хуудсуудад товч бус (div/span) дээр role="button" tabindex="0"
 // ашигласан icon-only интерактив элементүүдийг гар (Enter/Space) дээрээс идэвхжүүлдэг
 // нэгдсэн handler — browser div дээр role="button" тавихад л автоматаар Space дарахад

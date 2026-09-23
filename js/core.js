@@ -831,6 +831,8 @@ function renderCard(idea) {
     </div>`;
 }
 
+const SEASON_LABEL = { winter: "❄️ Өвөл", spring: "🌸 Хавар", summer: "☀️ Зун", autumn: "🍂 Намар" };
+
 function openIdeaModal(id) {
   const idea = allUbIdeas.find(i => i.id === id);
   if(!idea) return;
@@ -857,6 +859,11 @@ function openIdeaModal(id) {
         <div class="modal-meta-item">💸 <strong>${idea.priceText}</strong></div>
         <div class="modal-meta-item">❤️ <strong>${idea.likes + (isLiked?1:0)}</strong></div>
       </div>
+      ${(idea.category || idea.season) ? `
+      <div class="modal-tags">
+        ${idea.category ? `<button type="button" class="modal-tag" onclick="location.href='ub.html?category=${encodeURIComponent(idea.category)}'">${escapeHtml(idea.category)}</button>` : ""}
+        ${idea.season ? `<button type="button" class="modal-tag" onclick="location.href='ub.html?season=${idea.season}'">${SEASON_LABEL[idea.season] || idea.season}</button>` : ""}
+      </div>` : ""}
       ${idea.mapQuery ? mapEmbedHtml(idea.mapQuery) : ''}
       <p style="margin-bottom: 16px; line-height: 1.7;">${idea.desc}</p>
       <div class="feeling-box">
@@ -874,8 +881,14 @@ function openIdeaModal(id) {
         </button>
         <button class="btn btn-ghost" style="flex:1;min-width:120px" type="button" onclick="shareIdea('${idea.title.replace(/'/g,'').replace(/"/g,'')}', ${idea.id})">🔗 Хуваалцах</button>
       </div>
+      <!-- Одоо байгаа Урилга функц руу холбоно (шинэ feature биш) -->
+      <button class="btn btn-ghost" style="width:100%;margin-top:8px;justify-content:center;" type="button" onclick="navigate('urilga')">
+        <span class="nav-ico" data-icon="mail" data-icon-size="16"></span>Энэ санаагаар урилга үүсгэх
+      </button>
     </div>`;
   document.getElementById("modal").classList.add("show");
+  // Модал доторх [data-icon]-уудыг SVG болгоно (ui.js ачаалагдсан үед).
+  if (typeof nbHydrateIcons === "function") nbHydrateIcons(document.getElementById("modalContent"));
 }
 
 function closeModal() { document.getElementById("modal").classList.remove("show"); }

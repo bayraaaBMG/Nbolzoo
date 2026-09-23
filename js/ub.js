@@ -435,34 +435,166 @@ for(let i = 0; i < 365; i++) {
   });
 }
 
+// ===== Discovery filters =====
+// ЗӨВХӨН dataset-д бодитоор байгаа талбар дээр шүүнэ: season, price (тоо), category.
+// "Дотор/гадаа", "үргэлжлэх хугацаа" гэх мэт талбар өгөгдөлд БАЙХГҮЙ тул тийм шүүлтүүр
+// нэмээгүй — байхгүй мэдээллээр шүүлтүүр хийвэл хэрэглэгчийг төөрөгдүүлнэ.
+const UB_SEASONS = [
+  ["winter", "❄️ Өвөл"], ["spring", "🌸 Хавар"],
+  ["summer", "☀️ Зун"], ["autumn", "🍂 Намар"],
+];
+const UB_BUDGETS = [
+  ["free",      "Үнэгүй",           i => i.price === 0],
+  ["cheap",     "≤50,000₮",         i => i.price > 0 && i.price <= 50000],
+  ["medium",    "50–150,000₮",      i => i.price > 50000 && i.price <= 150000],
+  ["expensive", ">150,000₮",        i => i.price > 150000],
+];
+const ubFilter = { season: new Set(), budget: new Set(), category: new Set() };
+
+// Ангиллын жагсаалтыг hardcode хийхгүй — бодит өгөгдлөөс гаргана.
+function ubCategories() {
+  const counts = {};
+  allUbIdeas.forEach(i => { if (i.category) counts[i.category] = (counts[i.category] || 0) + 1; });
+  return Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+}
+
+function ubActiveCount() {
+  return ubFilter.season.size + ubFilter.budget.size + ubFilter.category.size;
+}
+
+function ubApplyFilters(list) {
+  let out = list;
+  if (ubFilter.season.size) out = out.filter(i => ubFilter.season.has(i.season));
+  if (ubFilter.category.size) out = out.filter(i => ubFilter.category.has(i.category));
+  if (ubFilter.budget.size) {
+    const tests = UB_BUDGETS.filter(([id]) => ubFilter.budget.has(id)).map(([, , fn]) => fn);
+    out = out.filter(i => tests.some(fn => fn(i)));
+  }
+  return out;
+}
+
+// Шүүлтүүрийн төлөвийг URL-д тусгана: хуваалцах, буцах товч, refresh бүгд ажиллана.
+function ubSyncUrl() {
+  const p = new URLSearchParams();
+  ["season", "budget", "category"].forEach(k => {
+    if (ubFilter[k].size) p.set(k, [...ubFilter[k]].join(","));
+  });
+  const qs = p.toString();
+  history.replaceState(null, "", qs ? location.pathname + "?" + qs : location.pathname);
+}
+
+function ubReadUrl() {
+  const p = new URLSearchParams(location.search);
+  ["season", "budget", "category"].forEach(k => {
+    const v = p.get(k);
+    if (v) v.split(",").filter(Boolean).forEach(x => ubFilter[k].add(x));
+  });
+  // Хуучин холбоосын нийцтэй байдал: нүүр хуудаснаас ирдэг ub.html?filter=free гэх мэт.
+  const legacy = p.get("filter");
+  if (legacy && legacy !== "all") {
+    if (UB_BUDGETS.some(([id]) => id === legacy)) ubFilter.budget.add(legacy);
+    else if (UB_SEASONS.some(([id]) => id === legacy)) ubFilter.season.add(legacy);
+  }
+}
+
+function ubToggle(kind, value) {
+  const set = ubFilter[kind];
+  set.has(value) ? set.delete(value) : set.add(value);
+  currentPage = 1;
+  ubSyncUrl();
+  renderUbIdeas();
+}
+
+function ubClearFilters() {
+  ubFilter.season.clear(); ubFilter.budget.clear(); ubFilter.category.clear();
+  currentPage = 1;
+  ubSyncUrl();
+  renderUbIdeas();
+}
+
+function ubToggleSheet(open) {
+  const sheet = document.getElementById("ubFilterSheet");
+  if (!sheet) return;
+  sheet.classList.toggle("open", open);
+  document.body.style.overflow = open ? "hidden" : "";
+}
+
+function ubChip(kind, id, label, count) {
+  const on = ubFilter[kind].has(id);
+  const dis = count === 0 && !on;
+  return `<button type="button" class="filter-chip${on ? " active" : ""}" role="switch" aria-checked="${on}"
+    ${dis ? "disabled" : ""} onclick="ubToggle('${kind}','${String(id).replace(/'/g, "\\'")}')">${label}
+    <span class="chip-count">${count}</span></button>`;
+}
+
+function renderUbFilterBar() {
+  const box = document.getElementById("ubFilterGroups");
+  if (!box) return;
+  // Бүлэг бүрийн тоог "тухайн бүлгээс бусад шүүлтүүрийг тооцсон" байдлаар гаргана —
+  // ингэснээр хэрэглэгч сонгохоосоо өмнө үр дүн 0 болохыг харна.
+  const countFor = (kind, test) => {
+    const saved = ubFilter[kind];
+    ubFilter[kind] = new Set();
+    const n = ubApplyFilters(allUbIdeas).filter(test).length;
+    ubFilter[kind] = saved;
+    return n;
+  };
+  const seasons = UB_SEASONS.map(([id, label]) =>
+    ubChip("season", id, label, countFor("season", i => i.season === id))).join("");
+  const budgets = UB_BUDGETS.map(([id, label, fn]) =>
+    ubChip("budget", id, label, countFor("budget", fn))).join("");
+  const cats = ubCategories().map(c =>
+    ubChip("category", c, c, countFor("category", i => i.category === c))).join("");
+  box.innerHTML = `
+    <div class="filter-group"><span class="filter-group-label">Улирал</span><div class="filter-chip-row">${seasons}</div></div>
+    <div class="filter-group"><span class="filter-group-label">Төсөв</span><div class="filter-chip-row">${budgets}</div></div>
+    <div class="filter-group"><span class="filter-group-label">Ангилал</span><div class="filter-chip-row">${cats}</div></div>`;
+}
+
 function renderUbIdeas() {
-  let filtered = allUbIdeas;
-  if(currentUbFilter === "winter") filtered = allUbIdeas.filter(i => i.season === "winter");
-  else if(currentUbFilter === "spring") filtered = allUbIdeas.filter(i => i.season === "spring");
-  else if(currentUbFilter === "summer") filtered = allUbIdeas.filter(i => i.season === "summer");
-  else if(currentUbFilter === "autumn") filtered = allUbIdeas.filter(i => i.season === "autumn");
-  else if(currentUbFilter === "cheap") filtered = allUbIdeas.filter(i => i.price > 0 && i.price <= 50000);
-  else if(currentUbFilter === "medium") filtered = allUbIdeas.filter(i => i.price > 50000 && i.price <= 150000);
-  else if(currentUbFilter === "expensive") filtered = allUbIdeas.filter(i => i.price > 150000);
-  else if(currentUbFilter === "free") filtered = allUbIdeas.filter(i => i.price === 0);
-  
+  renderUbFilterBar();
+  const filtered = ubApplyFilters(allUbIdeas);
+  const active = ubActiveCount();
+
+  const summary = document.getElementById("ubFilterSummary");
+  if (summary) {
+    const pills = [
+      ...[...ubFilter.season].map(v => ["season", v, (UB_SEASONS.find(s => s[0] === v) || [, v])[1]]),
+      ...[...ubFilter.budget].map(v => ["budget", v, (UB_BUDGETS.find(b => b[0] === v) || [, v])[1]]),
+      ...[...ubFilter.category].map(v => ["category", v, v]),
+    ];
+    summary.innerHTML = `
+      <span class="filter-result-count"><strong>${filtered.length}</strong> санаа</span>
+      ${pills.map(([k, v, l]) => `<button type="button" class="filter-pill" onclick="ubToggle('${k}','${String(v).replace(/'/g, "\\'")}')"
+        aria-label="${l} шүүлтүүрийг хасах">${l}<span aria-hidden="true">×</span></button>`).join("")}
+      ${active ? `<button type="button" class="filter-clear" onclick="ubClearFilters()">Цэвэрлэх</button>` : ""}`;
+  }
+  const btnCount = document.getElementById("ubFilterBtnCount");
+  if (btnCount) { btnCount.textContent = active || ""; btnCount.style.display = active ? "" : "none"; }
+
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const start = (currentPage - 1) * itemsPerPage;
   const pageItems = filtered.slice(start, start + itemsPerPage);
   
-  document.getElementById("ubGrid").innerHTML = pageItems.length ? pageItems.map(renderCard).join("") :
-    '<div class="empty-state">Энэ ангилалд санаа байхгүй байна</div>';
-  
+  document.getElementById("ubGrid").innerHTML = pageItems.length
+    ? pageItems.map(renderCard).join("")
+    : `<div class="empty-state">
+         <strong>Сонгосон шүүлтүүрт тохирох санаа олдсонгүй.</strong>
+         <p>Шүүлтүүрээ цөөлж эсвэл бүгдийг цэвэрлээд дахин үзнэ үү.</p>
+         ${ubActiveCount() ? `<button type="button" class="btn btn-primary" onclick="ubClearFilters()">Шүүлтүүр цэвэрлэх</button>` : ""}
+       </div>`;
+
+  // Үр дүн нэг хуудсанд багтвал хуудаслалт харуулахгүй.
+  const pag = document.getElementById("ubPagination");
+  if (totalPages <= 1) { pag.innerHTML = ""; return; }
   let paginationHtml = `<button type="button" onclick="changeUbPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹ Өмнөх</button>`;
   const startP = Math.max(1, currentPage - 2);
   const endP = Math.min(totalPages, startP + 4);
   for(let i = startP; i <= endP; i++) {
-    paginationHtml += `<button type="button" onclick="changeUbPage(${i})" class="${i===currentPage?'active':''}">${i}</button>`;
+    paginationHtml += `<button type="button" onclick="changeUbPage(${i})" class="${i===currentPage?'active':''}" ${i===currentPage?'aria-current="page"':''}>${i}</button>`;
   }
   paginationHtml += `<button type="button" onclick="changeUbPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>Дараах ›</button>`;
-  paginationHtml += `<span style="padding: 8px 14px; color: var(--text-light); font-size: 13px;">${filtered.length} санаа</span>`;
-  
-  document.getElementById("ubPagination").innerHTML = paginationHtml;
+  pag.innerHTML = paginationHtml;
 }
 
 function changeUbPage(p) {

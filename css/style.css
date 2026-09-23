@@ -251,6 +251,107 @@ body {
 
 .filter-chip:hover { border-color: var(--primary); }
 .filter-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+.filter-chip:disabled { opacity: 0.4; cursor: not-allowed; }
+.filter-chip:disabled:hover { border-color: var(--border); }
+
+/* ===== Discovery: filter toolbar + sheet =====
+   Desktop дээр самбар нь хажуудаа тогтмол нээлттэй, mobile дээр доороос гарах
+   bottom sheet болно. Идэвхтэй шүүлтүүр бүр pill болж харагдаж, тус бүрийг
+   нь салгаж хасах боломжтой. */
+.filter-toolbar {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin-bottom: 16px; flex-wrap: wrap;
+}
+.filter-toggle-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--white); border: 1px solid var(--border); color: var(--text);
+  padding: 9px 15px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  font-family: inherit; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.filter-toggle-btn:hover { border-color: var(--primary); color: var(--primary); }
+.filter-btn-count {
+  background: var(--primary); color: #fff; border-radius: 999px;
+  min-width: 19px; height: 19px; font-size: 11px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center; padding: 0 5px;
+}
+.filter-summary { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; min-height: 34px; }
+.filter-result-count { font-size: 14px; color: var(--text-light); }
+.filter-result-count strong { color: var(--text); font-size: 15px; }
+.filter-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--primary-extra-soft); color: var(--primary);
+  border: 1px solid var(--primary-soft); border-radius: 999px;
+  padding: 5px 11px; font-size: 12.5px; font-weight: 600;
+  font-family: inherit; cursor: pointer; transition: all 0.15s;
+}
+.filter-pill:hover { background: var(--primary-soft); }
+.filter-clear {
+  background: none; border: none; color: var(--text-light); font-family: inherit;
+  font-size: 13px; cursor: pointer; text-decoration: underline; padding: 4px 2px;
+}
+.filter-clear:hover { color: var(--accent); }
+
+.filter-groups { display: flex; flex-direction: column; gap: 16px; }
+.filter-group-label {
+  display: block; font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--text-lighter); margin-bottom: 8px;
+}
+.filter-chip-row { display: flex; flex-wrap: wrap; gap: 7px; }
+.filter-chip-row .filter-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: inherit; padding: 7px 12px;
+}
+.chip-count { font-size: 11px; opacity: 0.65; font-variant-numeric: tabular-nums; }
+
+.filter-sheet { display: none; }
+.filter-sheet.open { display: block; }
+.filter-sheet-backdrop {
+  position: fixed; inset: 0; background: rgba(27,38,59,0.45); z-index: 1400;
+}
+.filter-sheet-panel {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 1401;
+  background: var(--white); border-radius: 18px 18px 0 0;
+  max-height: 82vh; overflow-y: auto; padding: 16px 18px 20px;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+  animation: sheetUp 0.22s ease;
+}
+@keyframes sheetUp { from { transform: translateY(14px); opacity: 0.6; } to { transform: none; opacity: 1; } }
+.filter-sheet-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px; font-size: 16px;
+}
+.filter-sheet-foot {
+  display: flex; gap: 10px; margin-top: 18px;
+  position: sticky; bottom: -20px; background: var(--white); padding: 12px 0 0;
+}
+.filter-sheet-foot .btn { flex: 1; justify-content: center; }
+
+/* Desktop: sheet биш, байнга нээлттэй самбар болгоно */
+@media (min-width: 861px) {
+  .filter-toggle-btn { display: none; }
+  .filter-sheet { display: block; }
+  .filter-sheet-backdrop, .filter-sheet-head, .filter-sheet-foot { display: none; }
+  .filter-sheet-panel {
+    position: static; max-height: none; overflow: visible; padding: 16px 18px;
+    border-radius: 14px; border: 1px solid var(--border);
+    box-shadow: none; animation: none; margin-bottom: 20px;
+    background: var(--white);
+  }
+  .filter-groups { flex-direction: row; gap: 26px; flex-wrap: wrap; }
+  .filter-group { flex: 1 1 240px; min-width: 0; }
+}
+
+.empty-state p { margin: 8px 0 16px; font-size: 14px; }
+
+/* Дэлгэрэнгүй цонхны ангилал/улирлын шошго — дарвал тухайн шүүлтүүрээр UB жагсаалт нээнэ. */
+.modal-tags { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+.modal-tag {
+  background: var(--primary-extra-soft); color: var(--primary);
+  border: 1px solid var(--primary-soft); border-radius: 999px;
+  padding: 5px 12px; font-size: 12.5px; font-weight: 600;
+  font-family: inherit; cursor: pointer; transition: all 0.15s;
+}
+.modal-tag:hover { background: var(--primary-soft); }
 
 .cards-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));

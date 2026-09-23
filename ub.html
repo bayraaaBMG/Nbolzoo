@@ -118,16 +118,27 @@
     <div class="container">
       <h1 style="margin-bottom: 6px;">🏙 Улаанбаатарын 365 болзооны санаа</h1>
       <p style="color: var(--text-light); margin-bottom: 24px;">Жилийн өдөр бүрд нэг өвөрмөц санаа. Хосоо аз жаргалтай байлгах 365 арга.</p>
-      <div class="filters">
-        <div class="filter-chip active" data-ub-filter="all">Бүгд (365)</div>
-        <div class="filter-chip" data-ub-filter="winter">❄️ Өвөл</div>
-        <div class="filter-chip" data-ub-filter="spring">🌸 Хавар</div>
-        <div class="filter-chip" data-ub-filter="summer">☀️ Зун</div>
-        <div class="filter-chip" data-ub-filter="autumn">🍂 Намар</div>
-        <div class="filter-chip" data-ub-filter="free">🆓 Үнэгүй</div>
-        <div class="filter-chip" data-ub-filter="cheap">💸 Бага (≤50,000₮)</div>
-        <div class="filter-chip" data-ub-filter="medium">💳 Дунд (≤150,000₮)</div>
-        <div class="filter-chip" data-ub-filter="expensive">💎 Өндөр (&gt;150,000₮)</div>
+      <!-- Шүүлтүүрийг JS бүтээнэ: ангиллын жагсаалт болон тоонууд бодит dataset-ээс гарна. -->
+      <div class="filter-toolbar">
+        <button type="button" class="filter-toggle-btn" onclick="ubToggleSheet(true)" aria-controls="ubFilterSheet">
+          <span class="nav-ico" data-icon="search" data-icon-size="17"></span>Шүүлтүүр
+          <span class="filter-btn-count" id="ubFilterBtnCount" style="display:none"></span>
+        </button>
+        <div class="filter-summary" id="ubFilterSummary" aria-live="polite"></div>
+      </div>
+      <div class="filter-sheet" id="ubFilterSheet">
+        <div class="filter-sheet-backdrop" onclick="ubToggleSheet(false)"></div>
+        <div class="filter-sheet-panel" role="dialog" aria-modal="true" aria-label="Шүүлтүүр">
+          <div class="filter-sheet-head">
+            <strong>Шүүлтүүр</strong>
+            <button type="button" class="modal-close" onclick="ubToggleSheet(false)" aria-label="Хаах">×</button>
+          </div>
+          <div class="filter-groups" id="ubFilterGroups"></div>
+          <div class="filter-sheet-foot">
+            <button type="button" class="btn btn-ghost" onclick="ubClearFilters()">Цэвэрлэх</button>
+            <button type="button" class="btn btn-primary" onclick="ubToggleSheet(false)">Үр дүнг харах</button>
+          </div>
+        </div>
       </div>
       <div class="cards-grid" id="ubGrid"></div>
       <div class="pagination" id="ubPagination"></div>
@@ -195,15 +206,9 @@
 <script src="js/ub.js"></script>
 <script src="js/main.js"></script>
 <script>
-const __ubParams = new URLSearchParams(location.search);
-const __ubFilter = __ubParams.get("filter");
-if (__ubFilter && document.querySelector(`[data-ub-filter="${__ubFilter}"]`)) {
-  document.querySelectorAll('[data-ub-filter]').forEach(x => x.classList.remove("active"));
-  const __chip = document.querySelector(`[data-ub-filter="${__ubFilter}"]`);
-  __chip.classList.add("active");
-  currentUbFilter = __ubFilter;
-}
+ubReadUrl();
 renderUbIdeas();
+nbHydrateIcons();
 </script>
 
 </body>

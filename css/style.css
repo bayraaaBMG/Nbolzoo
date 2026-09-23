@@ -1125,6 +1125,26 @@ body {
   background: rgba(0,0,0,0.4); padding: 1px 5px; border-radius: 3px;
   z-index: 3; letter-spacing: 0.3px;
 }
+
+/* ===== Зураггүй үеийн брэндийн fallback =====
+   Тухайн санаанд найдвартай тохирох зураг байхгүй (эсвэл зураг ачаалагдаагүй) үед
+   ХОЛБОО ХАМААРАЛГҮЙ stock зураг тавихын оронд брэндийн градиент дээр тухайн санааны
+   өөрийнх нь эможийг том харуулна — худал байршил/газрын мэдэгдэл үүсэхгүй. */
+.media-fallback {
+  background-image:
+    radial-gradient(circle at 22% 18%, rgba(255,255,255,0.30) 0%, transparent 48%),
+    linear-gradient(135deg, var(--primary-soft) 0%, var(--primary-extra-soft) 55%, var(--accent-soft) 100%);
+  position: relative;
+}
+.media-fallback::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(rgba(0,119,182,0.13) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+.card-emoji-solo {
+  font-size: 44px; filter: none; z-index: 2;
+}
+.media-fallback .card-emoji-over { filter: drop-shadow(0 2px 5px rgba(0,0,0,0.14)); }
 .aimag-card-img-wrap {
   height: 110px; border-radius: 10px; overflow: hidden;
   margin-bottom: 10px; position: relative;

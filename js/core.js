@@ -386,7 +386,12 @@ const IDEA_IMG_RULES = [
   // зуу хийд — өөр, 400км зайд орших ТОДОРХОЙ ондоо газар!) гэсэн буруу тодорхой мэдэгдэл
   // өгөхийн оронд Гандантэгчэнлин хийдийн бодит зургийг ерөнхий "УБ-ын Буддын хийд" төлөөлөл
   // болгон ашиглана — үнэн ч хамгийн тохирох, худал тодорхой мэдэгдэл биш.
-  [["гандан", "хийд", "залбир", "шүтээн", "хөшөө", "будда", "сүм", "тахил", "овоо"], "gandanphoto", "Wikipedia CC"],
+  // ЗОРИУДААР энд ерөнхий "хийд/сүм/хөшөө" дүрэм БАЙХГҮЙ. Өмнө нь эдгээр түлхүүр үгэнд
+  // Гандантэгчэнлин хийдийн бодит зургийг "УБ-ын Буддын хийдийн ерөнхий төлөөлөл" болгон
+  // ашигладаг байсан нь Дамбадаржаа, Дашчойлин, Сүм-Ард зэрэг ӨӨР хийдийн тухай санаан дээр
+  // Гандангийн зургийг тавьж, тухайн газрын зураг мэт худал ойлгуулж байсан. Тодорхой нэр
+  // заасан дүрэм (дээрх «манзуширын хийд», «дашчойлин хийдэд» гэх мэт) тохирохгүй бол
+  // зураггүй, брэндийн fallback харуулна — худал байршлын мэдэгдэл хийхгүй.
   [["богд уул", "уулд алх", "уулын", "аялал", "хайк", "даваа", "толгод"], "hiking", "Unsplash"],
   [["art", "үзэсгэлэн", "экспо"], "art", "Unsplash"],
   [["кино", "theatre", "кинотеатр", "шангри"], "cinema", "Unsplash"],
@@ -416,9 +421,22 @@ function getIdeaImg(title, category) {
   for (const [triggers, imgKey, src] of IDEA_IMG_RULES) {
     if (triggers.some(k => t.includes(k))) return {u: IMG[imgKey], s: src};
   }
+  // Шашин/дурсгалын газрын тухай санаанд ангиллын нөөц зураг ашиглахгүй. idea.category нь
+  // агуулга тодорхойлдоггүй (жишээ нь «Дамбадаржаа хийдэд зочлох» санаа category:"ресторан"
+  // гэж тэмдэглэгдсэн) тул ангиллаар нь зураг сонгвол хийдийн тухай санаан дээр ресторан,
+  // кино, спа-гийн зураг гарч утгагүй болно. Дээрх тодорхой нэр заасан дүрэм тохироогүй бол
+  // энд зогсоож, брэндийн fallback руу шилжүүлнэ.
+  if (SACRED_SITE_WORDS.some(k => t.includes(k))) return null;
   if (category && CATEGORY_FALLBACK_IMG[category]) return CATEGORY_FALLBACK_IMG[category];
-  return {u: IMG.couple, s: "Unsplash"};
+  // Тохирох зураг байхгүй бол ЗОРИУДААР null буцаана. Өмнө нь энд ерөнхий хосын зургийг
+  // буцаадаг байсан нь санаатай огт холбоогүй зургийг "энэ болзооны зураг" мэт харуулж
+  // байсан. Одоо дуудагч тал брэндийн fallback (эможи + градиент) харуулна.
+  return null;
 }
+
+// Тодорхой нэр заасан дүрэм тохирохгүй бол зургаар төлөөлүүлэхгүй сэдвүүд (ямар нэг
+// ТОДОРХОЙ барилга/дурсгалын зураг тавивал худал байршлын мэдэгдэл болно).
+const SACRED_SITE_WORDS = ["хийд", "сүм", "дуган", "шүтээн", "мөргөл", "залбир", "тахил", "овоо", "будда", "хөшөө"];
 
 // idea-ийн байршил (location badge + Google Maps query) -аа title/desc/feeling дэх бодит
 // газрын нэр, venue, эсвэл title-д шууд бичигдсэн дүүргээс тодорхойлно — index%9 гэх мэт
@@ -767,10 +785,13 @@ function navigate(page, param) {
 
 // Зураг ачаалахад алдаа гарвал (эвдэрсэн URL, сервер унтарсан г.м) нэг удаа ерөнхий
 // нөөц зураг руу автоматаар шилжинэ; тэр ч бас ачаалахгүй бол зургийг арилгана.
+// Зураг ачаалагдаагүй тохиолдолд өөр зураг ОРЛУУЛАХГҮЙ — тухайн санаатай холбоогүй
+// зургийг "энэ болзооны зураг" мэт харуулахаас сэргийлж, зөвхөн зургийг нь авч хаяна.
+// Доорх .card-image / .modal-image дээрх брэндийн градиент + эможи нь fallback болж үлдэнэ.
 function imgFallback(el) {
-  if (el.dataset.fallbackDone) { el.remove(); return; }
-  el.dataset.fallbackDone = "1";
-  el.src = IMG.couple;
+  const wrap = el.parentElement;
+  el.remove();
+  if (wrap) wrap.classList.add("media-fallback");
 }
 
 function renderCard(idea) {
@@ -779,15 +800,18 @@ function renderCard(idea) {
   const badge = idea.day === 1
     ? '<div class="card-badge gold" style="z-index:3">⭐ Шинэ жил</div>'
     : '';
+  // alt="" — зураг нь тухайн ангиллыг төлөөлсөн чимэглэл бөгөөд гарчиг нь яг доор нь
+  // текстээр байгаа тул дэлгэц уншигчид давхардуулж уншуулахгүй (чимэглэлийн зургийн
+  // стандарт хандлага). Зураг байхгүй үед эможи + градиентээс бүрдсэн брэндийн fallback.
   const imageContent = imgInfo
-    ? `<img src="${imgInfo.u}" loading="lazy" alt="${idea.title}" class="card-bg-img" onerror="imgFallback(this)">
+    ? `<img src="${imgInfo.u}" loading="lazy" decoding="async" alt="" class="card-bg-img" onerror="imgFallback(this)">
        <div class="card-img-overlay"></div>
        <span class="card-emoji-over">${idea.emoji}</span>
        <span class="card-img-credit">${imgInfo.s==="Wikipedia CC"?"© Wikipedia CC":"Unsplash"}</span>`
-    : idea.emoji;
+    : `<span class="card-emoji-over card-emoji-solo">${idea.emoji}</span>`;
   return `
     <div class="card" onclick="openIdeaModal(${idea.id})">
-      <div class="card-image" style="background: ${getColor(idea.id)}; overflow:hidden;">
+      <div class="card-image${imgInfo ? "" : " media-fallback"}" style="background: ${getColor(idea.id)}; overflow:hidden;">
         ${imageContent}
         ${badge}
       </div>
@@ -814,12 +838,12 @@ function openIdeaModal(id) {
   const isLiked = userLikes.has(idea.id);
   const imgHtml = imgInfo
     ? `<div class="modal-image" style="background:${getColor(idea.id)};position:relative;overflow:hidden;padding:0;">
-        <img src="${imgInfo.u}" loading="lazy" alt="${idea.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="imgFallback(this)">
+        <img src="${imgInfo.u}" loading="lazy" decoding="async" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="imgFallback(this)">
         <div style="position:absolute;inset:0;background:rgba(0,0,0,0.2);"></div>
         <span style="position:relative;z-index:1;font-size:56px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));">${idea.emoji}</span>
         <span class="card-img-credit" style="z-index:2;">${imgInfo.s==="Wikipedia CC"?"© Wikipedia CC":"Unsplash"}</span>
       </div>`
-    : `<div class="modal-image" style="background:${getColor(idea.id)}">${idea.emoji}</div>`;
+    : `<div class="modal-image media-fallback" style="background:${getColor(idea.id)}">${idea.emoji}</div>`;
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
       <h2 style="font-size: 20px;">${idea.title}</h2>

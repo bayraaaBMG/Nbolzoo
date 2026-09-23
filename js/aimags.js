@@ -4591,6 +4591,14 @@ function renderAimagCard(a) {
 function renderAimags() {
   const filtered = currentRegion === "all" ? aimagsClean : aimagsClean.filter(a => a.region === currentRegion);
   document.getElementById("aimagsGrid").innerHTML = filtered.map(renderAimagCard).join("");
+  // Тоог бодит dataset-ээс гаргана (HTML дотор hardcode хийхгүй) — шүүлтүүр солигдоход
+  // тухайн бүсийн бодит тоо харагдана.
+  const intro = document.getElementById("aimagsIntro");
+  if (intro) {
+    const ideas = filtered.reduce((s, a) => s + (a.dates ? a.dates.length : 0), 0);
+    const places = filtered.reduce((s, a) => s + (a.wonders ? a.wonders.length : 0), 0);
+    intro.textContent = `${filtered.length} аймаг · ${places} онцлох газар · ${ideas} болзооны санаа`;
+  }
 }
 
 function renderAimagDetail(id) {

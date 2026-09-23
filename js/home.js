@@ -35,16 +35,26 @@ function renderHomeBanner(b) {
     : `<div class="home-banner${hasMobile ? " has-mobile" : ""}">${inner}</div>`;
 }
 
+// Бүх тоог бодит dataset-ээс тооцно — HTML дотор ямар ч тоо hardcode хийгээгүй тул
+// контент нэмэгдэх/хасагдахад UI автоматаар зөв тоо харуулна. Байрлалын индекс (statNums[0])
+// биш data-stat нэрээр холбосон нь hero-гийн дараалал өөрчлөгдвөл ч эвдрэхгүй.
 function updateHeroStats() {
-  const freeCount = allUbIdeas.filter(i => i.price === 0).length;
-  const statNums = document.querySelectorAll(".hero-stat-num");
-  // aimag-тутамд яг 9 санаа байна гэж таамаглахгүй, бодит dates массивын уртыг нийлбэрлэнэ —
-  // ямар нэг аймгийн дата өөрчлөгдвөл (нэмэгдэх/хасагдах) UI дээрх тоо автоматаар зөв харагдана.
+  // aimag-тутамд яг 9 санаа байна гэж таамаглахгүй, бодит dates массивын уртыг нийлбэрлэнэ.
   const totalAimagIdeas = aimagsClean.reduce((sum, a) => sum + (a.dates ? a.dates.length : 0), 0);
-  if(statNums[0]) statNums[0].textContent = allUbIdeas.length + totalAimagIdeas;
-  if(statNums[1]) statNums[1].textContent = allUbIdeas.length;
-  if(statNums[2]) statNums[2].textContent = aimagsClean.length;
-  if(statNums[3]) statNums[3].textContent = totalAimagIdeas;
+  const stats = {
+    total: allUbIdeas.length + totalAimagIdeas,
+    ub: allUbIdeas.length,
+    aimags: aimagsClean.length,
+    aimagIdeas: totalAimagIdeas,
+  };
+  document.querySelectorAll("[data-stat]").forEach(el => {
+    const v = stats[el.dataset.stat];
+    if (v !== undefined) el.textContent = v.toLocaleString("mn-MN");
+  });
+  const sub = document.getElementById("heroSubtitle");
+  if (sub) {
+    sub.textContent = `Улаанбаатарт ${stats.ub} санаа, ${stats.aimags} аймагт ${stats.aimagIdeas} санаа — нийт ${stats.total}`;
+  }
 }
 
 function getDayOfYear() {

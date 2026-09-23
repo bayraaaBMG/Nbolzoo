@@ -40,17 +40,31 @@
       </div>
     </div>
     <ul class="nav-menu">
-      <li><a class="nav-link" data-page="home" onclick="navigate('home')">🏠 Нүүр</a></li>
-      <li><a class="nav-link" data-page="ub" onclick="navigate('ub')">🏙 УБ 365</a></li>
-      <li><a class="nav-link" data-page="aimags" onclick="navigate('aimags')">🌄 21 аймаг</a></li>
-      <li><a class="nav-link" data-page="expert" onclick="navigate('expert')">💎 Зөвлөгөө</a></li>
-      <li><a class="nav-link" data-page="gifts" onclick="navigate('gifts')">🎁 Бэлэг</a></li>
-      <li><a class="nav-link active" data-page="community" onclick="navigate('community')">👥 Нийгэмлэг</a></li>
-      <li><a class="nav-link" data-page="movies" onclick="navigate('movies')">🎬 Кино</a></li>
-      <li><a class="nav-link" data-page="saved" onclick="navigate('saved')">❤️ Хадгалсан</a></li>
-      <li><a class="nav-link" data-page="urilga" onclick="navigate('urilga')">💌 Урилга</a></li>
-      <li><a class="nav-link" data-page="games" onclick="navigate('games')">🎮 Тоглоом</a></li>
-<li><a class="nav-link" id="navAdminLink" data-page="admin" onclick="navigate('admin')" style="display:none;">⚙️ Админ</a></li>
+      <li><a class="nav-link" data-page="home" onclick="navigate('home')"><span class="nav-ico" data-icon="home"></span>Нүүр</a></li>
+      <li class="nav-group">
+        <button type="button" class="nav-link nav-group-btn" aria-expanded="false" aria-haspopup="true" aria-controls="navGroup-ideas">
+          <span class="nav-ico" data-icon="compass"></span>Санаанууд<span class="nav-caret" data-icon="chevron" data-icon-size="14"></span>
+        </button>
+        <div class="nav-dropdown" id="navGroup-ideas" role="menu">
+          <a class="nav-dropdown-link" data-page="ub" onclick="navigate('ub')"><span class="nav-ico" data-icon="city"></span>УБ 365</a>
+          <a class="nav-dropdown-link" data-page="aimags" onclick="navigate('aimags')"><span class="nav-ico" data-icon="mountain"></span>21 аймаг</a>
+          <a class="nav-dropdown-link" data-page="expert" onclick="navigate('expert')"><span class="nav-ico" data-icon="gem"></span>Зөвлөгөө</a>
+        </div>
+      </li>
+      <li class="nav-group">
+        <button type="button" class="nav-link nav-group-btn" aria-expanded="false" aria-haspopup="true" aria-controls="navGroup-tools">
+          <span class="nav-ico" data-icon="tools"></span>Хэрэгслүүд<span class="nav-caret" data-icon="chevron" data-icon-size="14"></span>
+        </button>
+        <div class="nav-dropdown" id="navGroup-tools" role="menu">
+          <a class="nav-dropdown-link" data-page="urilga" onclick="navigate('urilga')"><span class="nav-ico" data-icon="mail"></span>Урилга</a>
+          <a class="nav-dropdown-link" data-page="games" onclick="navigate('games')"><span class="nav-ico" data-icon="gamepad"></span>Тоглоом</a>
+          <a class="nav-dropdown-link" data-page="gifts" onclick="navigate('gifts')"><span class="nav-ico" data-icon="gift"></span>Бэлэг</a>
+          <a class="nav-dropdown-link" data-page="movies" onclick="navigate('movies')"><span class="nav-ico" data-icon="film"></span>Кино</a>
+        </div>
+      </li>
+      <li><a class="nav-link active" data-page="community" onclick="navigate('community')" aria-current="page"><span class="nav-ico" data-icon="users"></span>Нийгэмлэг</a></li>
+      <li><a class="nav-link" data-page="saved" onclick="navigate('saved')"><span class="nav-ico" data-icon="heart"></span>Хадгалсан</a></li>
+      <li><a class="nav-link" id="navAdminLink" data-page="admin" onclick="navigate('admin')" style="display:none;"><span class="nav-ico" data-icon="settings"></span>Админ</a></li>
     </ul>
     <div class="nav-actions">
       <div id="navAuthButtons">
@@ -59,13 +73,13 @@
       </div>
       <div id="navUserInfo" style="display:none; align-items:center; gap:8px;">
         <div class="notif-bell" id="notifBell" onclick="toggleNotifDropdown()" role="button" tabindex="0" aria-label="Мэдэгдэл">
-          🔔<span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+          <span class="nav-ico" data-icon="bell"></span><span class="notif-badge" id="notifBadge" style="display:none;">0</span>
           <div class="notif-dropdown" id="notifDropdown" style="display:none;"></div>
         </div>
         <div class="avatar" id="navAvatar" style="width:34px;height:34px;font-size:13px;cursor:pointer;" onclick="openProfileModal()" role="button" tabindex="0" aria-label="Профайл нээх"></div>
         <button type="button" class="btn btn-ghost" style="font-size:13px;padding:8px 12px;" onclick="logoutUser()">Гарах</button>
       </div>
-      <button type="button" class="mobile-menu-btn" onclick="openMobileMenu()" title="Цэс нээх" aria-label="Цэс нээх">☰</button>
+      <button type="button" class="mobile-menu-btn" onclick="openMobileMenu()" title="Цэс нээх" aria-label="Цэс нээх"><span class="nav-ico" data-icon="menu" data-icon-size="20"></span></button>
     </div>
   </nav>
 </header>
@@ -80,16 +94,16 @@
     <button type="button" class="mobile-nav-close" onclick="closeMobileMenu()" aria-label="Цэс хаах">✕</button>
   </div>
   <div class="mobile-nav-items">
-    <a onclick="navigate('home');closeMobileMenu()">🏠 Нүүр</a>
-    <a onclick="navigate('ub');closeMobileMenu()">🏙 УБ 365</a>
-    <a onclick="navigate('aimags');closeMobileMenu()">🌄 21 аймаг</a>
-    <a onclick="navigate('expert');closeMobileMenu()">💎 Зөвлөгөө</a>
-    <a onclick="navigate('gifts');closeMobileMenu()">🎁 Бэлэг</a>
-    <a onclick="navigate('community');closeMobileMenu()">👥 Нийгэмлэг</a>
-    <a onclick="navigate('movies');closeMobileMenu()">🎬 Кино</a>
-    <a onclick="navigate('saved');closeMobileMenu()">❤️ Хадгалсан</a>
-    <a onclick="navigate('urilga');closeMobileMenu()">💌 Урилга</a>
-    <a onclick="navigate('games');closeMobileMenu()">🎮 Тоглоом</a>
+    <a onclick="navigate('home');closeMobileMenu()"><span class="nav-ico" data-icon="home"></span>Нүүр</a>
+    <a onclick="navigate('ub');closeMobileMenu()"><span class="nav-ico" data-icon="city"></span>УБ 365</a>
+    <a onclick="navigate('aimags');closeMobileMenu()"><span class="nav-ico" data-icon="mountain"></span>21 аймаг</a>
+    <a onclick="navigate('expert');closeMobileMenu()"><span class="nav-ico" data-icon="gem"></span>Зөвлөгөө</a>
+    <a onclick="navigate('urilga');closeMobileMenu()"><span class="nav-ico" data-icon="mail"></span>Урилга</a>
+    <a onclick="navigate('games');closeMobileMenu()"><span class="nav-ico" data-icon="gamepad"></span>Тоглоом</a>
+    <a onclick="navigate('gifts');closeMobileMenu()"><span class="nav-ico" data-icon="gift"></span>Бэлэг</a>
+    <a onclick="navigate('movies');closeMobileMenu()"><span class="nav-ico" data-icon="film"></span>Кино</a>
+    <a onclick="navigate('community');closeMobileMenu()" class="active" aria-current="page"><span class="nav-ico" data-icon="users"></span>Нийгэмлэг</a>
+    <a onclick="navigate('saved');closeMobileMenu()"><span class="nav-ico" data-icon="heart"></span>Хадгалсан</a>
   </div>
   <div class="mobile-nav-divider"></div>
   <div class="mobile-nav-actions" id="mobileAuthButtons">
@@ -172,15 +186,15 @@
     </div>
     <div class="footer-col">
       <h4>Санаанууд</h4>
-      <a onclick="navigate('ub')">🏙 УБ 365 санаа</a>
-      <a onclick="navigate('aimags')">🌄 21 аймаг</a>
-      <a onclick="navigate('movies')">🎬 Хосын кино</a>
-      <a onclick="navigate('gifts')">🎁 Бэлгийн санаа</a>
+      <a onclick="navigate('ub')"><span class="nav-ico" data-icon="city"></span>УБ 365 санаа</a>
+      <a onclick="navigate('aimags')"><span class="nav-ico" data-icon="mountain"></span>21 аймаг</a>
+      <a onclick="navigate('movies')"><span class="nav-ico" data-icon="film"></span>Хосын кино</a>
+      <a onclick="navigate('gifts')"><span class="nav-ico" data-icon="gift"></span>Бэлгийн санаа</a>
     </div>
     <div class="footer-col">
       <h4>Зөвлөгөө</h4>
-      <a onclick="navigate('expert')">💎 Мэргэжилтэн зөвлөгөө</a>
-      <a onclick="navigate('community')">👥 Нийгэмлэг</a>
+      <a onclick="navigate('expert')"><span class="nav-ico" data-icon="gem"></span>Мэргэжилтэн зөвлөгөө</a>
+      <a onclick="navigate('community')"><span class="nav-ico" data-icon="users"></span>Нийгэмлэг</a>
       <a onclick="navigate('expert','questions')">247 асуулт</a>
     </div>
     <div class="footer-col">
@@ -213,6 +227,7 @@
 <script src="js/notifications.js"></script>
 <script src="js/storage-utils.js"></script>
 <script src="js/couple.js"></script>
+<script src="js/ui.js"></script>
 <script src="js/core.js"></script>
 <script src="js/community.js"></script>
 <script src="js/main.js"></script>

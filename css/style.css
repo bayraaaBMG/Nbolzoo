@@ -48,17 +48,53 @@ body {
 .logo-text { font-size: 22px; font-weight: 700; color: var(--text); }
 .logo-tagline { font-size: 10px; color: var(--text-lighter); display: block; margin-top: -3px; }
 
-.nav-menu { display: flex; gap: 4px; list-style: none; }
+.nav-menu { display: flex; gap: 4px; list-style: none; align-items: center; }
 
 .nav-menu a {
   text-decoration: none; color: var(--text-light); font-size: 14px;
   font-weight: 500; transition: all 0.2s; cursor: pointer;
-  padding: 10px 14px; border-radius: 8px; display: block;
+  padding: 10px 12px; border-radius: 8px;
+  display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
 }
 
 .nav-menu a:hover { background: var(--primary-extra-soft); color: var(--primary); }
 
 .nav-menu a.active { background: var(--primary-extra-soft); color: var(--primary); }
+
+/* ===== Icon system =====
+   Иконууд бол чимэглэл (aria-hidden) — нэрийг нь хажуугийн текст эсвэл эцгийн aria-label
+   өгнө. currentColor ашигладаг тул hover/active өнгийг автоматаар дагана. */
+.nav-ico {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0; line-height: 0; color: currentColor;
+}
+.nav-ico svg { display: block; }
+.nav-caret { display: inline-flex; margin-left: 2px; opacity: 0.6; transition: transform 0.2s; }
+
+/* ===== Navigation dropdown =====
+   Click-ээр нээгддэг (hover биш) тул keyboard, touch дээр ижилхэн ажиллана. */
+.nav-group { position: relative; }
+.nav-group-btn {
+  background: none; border: none; font-family: inherit;
+  color: var(--text-light); font-size: 14px; font-weight: 500;
+  padding: 10px 12px; border-radius: 8px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+  transition: all 0.2s;
+}
+.nav-group-btn:hover,
+.nav-group-btn.active,
+.nav-group.open > .nav-group-btn { background: var(--primary-extra-soft); color: var(--primary); }
+.nav-group.open .nav-caret { transform: rotate(180deg); }
+
+.nav-dropdown {
+  display: none; position: absolute; top: calc(100% + 6px); left: 0;
+  min-width: 208px; background: var(--white);
+  border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(27,38,59,0.12); padding: 6px; z-index: 1200;
+}
+.nav-group.open .nav-dropdown { display: block; animation: navDropIn 0.16s ease; }
+@keyframes navDropIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.nav-menu .nav-dropdown a { display: flex; width: 100%; padding: 9px 11px; font-size: 14px; }
 
 .nav-actions { display: flex; gap: 10px; align-items: center; }
 
@@ -1176,7 +1212,8 @@ body {
 .footer-brand p { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 10px; line-height: 1.6; }
 .footer-col h4 { color: white; font-size: 14px; margin-bottom: 12px; }
 .footer-col a {
-  display: block; color: rgba(255,255,255,0.6); font-size: 13px;
+  display: flex; align-items: center; gap: 8px;
+  color: rgba(255,255,255,0.6); font-size: 13px;
   text-decoration: none; margin-bottom: 8px; cursor: pointer;
   transition: color 0.2s;
 }
@@ -1285,7 +1322,12 @@ body {
 }
 
 /* ===== Notifications bell ===== */
-.notif-bell { position: relative; cursor: pointer; font-size: 18px; padding: 4px; }
+.notif-bell {
+  position: relative; cursor: pointer; padding: 7px; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--text-light); transition: background 0.2s, color 0.2s;
+}
+.notif-bell:hover { background: var(--primary-extra-soft); color: var(--primary); }
 .notif-badge {
   position: absolute; top: -2px; right: -2px; min-width: 16px; height: 16px; padding: 0 3px;
   background: #ef4444; color: #fff; font-size: 10px; font-weight: 700; border-radius: 999px;

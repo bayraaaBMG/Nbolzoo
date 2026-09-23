@@ -132,9 +132,13 @@ body {
   padding: 3px 8px; border-radius: 20px; letter-spacing: 0.02em; line-height: 1.4;
 }
 
+/* Дэлгэцийн өргөнөөс хамааран padding-г clamp-аар зохицуулна: desktop дээр өмнө нь 70px
+   тогтмол байсан нь дэлгэцийн дээд хэсэгт хэт их хоосон цэнхэр зай үүсгэж, hero доорх
+   бодит контентыг доош түлхдэг байсан. */
 .hero {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-  color: white; padding: 70px 24px; text-align: center; position: relative; overflow: hidden;
+  color: white; padding: clamp(32px, 5.2vw, 56px) 20px clamp(30px, 4.4vw, 48px);
+  text-align: center; position: relative; overflow: hidden;
 }
 
 .hero::before {
@@ -152,13 +156,29 @@ body {
 }
 
 .hero-content { max-width: 760px; margin: 0 auto; position: relative; z-index: 1; }
-.hero h1 { font-size: 44px; font-weight: 800; margin-bottom: 12px; line-height: 1.2; }
-.hero p { font-size: 17px; opacity: 0.95; margin-bottom: 28px; }
+/* Гарчиг/тайлбар/хайлт гурвын хэмжээний зөрүүг тодруулж, хайлтыг гол CTA болгов.
+   font-size-ууд clamp — 320px дээр ч тасрахгүй, 1920px дээр ч хэт томрохгүй. */
+.hero h1 {
+  font-size: clamp(27px, 3.6vw, 42px); font-weight: 800;
+  margin-bottom: 10px; line-height: 1.18; letter-spacing: -0.01em;
+}
+.hero p {
+  font-size: clamp(14px, 1.15vw, 16px); opacity: 0.92;
+  margin: 0 auto 22px; max-width: 540px; line-height: 1.55;
+}
 
+/* Хайлт бол hero-гийн гол CTA — сүүдэр, хүрээг тодруулж, фокуст байхад
+   тод харагдахаар болгов. */
 .search-box {
-  background: white; border-radius: 16px; padding: 8px;
-  display: flex; gap: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-  max-width: 600px; margin: 0 auto;
+  background: white; border-radius: 16px; padding: 7px;
+  display: flex; gap: 8px;
+  box-shadow: 0 18px 44px rgba(2,62,138,0.28), 0 2px 6px rgba(0,0,0,0.08);
+  max-width: 620px; margin: 0 auto;
+  transition: box-shadow 0.22s, transform 0.22s;
+}
+.search-box:focus-within {
+  box-shadow: 0 22px 52px rgba(2,62,138,0.34), 0 0 0 3px rgba(255,255,255,0.65);
+  transform: translateY(-1px);
 }
 
 .search-box input {
@@ -167,13 +187,52 @@ body {
 }
 
 .hero-stats {
-  display: flex; justify-content: center; gap: 40px;
-  margin-top: 32px; flex-wrap: wrap;
+  display: flex; justify-content: center; gap: 10px;
+  margin-top: 26px; flex-wrap: wrap;
 }
 
-.hero-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.hero-stat-num { font-size: 26px; font-weight: 800; }
-.hero-stat-label { font-size: 12px; opacity: 0.85; }
+/* Тоонуудыг тусдаа "шил" карт болгосон нь hero-гийн доод хэсэгт бүтэц өгч,
+   ялгаагүй урсгал текст байхаас сэргийлнэ. */
+.hero-stat {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  background: rgba(255,255,255,0.13); border: 1px solid rgba(255,255,255,0.22);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border-radius: 12px; padding: 10px 18px; min-width: 96px;
+}
+.hero-stat-num { font-size: clamp(19px, 2vw, 24px); font-weight: 800; line-height: 1.15; }
+.hero-stat-label { font-size: 11.5px; opacity: 0.88; letter-spacing: 0.01em; }
+
+/* ===== "Яаж ажилладаг вэ?" — бүтээгдэхүүний гол loop =====
+   Санаа олох → хамтдаа сонгох → хэрэгжүүлэх → дурсамжаа хуваалцах. Энд ямар ч
+   тоо/статистик/сэтгэгдэл зохиоогүй — зөвхөн сайт дээр бодитоор байгаа үйлдлүүд. */
+.how-it-works { background: var(--white); border-top: 1px solid var(--border); }
+.how-inner { max-width: 1280px; margin: 0 auto; padding: 38px 24px 34px; }
+.how-head { text-align: center; margin-bottom: 26px; }
+.how-head h2 { font-size: clamp(20px, 2.2vw, 26px); font-weight: 750; margin-bottom: 6px; }
+.how-head p { color: var(--text-light); font-size: 14px; max-width: 520px; margin: 0 auto; }
+.how-steps {
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+.how-step {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+  padding: 20px 18px; position: relative;
+}
+.how-step-num {
+  position: absolute; top: 14px; right: 16px;
+  font-size: 12px; font-weight: 700; color: var(--primary);
+  background: var(--primary-extra-soft); border-radius: 999px;
+  width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+}
+.how-step-ico {
+  width: 40px; height: 40px; border-radius: 11px; margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--primary-extra-soft); color: var(--primary);
+}
+.how-step h3 { font-size: 15px; font-weight: 650; margin-bottom: 5px; }
+.how-step p { font-size: 13.5px; color: var(--text-light); line-height: 1.6; }
+.how-step a { color: var(--primary); text-decoration: none; font-weight: 600; cursor: pointer; }
+.how-step a:hover { text-decoration: underline; }
 
 .section-title {
   display: flex; align-items: center; justify-content: space-between;

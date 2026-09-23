@@ -125,7 +125,7 @@
           <button class="btn btn-accent" onclick="performSearch()" type="button">Хайх</button>
         </div>
         <div style="margin-top: 14px;">
-          <button class="btn btn-random" onclick="openRandomIdea()" type="button">🎲 Санамсаргүй санаа авах</button>
+          <button class="btn btn-random" onclick="openRandomIdea()" type="button"><span class="nav-ico" data-icon="dice"></span>Санамсаргүй санаа авах</button>
         </div>
         <div class="hero-stats">
           <!-- Тоонуудыг hardcode хийхгүй: updateHeroStats() бодит dataset-ээс тооцоод бөглөнө.
@@ -134,6 +134,43 @@
           <div class="hero-stat"><span class="hero-stat-num" data-stat="ub">—</span><span class="hero-stat-label">УБ-д жилийн өдөр</span></div>
           <div class="hero-stat"><span class="hero-stat-num" data-stat="aimags">—</span><span class="hero-stat-label">аймаг</span></div>
           <div class="hero-stat"><span class="hero-stat-num" data-stat="aimagIdeas">—</span><span class="hero-stat-label">аймгийн санаа</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NBolzoo-ийн гол loop. Энд статистик, сэтгэгдэл зохиогоогүй — доорх алхам бүр
+         сайт дээр бодитоор ажилладаг үйлдэл рүү холбогдоно. -->
+    <section class="how-it-works" aria-labelledby="howTitle">
+      <div class="how-inner">
+        <div class="how-head">
+          <h2 id="howTitle">Яаж ажилладаг вэ?</h2>
+          <p>Санаа олох, хамтдаа сонгох, хэрэгжүүлэх, дараа нь дурсамжаа хуваалцах — дөрвөн энгийн алхам.</p>
+        </div>
+        <div class="how-steps">
+          <div class="how-step">
+            <span class="how-step-num">1</span>
+            <div class="how-step-ico"><span class="nav-ico" data-icon="compass" data-icon-size="21"></span></div>
+            <h3>Санаагаа ол</h3>
+            <p>Улаанбаатарын өдөр бүрийн санаа, 21 аймгийн газруудаас төсөв, улирал, ангиллаар шүүж сонго.</p>
+          </div>
+          <div class="how-step">
+            <span class="how-step-num">2</span>
+            <div class="how-step-ico"><span class="nav-ico" data-icon="heart" data-icon-size="21"></span></div>
+            <h3>Хостойгоо сонго</h3>
+            <p>Таалагдсанаа хадгалж, <a onclick="navigate('saved')">Хадгалсан</a> хэсэгт цуглуулаад хамтдаа шийд.</p>
+          </div>
+          <div class="how-step">
+            <span class="how-step-num">3</span>
+            <div class="how-step-ico"><span class="nav-ico" data-icon="mail" data-icon-size="21"></span></div>
+            <h3>Болзоогоо хэрэгжүүл</h3>
+            <p><a onclick="navigate('urilga')">Урилга</a> үүсгэж QR/холбоосоор илгээ, газрын зураг, авч явах зүйлсийн жагсаалтыг ашигла.</p>
+          </div>
+          <div class="how-step">
+            <span class="how-step-num">4</span>
+            <div class="how-step-ico"><span class="nav-ico" data-icon="users" data-icon-size="21"></span></div>
+            <h3>Дурсамжаа хуваалц</h3>
+            <p><a onclick="navigate('community')">Нийгэмлэг</a>-т туршлагаа бичиж, бусад хосын санаанаас шинийг ол.</p>
+          </div>
         </div>
       </div>
     </section>

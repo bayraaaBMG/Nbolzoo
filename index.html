@@ -117,7 +117,7 @@
 
 <main>
   <div id="page-home" class="page active">
-    <div id="homeBannerSlot" data-home-section="banner"></div>
+    <div id="homeBannerSlot" data-home-section="banner" data-banner-slot="home-hero"></div>
     <section class="hero" data-home-section="hero">
       <div class="hero-content">
         <h1 id="heroTitle">Өнөөдөр хамт хаашаа явах вэ? 💕</h1>
@@ -128,6 +128,9 @@
         </div>
         <div style="margin-top: 14px;">
           <button class="btn btn-random" onclick="openRandomIdea()" type="button"><span class="nav-ico" data-icon="dice"></span>Санамсаргүй санаа авах</button>
+          <!-- Admin нүүр хуудсын тохиргоонд CTA нэр + холбоос өгвөл энд товч нэмэгдэнэ.
+               Өгөөгүй бол энэ хэсэг бүрэн хоосон үлдэнэ (хоосон зай ч гарахгүй). -->
+          <span id="heroCtaSlot"></span>
         </div>
         <div class="hero-stats">
           <!-- Тоонуудыг hardcode хийхгүй: updateHeroStats() бодит dataset-ээс тооцоод бөглөнө.
@@ -193,6 +196,7 @@
       <div class="filters" id="budgetChips"></div>
       </section>
 
+      <div data-banner-slot="home-mid"></div>
       <section data-home-section="mood">
       <div class="section-title">
         <h2>🎭 Мэдрэмжээр хайх</h2>
@@ -217,6 +221,7 @@
       <div class="aimag-grid" id="featuredAimags"></div>
       </section>
 
+      <div data-banner-slot="home-bottom"></div>
       <section data-home-section="games">
       <div class="section-title">
         <h2>🎮 Хамтдаа тоглож, урилга илгээцгээе</h2>
@@ -242,7 +247,7 @@
         <img src="logo.svg" alt="NBolzoo" class="logo-icon" width="42" height="42">
         <span class="logo-text">NBolzoo</span>
       </div>
-      <p>Монголын анхны болзооны санааны платформ. Улаанбаатар болон 21 аймгийн болзооны санаанууд.</p>
+      <p data-footer="tagline">Монголын анхны болзооны санааны платформ. Улаанбаатар болон 21 аймгийн болзооны санаанууд.</p>
     </div>
     <div class="footer-col">
       <h4>Санаанууд</h4>
@@ -259,13 +264,13 @@
     </div>
     <div class="footer-col">
       <h4>Холбоо барих</h4>
-      <a href="mailto:info@nbolzoo.mn">📧 info@nbolzoo.mn</a>
-      <span class="footer-static">📱 Instagram: @nbolzoo</span>
-      <span class="footer-static">💬 Facebook: NBolzoo</span>
+      <a href="mailto:info@nbolzoo.mn" data-footer="email">📧 info@nbolzoo.mn</a>
+      <span class="footer-static" data-footer="instagram">📱 Instagram: @nbolzoo</span>
+      <span class="footer-static" data-footer="facebook">💬 Facebook: NBolzoo</span>
     </div>
   </div>
   <div class="footer-bottom">
-    <span id="footerYear">© 2026 NBolzoo.mn · Монголын хайрын платформ 💕</span>
+    <span id="footerYear" data-footer="bottom">© 2026 NBolzoo.mn · Монголын хайрын платформ 💕</span>
   </div>
 </footer>
 
@@ -288,6 +293,7 @@
 <script src="js/aimags.js"></script>
 <script src="js/cms.js"></script>
 <script src="js/home.js"></script>
+<script src="js/banner.js"></script>
 <script src="js/site-settings.js"></script>
 <script src="js/main.js"></script>
 <script>
@@ -298,7 +304,6 @@ renderEditorialPicks();
 renderFeaturedAimags();
 renderPromoSections();
 updateHeroStats();
-loadHomeBanner();
 </script>
 
 </body>

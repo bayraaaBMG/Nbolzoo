@@ -71,6 +71,7 @@ const ADMIN_TABS = [
     { id: "theme",      label: "Өнгө / Загвар",     icon: "🎨", perm: "settings.theme",      render: () => renderAdminTheme() },
     { id: "navigation", label: "Цэс",               icon: "🧭", perm: "settings.navigation", render: () => renderAdminNavigation() },
     { id: "homepage",   label: "Нүүр хуудас",       icon: "🏠", perm: "settings.homepage",   render: () => renderAdminHomepage() },
+    { id: "footer",     label: "Footer",            icon: "📄", perm: "settings.homepage",   render: () => renderAdminFooter() },
   ]},
 ];
 
@@ -116,15 +117,38 @@ function showAdminTab(tab) {
 // Every moderation/write action funnels through here so the Activity log tab has a
 // trustworthy audit trail. Logging failure must never block the actual action, so this
 // is fire-and-forget with its own try/catch — callers don't (and shouldn't) await it.
-async function logAdminAction(action, targetId, extra) {
+// Ямар нэг утга өөрчлөгдвөл ӨМНӨХ болон ШИНЭ утгыг хамт хадгална — эс бөгөөс
+// "хэн юу өөрчилсөн" нь мэдэгдэх ч "юуг юу болгосон" нь мэдэгдэхгүй, буцаах ч
+// боломжгүй болно. before/after нь сонголттой: устгах гэх мэт үйлдэлд утгагүй.
+//
+// Логлох нь бүтэлгүйтвэл ҮНДСЭН үйлдлийг хэзээ ч зогсоохгүй — тиймээс энэ нь
+// өөрийн try/catch-тэй, дуудагч нь await хийдэггүй (бас хийх ёсгүй).
+async function logAdminAction(action, targetId, extra, before, after) {
   try {
-    await db.collection("adminLog").add({
+    const entry = {
       action, targetId: targetId || "", extra: extra || "",
-      actorUid: currentUser.uid, actorName: currentUser.name,
+      actorUid: currentUser.uid, actorName: currentUser.name, actorRole: nbRole() || "",
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
+    };
+    if (before !== undefined) entry.before = adminLogValue(before);
+    if (after !== undefined) entry.after = adminLogValue(after);
+    await db.collection("adminLog").add(entry);
   } catch (e) { console.warn("logAdminAction failed:", e); }
 }
+
+// Аудит бүртгэлд орох утгыг аюулгүй, уншигдахуйц болгоно: объектыг JSON болгож,
+// хэт урт бичвэрийг таслана (нэг бүртгэл 1MB-ийн Firestore хязгаарт багтах ёстой).
+function adminLogValue(v) {
+  if (v === null || v === undefined) return "";
+  let s;
+  if (typeof v === "object") {
+    try { s = JSON.stringify(v); } catch (e) { s = String(v); }
+  } else {
+    s = String(v);
+  }
+  return s.length > 600 ? s.slice(0, 600) + "…" : s;
+}
+
 const ADMIN_ACTION_LABELS = {
   suggestion_approve: "Кино санал зөвшөөрсөн", suggestion_reject: "Кино санал татгалзсан",
   movie_add: "Кино нэмсэн", movie_delete: "Кино устгасан",
@@ -136,10 +160,11 @@ const ADMIN_ACTION_LABELS = {
   report_hide: "Гомдлыг шийдэж контент нуусан", report_delete: "Гомдлыг шийдэж контент устгасан", report_dismiss: "Гомдлыг татгалзсан",
   moderator_grant: "Moderator эрх олгосон", moderator_revoke: "Moderator эрх хассан",
   cms_hide: "Контент нуусан", cms_show: "Контент дахин харуулсан", cms_edit: "Контент засварласан",
-  cms_reorder: "Контентын дараалал өөрчилсөн", cms_add: "Шинэ контент нэмсэн", cms_reset: "Контентын өөрчлөлтийг буцаасан",
+  cms_reorder: "Контентын дараалал өөрчилсөн", cms_add: "Шинэ контент нэмсэн",
+  cms_delete: "Нэмсэн контентыг устгасан", cms_reset: "Контентын өөрчлөлтийг буцаасан",
   service_approve: "Үйлчилгээ зөвшөөрсөн", service_reject: "Үйлчилгээ татгалзсан", service_delete: "Үйлчилгээ устгасан",
   settings_theme: "Өнгөний тохиргоо хадгалсан", settings_navigation: "Цэсний тохиргоо хадгалсан",
-  settings_homepage: "Нүүр хуудсын тохиргоо хадгалсан", settings_reset: "Тохиргоог анхны байдалд буцаасан",
+  settings_homepage: "Нүүр хуудсын тохиргоо хадгалсан", settings_footer: "Footer тохиргоо хадгалсан", settings_reset: "Тохиргоог анхны байдалд буцаасан",
 };
 
 // ---------- Кино саналууд (movieSuggestions) ----------
@@ -292,7 +317,7 @@ async function renderAdminPosts() {
 async function adminTogglePostHidden(id, hidden) {
   try {
     await db.collection("posts").doc(id).update({ hidden });
-    logAdminAction(hidden ? "post_hide" : "post_unhide", id);
+    logAdminAction(hidden ? "post_hide" : "post_unhide", id, "", hidden ? "харагдаж байсан" : "нуугдсан байсан", hidden ? "нуусан" : "харуулсан");
     renderAdminPosts();
   } catch (e) {
     showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
@@ -338,7 +363,7 @@ async function renderAdminComments() {
 async function adminToggleCommentHidden(id, hidden) {
   try {
     await db.collection("comments").doc(id).update({ hidden });
-    logAdminAction(hidden ? "comment_hide" : "comment_unhide", id);
+    logAdminAction(hidden ? "comment_hide" : "comment_unhide", id, "", hidden ? "харагдаж байсан" : "нуугдсан байсан", hidden ? "нуусан" : "харуулсан");
     renderAdminComments();
   } catch (e) {
     showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
@@ -466,7 +491,9 @@ function renderAdminUsersList() {
     if (role === "admin" && nbCanAssignRole("admin")) {
       actions.push(`<button class="btn btn-outline btn-sm" type="button" onclick="adminRevokeRole('${u.uid}','admin')">Admin эрх хасах</button>`);
     }
+    actions.unshift(`<button class="btn btn-outline btn-sm" type="button" onclick="adminOpenUser('${u.uid}')">👤 Дэлгэрэнгүй</button>`);
     return `<div class="admin-card">
+      ${u.photoURL ? `<img src="${escapeHtml(u.photoURL)}" alt="" class="admin-card-thumb" style="width:44px;height:44px;border-radius:50%" onerror="this.remove()">` : ""}
       <div class="admin-card-main">
         <strong>${escapeHtml(u.name || "(нэргүй)")}</strong>${roleBadge} ${u.banned ? '<span style="color:#ef4444">(хориглосон)</span>' : ""}
         <div class="admin-card-meta">${escapeHtml(u.email || "")} · uid: ${escapeHtml(u.uid)}</div>
@@ -485,7 +512,71 @@ function renderAdminUsersList() {
     <div class="admin-note">${escapeHtml(note)}</div>
     <input class="admin-search" type="search" placeholder="Нэр, имэйл, uid-аар хайх..." value="${escapeHtml(adminUserQuery)}" oninput="adminFilterUsers(this.value)" aria-label="Хэрэглэгч хайх">
     <div class="admin-list-count">${list.length} / ${adminUsersCache.length} хэрэглэгч</div>
+    <div id="adminUserDetail"></div>
     ${rows || `<div class="admin-empty">Тохирох хэрэглэгч олдсонгүй</div>`}`;
+}
+
+// ---------- Нэг хэрэглэгчийн дэлгэрэнгүй: профайл + пост/сэтгэгдэл/гомдлын түүх ----------
+// Дөрвөн query-г Promise.allSettled-ээр зэрэг явуулна: аль нэг нь (индекс дутуу,
+// эрх хүрэлцэхгүй г.м) унасан ч бусад нь харагдах ёстой. Унасан хэсгийг "уншиж
+// чадсангүй" гэж ИЛ хэлнэ — хоосон жагсаалт харуулж "түүх алга" гэж төөрөгдүүлэхгүй.
+async function adminOpenUser(uid) {
+  const slot = document.getElementById("adminUserDetail");
+  if (!slot) return;
+  const u = adminUsersCache.find(x => x.uid === uid);
+  slot.innerHTML = `<div class="cms-edit"><div class="admin-loading">Ачаалж байна...</div></div>`;
+  slot.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+  const [postsR, commentsR, reportsAboutR, logR] = await Promise.allSettled([
+    db.collection("posts").where("authorId", "==", uid).limit(20).get(),
+    db.collection("comments").where("authorId", "==", uid).limit(20).get(),
+    db.collection("reports").where("reporterId", "==", uid).limit(20).get(),
+    db.collection("adminLog").where("targetId", "==", uid).limit(20).get(),
+  ]);
+
+  const block = (title, res, mapFn, emptyMsg) => {
+    if (res.status !== "fulfilled") {
+      return `<div class="user-detail-block"><h5>${title}</h5><div class="admin-empty">Уншиж чадсангүй (эрх эсвэл индекс дутуу байж болзошгүй)</div></div>`;
+    }
+    const docs = res.value.docs;
+    if (!docs.length) return `<div class="user-detail-block"><h5>${title}</h5><div class="admin-empty">${emptyMsg}</div></div>`;
+    return `<div class="user-detail-block"><h5>${title} <span class="admin-list-count" style="display:inline">(${docs.length})</span></h5>
+      ${docs.map(mapFn).join("")}</div>`;
+  };
+
+  slot.innerHTML = `
+    <div class="cms-edit user-detail" role="region" aria-label="Хэрэглэгчийн дэлгэрэнгүй">
+      <h4>👤 ${escapeHtml((u && u.name) || "(нэргүй)")}
+        ${u && u._role ? `<span class="admin-role-badge admin-role-${escapeHtml(u._role)}">${NB_ROLE_LABELS[u._role]}</span>` : ""}
+        ${u && u.banned ? `<span class="cms-flag cms-flag-hidden">Хориглосон</span>` : ""}
+      </h4>
+      <div class="admin-card-meta" style="margin-bottom:14px;">
+        ${escapeHtml((u && u.email) || "")} · uid: ${escapeHtml(uid)}${u && u.createdAt ? " · бүртгүүлсэн: " + timeAgo(u.createdAt) : ""}
+      </div>
+      ${block("Нийтлэлүүд", postsR, d => {
+        const p = d.data();
+        return `<div class="user-detail-row">${p.hidden ? `<span class="cms-flag cms-flag-hidden">Нуусан</span> ` : ""}${escapeHtml((p.content || "").slice(0, 110))}
+          <span class="user-detail-time">${timeAgo(p.createdAt)}</span></div>`;
+      }, "Нийтлэл алга")}
+      ${block("Сэтгэгдэл", commentsR, d => {
+        const c = d.data();
+        return `<div class="user-detail-row">${c.hidden ? `<span class="cms-flag cms-flag-hidden">Нуусан</span> ` : ""}${escapeHtml((c.text || "").slice(0, 110))}
+          <span class="user-detail-time">${timeAgo(c.createdAt)}</span></div>`;
+      }, "Сэтгэгдэл алга")}
+      ${block("Энэ хэрэглэгчийн мэдүүлсэн гомдол", reportsAboutR, d => {
+        const r = d.data();
+        return `<div class="user-detail-row">${escapeHtml(r.targetType || "")}: ${escapeHtml((r.contentPreview || "").slice(0, 90))}
+          <span class="user-detail-time">${escapeHtml(ADMIN_REPORT_STATUS_LABELS[r.status] || r.status || "")}</span></div>`;
+      }, "Мэдүүлсэн гомдол алга")}
+      ${block("Энэ хэрэглэгчид авсан арга хэмжээ", logR, d => {
+        const l = d.data();
+        return `<div class="user-detail-row">${escapeHtml(ADMIN_ACTION_LABELS[l.action] || l.action)} — ${escapeHtml(l.actorName || "?")}
+          <span class="user-detail-time">${timeAgo(l.createdAt)}</span></div>`;
+      }, "Арга хэмжээ аваагүй")}
+      <div class="cms-edit-actions">
+        <button class="btn btn-ghost" type="button" onclick="document.getElementById('adminUserDetail').innerHTML=''">Хаах</button>
+      </div>
+    </div>`;
 }
 
 // Эрх олгох. Owner эрх ЭНД ХЭЗЭЭ Ч олгогдохгүй (зөвхөн bootstrap-аар үүсдэг).
@@ -495,6 +586,12 @@ async function adminSetRole(uid, role) {
   try {
     const userSnap = await db.collection("users").doc(uid).get();
     const u = userSnap.exists ? userSnap.data() : {};
+    // Аудит бүртгэлд "юуг юу болгосон"-ыг бичихийн тулд хуучин эрхийг нь эхлээд уншина.
+    let prevRole = "";
+    try {
+      const prev = await db.collection("admins").doc(uid).get();
+      if (prev.exists) prevRole = prev.data().role || "";
+    } catch (e) { /* заавал биш — лог бүрэн бус байх нь эрх олгохыг зогсоох шалтгаан биш */ }
     // Түвшин солиход эхлээд хуучныг устгана — admins/{uid} дээр in-place update
     // зориуд хаалттай (rules: allow update: if false), тиймээс үргэлж delete+create.
     try { await db.collection("admins").doc(uid).delete(); } catch (e) {}
@@ -502,7 +599,7 @@ async function adminSetRole(uid, role) {
       email: u.email || "", name: u.name || "", role,
       addedBy: currentUser.uid, addedAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
-    logAdminAction(role === "admin" ? "admin_grant" : "moderator_grant", uid, u.name || "");
+    logAdminAction(role === "admin" ? "admin_grant" : "moderator_grant", uid, u.name || "", prevRole || "эрхгүй", role);
     showToast("✅ Эрх олгогдлоо");
     renderAdminUsers();
   } catch (e) {
@@ -515,7 +612,7 @@ async function adminRevokeRole(uid, role) {
   if (!confirm("Энэ хэрэглэгчийн эрхийг хасах уу?")) return;
   try {
     await db.collection("admins").doc(uid).delete();
-    logAdminAction(role === "admin" ? "admin_revoke" : "moderator_revoke", uid);
+    logAdminAction(role === "admin" ? "admin_revoke" : "moderator_revoke", uid, "", role, "эрхгүй");
     showToast("✅ Эрх хасагдлаа");
     renderAdminUsers();
   } catch (e) {
@@ -526,7 +623,7 @@ async function adminRevokeRole(uid, role) {
 async function toggleUserBan(uid, banned) {
   try {
     await db.collection("users").doc(uid).update({ banned });
-    logAdminAction(banned ? "user_ban" : "user_unban", uid);
+    logAdminAction(banned ? "user_ban" : "user_unban", uid, "", banned ? "идэвхтэй" : "хориглосон", banned ? "хориглосон" : "идэвхтэй");
     showToast(banned ? "🚫 Хэрэглэгч түдгэлзүүлэгдлээ" : "✅ Хориг арилгагдлаа");
     renderAdminUsers();
   } catch (e) {
@@ -538,8 +635,17 @@ async function toggleUserBan(uid, banned) {
 // Байршил бүр нийтийн хуудсанд БОДИТООР байгаа slot-той тохирно. Шинэ байршил
 // нэмэхдээ тухайн хуудсанд slot-ыг нь мөн нэмэх ёстой — эс бөгөөс сонгож болох ч
 // хэзээ ч харагдахгүй "хуурамч" сонголт болно.
+// Байршил бүр нийтийн хуудсанд БОДИТООР байгаа slot-той тохирно (js/banner.js-ийн
+// BANNER_SLOTS-ыг үзнэ үү). Шинэ байршил нэмэхдээ тухайн хуудсанд slot-ыг нь МӨН нэмнэ —
+// эс бөгөөс сонгож болох ч хэзээ ч харагдахгүй "хуурамч" сонголт болно.
 const ADMIN_BANNER_PLACEMENTS = [
-  { id: "home-top", label: "Нүүр хуудасны дээд хэсэг" },
+  { id: "home-hero", label: "Нүүр — hero дээр" },
+  { id: "home-mid", label: "Нүүр — дунд" },
+  { id: "home-bottom", label: "Нүүр — доод хэсэг" },
+  { id: "ideas", label: "Болзооны санаанууд (УБ 365)" },
+  { id: "aimags", label: "Аймгууд" },
+  { id: "community", label: "Нийгэмлэг" },
+  { id: "services", label: "Үйлчилгээ" },
 ];
 
 async function renderAdminBanners() {
@@ -576,7 +682,7 @@ async function renderAdminBanners() {
             <div class="admin-card-main">
               <strong>${escapeHtml(b.title || "(гарчиггүй)")}</strong> — ${statusLabel}
               <div class="admin-card-meta">
-                Байршил: ${escapeHtml((ADMIN_BANNER_PLACEMENTS.find(p => p.id === b.placement) || {}).label || b.placement || "-")}
+                Байршил: ${escapeHtml((ADMIN_BANNER_PLACEMENTS.find(p => p.id === b.placement) || {}).label || b.placement || "-")}${b.mobileOnly ? " (зөвхөн утас)" : ""}
                 · Ач холбогдол: ${b.priority ?? 0}
                 · ${escapeHtml(b.startDate || "хугацаагүй")} – ${escapeHtml(b.endDate || "хугацаагүй")}
               </div>
@@ -607,7 +713,8 @@ function adminAddBannerFormHtml() {
         <div class="form-group"><label>Ач холбогдол (том тоо → түрүүлж харагдана)</label><input type="number" id="admBnrPriority" value="0"></div>
         <div class="form-group"><label>Зураг (desktop, өргөн)</label><input type="file" id="admBnrImageDesktop" accept="image/*"></div>
         <div class="form-group"><label>Зураг (mobile, сонголтоор)</label><input type="file" id="admBnrImageMobile" accept="image/*"></div>
-        <div class="form-group" style="grid-column:1/-1"><label><input type="checkbox" id="admBnrActive" checked style="width:auto;display:inline-block;margin-right:6px;"> Идэвхтэй (шууд харагдана)</label></div>
+        <div class="form-group"><label><input type="checkbox" id="admBnrActive" checked style="width:auto;display:inline-block;margin-right:6px;"> Идэвхтэй (шууд харагдана)</label></div>
+        <div class="form-group"><label><input type="checkbox" id="admBnrMobileOnly" style="width:auto;display:inline-block;margin-right:6px;"> Зөвхөн утсан дээр харуулах</label></div>
       </div>
       <div id="admBnrStatus" style="min-height:18px;font-size:13px;margin-bottom:8px;"></div>
       <button class="btn btn-primary" type="button" id="admBnrSaveBtn" onclick="adminAddBanner()">✓ Banner нэмэх</button>
@@ -622,6 +729,7 @@ async function adminAddBanner() {
   const placement = document.getElementById("admBnrPlacement").value;
   const priority = parseInt(document.getElementById("admBnrPriority").value, 10) || 0;
   const active = document.getElementById("admBnrActive").checked;
+  const mobileOnly = document.getElementById("admBnrMobileOnly").checked;
   const desktopFile = document.getElementById("admBnrImageDesktop").files[0];
   const mobileFile = document.getElementById("admBnrImageMobile").files[0];
   const statusEl = document.getElementById("admBnrStatus");
@@ -641,13 +749,13 @@ async function adminAddBanner() {
       mobileImageUrl = await uploadBlobToStorage(`banners/${stamp}_mobile.jpg`, await compressImage(mobileFile, 900, 900, 0.85));
     }
     await db.collection("banners").add({
-      title, targetUrl, startDate, endDate, placement, priority, active,
+      title, targetUrl, startDate, endDate, placement, priority, active, mobileOnly,
       imageUrl, mobileImageUrl,
       createdBy: currentUser.uid,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
     statusEl.textContent = "";
-    logAdminAction("banner_add", stamp + "", title);
+    logAdminAction("banner_add", stamp + "", title, undefined, { title, placement, startDate, endDate, priority, active });
     showToast("✅ Banner нэмэгдлээ");
     renderAdminBanners();
   } catch (e) {
@@ -661,7 +769,7 @@ async function adminAddBanner() {
 async function adminToggleBannerActive(id, active) {
   try {
     await db.collection("banners").doc(id).update({ active });
-    logAdminAction("banner_toggle", id, active ? "active" : "inactive");
+    logAdminAction("banner_toggle", id, "", active ? "идэвхгүй" : "идэвхтэй", active ? "идэвхтэй" : "идэвхгүй");
     renderAdminBanners();
   } catch (e) {
     showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
@@ -672,7 +780,7 @@ async function adminDeleteBanner(id) {
   if (!confirm("Энэ banner-ийг устгах уу?")) return;
   try {
     await db.collection("banners").doc(id).delete();
-    logAdminAction("banner_delete", id);
+    logAdminAction("banner_delete", id, "", "байсан", "устгасан");
     showToast("🗑 Banner устгагдлаа");
     renderAdminBanners();
   } catch (e) {
@@ -816,22 +924,65 @@ async function renderAdminInvites() {
 }
 
 // ---------- Activity log (append-only audit trail of admin actions) ----------
+// ---------- Activity log (append-only audit trail of admin actions) ----------
+let adminLogFilter = "";
+let adminLogActor = "";
+let adminLogCache = [];
+
 async function renderAdminActivity() {
   const el = document.getElementById("admin-activity");
   el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>`;
   try {
-    const snap = await db.collection("adminLog").orderBy("createdAt", "desc").limit(100).get();
-    if (snap.empty) { el.innerHTML = `<div class="admin-empty">Үйл ажиллагааны түүх алга</div>`; return; }
-    el.innerHTML = snap.docs.map(d => {
-      const l = d.data();
-      return `<div class="admin-card">
-        <div class="admin-card-main">
-          <strong>${escapeHtml(l.actorName || "?")}</strong> — ${escapeHtml(ADMIN_ACTION_LABELS[l.action] || l.action)}
-          <div class="admin-card-meta">${l.extra ? escapeHtml(l.extra) + " · " : ""}${l.targetId ? "ID: " + escapeHtml(l.targetId) + " · " : ""}${timeAgo(l.createdAt)}</div>
-        </div>
-      </div>`;
-    }).join("");
+    const snap = await db.collection("adminLog").orderBy("createdAt", "desc").limit(200).get();
+    adminLogCache = snap.docs.map(d => Object.assign({ _id: d.id }, d.data()));
+    renderAdminActivityList();
   } catch (e) {
     el.innerHTML = `<div class="admin-empty">Алдаа: ${escapeHtml(e.message)}</div>`;
   }
+}
+
+function adminSetLogFilter(v) { adminLogFilter = v; renderAdminActivityList(); }
+function adminSetLogActor(v) { adminLogActor = v; renderAdminActivityList(); }
+
+function renderAdminActivityList() {
+  const el = document.getElementById("admin-activity");
+  // Шүүлтүүрийн сонголтыг БОДИТООР бүртгэгдсэн үйлдлээс гаргана — хэрэглэгдээгүй
+  // төрлийг сонголтод харуулж хоосон үр дүн рүү хөтлөхгүй.
+  const actions = [...new Set(adminLogCache.map(l => l.action))].sort();
+  const actors = [...new Set(adminLogCache.map(l => l.actorName).filter(Boolean))].sort();
+
+  const list = adminLogCache.filter(l =>
+    (!adminLogFilter || l.action === adminLogFilter) &&
+    (!adminLogActor || l.actorName === adminLogActor));
+
+  const rows = list.map(l => {
+    const hasDiff = l.before !== undefined || l.after !== undefined;
+    return `<div class="admin-card admin-log-row">
+      <div class="admin-card-main">
+        <strong>${escapeHtml(l.actorName || "?")}</strong>
+        ${l.actorRole ? `<span class="admin-role-badge admin-role-${escapeHtml(l.actorRole)}">${NB_ROLE_LABELS[l.actorRole] || l.actorRole}</span>` : ""}
+        — ${escapeHtml(ADMIN_ACTION_LABELS[l.action] || l.action)}
+        <div class="admin-card-meta">${l.extra ? escapeHtml(l.extra) + " · " : ""}${l.targetId ? "ID: " + escapeHtml(l.targetId) + " · " : ""}${timeAgo(l.createdAt)}</div>
+        ${hasDiff ? `<div class="admin-log-diff">
+          ${l.before !== undefined && l.before !== "" ? `<div class="admin-log-before"><span>Өмнө</span><code>${escapeHtml(l.before)}</code></div>` : ""}
+          ${l.after !== undefined && l.after !== "" ? `<div class="admin-log-after"><span>Дараа</span><code>${escapeHtml(l.after)}</code></div>` : ""}
+        </div>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+
+  el.innerHTML = `
+    <div class="admin-note">Энэ бүртгэл нь зөвхөн нэмэгддэг — хэн ч (Owner ч) засаж, устгаж чадахгүй. Сүүлийн 200 үйлдэл.</div>
+    <div class="cms-toolbar">
+      <select class="admin-search" style="flex:1;min-width:160px;" onchange="adminSetLogFilter(this.value)" aria-label="Үйлдлээр шүүх">
+        <option value="">Бүх үйлдэл</option>
+        ${actions.map(a => `<option value="${escapeHtml(a)}"${a === adminLogFilter ? " selected" : ""}>${escapeHtml(ADMIN_ACTION_LABELS[a] || a)}</option>`).join("")}
+      </select>
+      <select class="admin-search" style="flex:1;min-width:160px;" onchange="adminSetLogActor(this.value)" aria-label="Ажилтнаар шүүх">
+        <option value="">Бүх ажилтан</option>
+        ${actors.map(a => `<option value="${escapeHtml(a)}"${a === adminLogActor ? " selected" : ""}>${escapeHtml(a)}</option>`).join("")}
+      </select>
+    </div>
+    <div class="admin-list-count">${list.length} / ${adminLogCache.length} бүртгэл</div>
+    ${rows || `<div class="admin-empty">Тохирох бүртгэл олдсонгүй</div>`}`;
 }

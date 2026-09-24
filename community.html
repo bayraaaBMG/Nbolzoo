@@ -120,6 +120,7 @@
     <div class="container">
       <h1 style="margin-bottom: 6px;">👥 Нийгэмлэг</h1>
       <p style="color:var(--text-light);margin-bottom:18px;">Хосууд бие биенээсээ суралцаж, хамтдаа хөгждөг газар — санаагаа хуваалц, бусдын туршлагаас суралц 💕</p>
+      <div data-banner-slot="community"></div>
       <div class="community-layout">
         <div>
           <div class="post-form">
@@ -184,7 +185,7 @@
         <img src="logo.svg" alt="NBolzoo" class="logo-icon" width="42" height="42">
         <span class="logo-text">NBolzoo</span>
       </div>
-      <p>Монголын анхны болзооны санааны платформ. Улаанбаатар болон 21 аймгийн болзооны санаанууд.</p>
+      <p data-footer="tagline">Монголын анхны болзооны санааны платформ. Улаанбаатар болон 21 аймгийн болзооны санаанууд.</p>
     </div>
     <div class="footer-col">
       <h4>Санаанууд</h4>
@@ -201,13 +202,13 @@
     </div>
     <div class="footer-col">
       <h4>Холбоо барих</h4>
-      <a href="mailto:info@nbolzoo.mn">📧 info@nbolzoo.mn</a>
-      <span class="footer-static">📱 Instagram: @nbolzoo</span>
-      <span class="footer-static">💬 Facebook: NBolzoo</span>
+      <a href="mailto:info@nbolzoo.mn" data-footer="email">📧 info@nbolzoo.mn</a>
+      <span class="footer-static" data-footer="instagram">📱 Instagram: @nbolzoo</span>
+      <span class="footer-static" data-footer="facebook">💬 Facebook: NBolzoo</span>
     </div>
   </div>
   <div class="footer-bottom">
-    <span id="footerYear">© 2026 NBolzoo.mn · Монголын хайрын платформ 💕</span>
+    <span id="footerYear" data-footer="bottom">© 2026 NBolzoo.mn · Монголын хайрын платформ 💕</span>
   </div>
 </footer>
 
@@ -227,6 +228,7 @@
 <script src="js/ui.js"></script>
 <script src="js/core.js"></script>
 <script src="js/community.js"></script>
+<script src="js/banner.js"></script>
 <script src="js/site-settings.js"></script>
 <script src="js/main.js"></script>
 <script>

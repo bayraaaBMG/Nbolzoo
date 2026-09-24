@@ -2507,3 +2507,61 @@ select:focus-visible, [tabindex]:focus-visible {
   .nav-cfg-row { gap: 8px; }
   .service-form { padding: 16px; }
 }
+
+/* ===================================================================
+   ADMIN v3 — эрэмбэ, аудитын өөрчлөлт, хэрэглэгчийн дэлгэрэнгүй,
+   CMS зураг, үйлчилгээний нэмэлт талбар
+   =================================================================== */
+
+/* ---- Дээш/доош зөөх жижиг товч ---- */
+.btn-icon { padding: 6px 9px; min-width: 32px; line-height: 1; font-size: 13px; }
+.btn-icon[disabled] { opacity: .35; cursor: not-allowed; }
+.nav-cfg-order { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+
+/* ---- Аудит: өмнөх / шинэ утга ---- */
+.admin-log-diff {
+  display: flex; flex-direction: column; gap: 5px; margin-top: 9px;
+  padding: 9px 11px; border-radius: 8px; background: var(--primary-extra-soft);
+}
+.admin-log-before, .admin-log-after { display: flex; gap: 8px; align-items: baseline; font-size: 12px; }
+.admin-log-before span, .admin-log-after span {
+  flex-shrink: 0; font-weight: 700; min-width: 42px;
+}
+.admin-log-before span { color: #b91c1c; }
+.admin-log-after span { color: var(--success); }
+.admin-log-diff code {
+  font-size: 11px; word-break: break-word; overflow-wrap: anywhere;
+  color: var(--text-light); background: none; padding: 0;
+}
+
+/* ---- Хэрэглэгчийн дэлгэрэнгүй ---- */
+.user-detail h4 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.user-detail-block { margin-bottom: 18px; }
+.user-detail-block h5 { font-size: 13px; font-weight: 700; margin: 0 0 8px; }
+.user-detail-row {
+  display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+  font-size: 13px; padding: 8px 11px; margin-bottom: 5px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
+}
+.user-detail-time { margin-left: auto; font-size: 11px; color: var(--text-lighter); white-space: nowrap; }
+
+/* ---- CMS: зургийн талбар, төлвийн тэмдэг ---- */
+.cms-img-field { display: flex; flex-direction: column; gap: 7px; }
+.cms-img-field input[type=file] { font-size: 12px; }
+.cms-img-status { font-size: 12px; min-height: 16px; color: var(--text-light); }
+.cms-img-preview {
+  max-width: 200px; max-height: 130px; object-fit: cover;
+  border-radius: 8px; border: 1px solid var(--border);
+}
+.cms-flag-published { background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--success); }
+.cms-edit-id { font-size: 12px; font-weight: 400; color: var(--text-lighter); }
+
+/* ---- Үйлчилгээ: үнэ, цаг, холбоо барих товч ---- */
+.service-price { font-size: 14px; font-weight: 700; color: var(--accent); }
+.service-hours { font-size: 12px; color: var(--text-light); }
+.service-cta { margin-top: 10px; text-align: center; text-decoration: none; display: block; }
+
+@media (max-width: 860px) {
+  .nav-cfg-order { flex-direction: row; }
+  .user-detail-time { margin-left: 0; flex-basis: 100%; }
+}

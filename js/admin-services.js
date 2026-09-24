@@ -3,13 +3,20 @@
 // Зөвшөөрөгдсөн нь л нийтэд харагдана (firestore.rules дээр албадсан, зөвхөн UI биш).
 // ТӨЛБӨР, ЗАХИАЛГА, ҮНЭЛГЭЭ ЭНД БАЙХГҮЙ — зөвхөн жагсаалт.
 
+// ЗӨВХӨН харуулах шошго. Жинхэнэ жагсаалт нь js/services.js-ийн SERVICE_CATS —
+// хоёулаа таарч байх ёстой (tests/services_test.js шалгадаг).
 const SERVICE_CATEGORIES = [
-  { id: "restaurant", label: "Ресторан / Кафе" },
-  { id: "activity", label: "Үйл ажиллагаа / Адал явдал" },
-  { id: "gift", label: "Бэлэг / Цэцэг" },
-  { id: "photo", label: "Гэрэл зураг / Видео" },
-  { id: "stay", label: "Байр / Амралт" },
-  { id: "event", label: "Эвент зохион байгуулалт" },
+  { id: "restaurant", label: "Ресторан" },
+  { id: "cafe", label: "Кофе шоп" },
+  { id: "flower", label: "Цэцэг" },
+  { id: "gift", label: "Бэлэг" },
+  { id: "photo", label: "Гэрэл зурагчин" },
+  { id: "video", label: "Видео зурагчин" },
+  { id: "event", label: "Эвент үйлчилгээ" },
+  { id: "stay", label: "Амралтын газар" },
+  { id: "activity", label: "Үйл ажиллагаа" },
+  { id: "handmade", label: "Гар хийцийн бүтээгдэхүүн" },
+  { id: "date", label: "Болзоонд зориулсан" },
   { id: "other", label: "Бусад" },
 ];
 const SERVICE_STATUS_LABELS = { pending: "Хүлээгдэж буй", approved: "Зөвшөөрсөн", rejected: "Татгалзсан" };
@@ -48,8 +55,11 @@ async function renderAdminServices() {
           <div class="admin-card-meta">${escapeHtml(adminServiceCatLabel(sv.category))}${sv.district ? " · " + escapeHtml(sv.district) : ""} · ${escapeHtml(sv.submittedByName || "?")} · ${timeAgo(sv.createdAt)}</div>
           <div class="admin-card-desc">${escapeHtml(sv.desc || "")}</div>
           <div class="admin-card-meta">
-            ${sv.phone ? "☎ " + escapeHtml(sv.phone) + " " : ""}
-            ${sv.website ? "🔗 " + escapeHtml(sv.website) : ""}
+            ${sv.price ? "💸 " + escapeHtml(sv.price) + " · " : ""}
+            ${sv.hours ? "🕒 " + escapeHtml(sv.hours) + " · " : ""}
+            ${sv.phone ? "☎ " + escapeHtml(sv.phone) + " · " : ""}
+            ${sv.website ? "🔗 " + escapeHtml(sv.website) + " " : ""}
+            ${sv.social ? "💬 " + escapeHtml(sv.social) : ""}
           </div>
           ${sv.reviewNote ? `<div class="admin-card-meta">Тэмдэглэл: ${escapeHtml(sv.reviewNote)}</div>` : ""}
         </div>
@@ -78,7 +88,7 @@ async function adminReviewService(id, status) {
       reviewedBy: currentUser.uid, reviewedByName: currentUser.name,
       reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
-    logAdminAction(status === "approved" ? "service_approve" : "service_reject", id, note);
+    logAdminAction(status === "approved" ? "service_approve" : "service_reject", id, note, adminServiceStatus, status);
     showToast(status === "approved" ? "✅ Зөвшөөрөгдлөө" : "Татгалзлаа");
     renderAdminServices();
   } catch (e) { showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || "")); }

@@ -129,6 +129,7 @@
         <div class="filter-chip" data-region="Өмнөд">🏜 Өмнөд</div>
         <div class="filter-chip" data-region="Төв">🏞 Төв</div>
       </div>
+      <div data-banner-slot="aimags"></div>
       <div class="aimag-grid" id="aimagsGrid"></div>
     </div>
   </div>
@@ -151,7 +152,7 @@
         <img src="logo.svg" alt="NBolzoo" class="logo-icon" width="42" height="42">
         <span class="logo-text">NBolzoo</span>
       </div>
-      <p>Монголын анхны болзооны санааны платформ. Улаанбаатар болон 21 аймгийн болзооны санаанууд.</p>
+      <p data-footer="tagline">Монголын анхны болзооны санааны платформ. Улаанбаатар болон 21 аймгийн болзооны санаанууд.</p>
     </div>
     <div class="footer-col">
       <h4>Санаанууд</h4>
@@ -168,13 +169,13 @@
     </div>
     <div class="footer-col">
       <h4>Холбоо барих</h4>
-      <a href="mailto:info@nbolzoo.mn">📧 info@nbolzoo.mn</a>
-      <span class="footer-static">📱 Instagram: @nbolzoo</span>
-      <span class="footer-static">💬 Facebook: NBolzoo</span>
+      <a href="mailto:info@nbolzoo.mn" data-footer="email">📧 info@nbolzoo.mn</a>
+      <span class="footer-static" data-footer="instagram">📱 Instagram: @nbolzoo</span>
+      <span class="footer-static" data-footer="facebook">💬 Facebook: NBolzoo</span>
     </div>
   </div>
   <div class="footer-bottom">
-    <span id="footerYear">© 2026 NBolzoo.mn · Монголын хайрын платформ 💕</span>
+    <span id="footerYear" data-footer="bottom">© 2026 NBolzoo.mn · Монголын хайрын платформ 💕</span>
   </div>
 </footer>
 
@@ -195,6 +196,7 @@
 <script src="js/core.js"></script>
 <script src="js/cms.js"></script>
 <script src="js/aimags.js"></script>
+<script src="js/banner.js"></script>
 <script src="js/site-settings.js"></script>
 <script src="js/main.js"></script>
 <script>

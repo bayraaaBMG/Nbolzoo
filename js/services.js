@@ -5,12 +5,17 @@
 // бөглөж, admin шалгасан утга.
 
 const SERVICE_CATS = [
-  { id: "restaurant", label: "Ресторан / Кафе", emoji: "🍴" },
+  { id: "restaurant", label: "Ресторан", emoji: "🍴" },
+  { id: "cafe", label: "Кофе шоп", emoji: "☕" },
+  { id: "flower", label: "Цэцэг", emoji: "💐" },
+  { id: "gift", label: "Бэлэг", emoji: "🎁" },
+  { id: "photo", label: "Гэрэл зурагчин", emoji: "📷" },
+  { id: "video", label: "Видео зурагчин", emoji: "🎥" },
+  { id: "event", label: "Эвент үйлчилгээ", emoji: "🎉" },
+  { id: "stay", label: "Амралтын газар", emoji: "🏡" },
   { id: "activity", label: "Үйл ажиллагаа", emoji: "🎯" },
-  { id: "gift", label: "Бэлэг / Цэцэг", emoji: "🎁" },
-  { id: "photo", label: "Гэрэл зураг", emoji: "📷" },
-  { id: "stay", label: "Байр / Амралт", emoji: "🏡" },
-  { id: "event", label: "Эвент", emoji: "🎉" },
+  { id: "handmade", label: "Гар хийцийн бүтээгдэхүүн", emoji: "🧵" },
+  { id: "date", label: "Болзоонд зориулсан", emoji: "💕" },
   { id: "other", label: "Бусад", emoji: "✨" },
 ];
 
@@ -73,11 +78,14 @@ function renderServiceGrid() {
         <div class="card-location">${escapeHtml(c.label)}${s.district ? " · " + escapeHtml(s.district) : ""}</div>
         <div class="card-title">${escapeHtml(s.name || "")}</div>
         <div class="card-desc">${escapeHtml(s.desc || "")}</div>
+        ${s.price ? `<div class="service-price">💸 ${escapeHtml(s.price)}</div>` : ""}
+        ${s.hours ? `<div class="service-hours">🕒 ${escapeHtml(s.hours)}</div>` : ""}
         <div class="service-contact">
-          ${s.phone ? `<a href="tel:${escapeHtml(s.phone)}">☎ ${escapeHtml(s.phone)}</a>` : ""}
           ${s.website ? `<a href="${escapeHtml(s.website)}" target="_blank" rel="noopener nofollow">🔗 Вэбсайт</a>` : ""}
+          ${s.social ? `<a href="${escapeHtml(s.social)}" target="_blank" rel="noopener nofollow">💬 Social</a>` : ""}
           ${s.address ? `<a href="https://www.google.com/maps/search/${encodeURIComponent(s.address)}" target="_blank" rel="noopener">📍 Газрын зураг</a>` : ""}
         </div>
+        ${s.phone ? `<a class="btn btn-primary btn-sm service-cta" href="tel:${escapeHtml(s.phone)}">☎ Холбоо барих — ${escapeHtml(s.phone)}</a>` : ""}
       </div>
     </article>`;
   }).join("");
@@ -126,10 +134,13 @@ function openServiceForm() {
         <select id="svcCat" required>${SERVICE_CATS.map(c => `<option value="${c.id}">${escapeHtml(c.label)}</option>`).join("")}</select>
       </div>
       <div class="form-group"><label for="svcDesc">Товч тайлбар *</label><textarea id="svcDesc" rows="3" required maxlength="400"></textarea></div>
+      <div class="form-group"><label for="svcPrice">Үнэ / үнийн санал</label><input type="text" id="svcPrice" maxlength="60" placeholder="Жишээ: 30,000₮-ээс"></div>
+      <div class="form-group"><label for="svcHours">Ажиллах цаг</label><input type="text" id="svcHours" maxlength="80" placeholder="Жишээ: Даваа–Бям 10:00–20:00"></div>
       <div class="form-group"><label for="svcDistrict">Дүүрэг / Аймаг</label><input type="text" id="svcDistrict" maxlength="60"></div>
       <div class="form-group"><label for="svcAddress">Хаяг</label><input type="text" id="svcAddress" maxlength="160"></div>
       <div class="form-group"><label for="svcPhone">Утас</label><input type="tel" id="svcPhone" maxlength="30"></div>
-      <div class="form-group"><label for="svcWeb">Вэбсайт / Facebook</label><input type="url" id="svcWeb" placeholder="https://..." maxlength="200"></div>
+      <div class="form-group"><label for="svcWeb">Вэбсайт</label><input type="url" id="svcWeb" placeholder="https://..." maxlength="200"></div>
+      <div class="form-group"><label for="svcSocial">Facebook / Instagram холбоос</label><input type="url" id="svcSocial" placeholder="https://facebook.com/..." maxlength="200"></div>
       <div class="form-group"><label for="svcImg">Зураг (сонголтоор)</label><input type="file" id="svcImg" accept="image/*"></div>
       <div id="svcStatus" class="service-form-status" role="status"></div>
       <div class="cms-edit-actions">
@@ -146,11 +157,14 @@ async function submitService(ev) {
   const btn = document.getElementById("svcSubmit");
   const status = document.getElementById("svcStatus");
   const website = document.getElementById("svcWeb").value.trim();
-  // http/https биш схемийг (javascript: г.м) хүлээж авахгүй — энэ нь дараа нь
+  const social = document.getElementById("svcSocial").value.trim();
+  // http/https биш схемийг (javascript: г.м) хүлээж авахгүй — эдгээр нь дараа нь
   // href болж render хийгддэг тул эх үүсвэр дээр нь таслах нь хамгийн найдвартай.
-  if (website && !/^https?:\/\//i.test(website)) {
-    status.textContent = "⚠️ Вэбсайт нь http:// эсвэл https:// -ээр эхлэх ёстой";
-    return;
+  for (const [val, label] of [[website, "Вэбсайт"], [social, "Social холбоос"]]) {
+    if (val && !/^https?:\/\//i.test(val)) {
+      status.textContent = "⚠️ " + label + " нь http:// эсвэл https:// -ээр эхлэх ёстой";
+      return;
+    }
   }
   btn.disabled = true;
   status.textContent = "Илгээж байна...";
@@ -169,7 +183,9 @@ async function submitService(ev) {
       district: document.getElementById("svcDistrict").value.trim(),
       address: document.getElementById("svcAddress").value.trim(),
       phone: document.getElementById("svcPhone").value.trim(),
-      website, imageUrl,
+      website, social, imageUrl,
+      price: document.getElementById("svcPrice").value.trim(),
+      hours: document.getElementById("svcHours").value.trim(),
       status: "pending",              // rules-д ч мөн албадсан — өөрөө зөвшөөрөх боломжгүй
       ownerUid: currentUser.uid,
       submittedByName: currentUser.name,

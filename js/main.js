@@ -18,3 +18,8 @@ window.addEventListener("scroll", () => {
 if (typeof applySiteSettings === "function") {
   applySiteSettings().catch(e => console.warn("applySiteSettings failed:", e));
 }
+
+// Хуудсанд banner slot байвал дүүргэнэ (js/banner.js). Slot байхгүй бол юу ч хийхгүй.
+if (typeof loadBanners === "function") {
+  loadBanners().catch(e => console.warn("loadBanners failed:", e));
+}

@@ -1,54 +1,5 @@
-// ===== Admin-managed ad/promo banner (нүүр хуудасны дээд хэсэг) =====
-// active==true бол л Firestore-оос авна (тэгэхгүй бол хугацаа хэдийнэ дууссан/идэвхгүй
-// banner-үүд ч бас татагдана); эхлэх/дуусах огноог client-side-д шалгана, учир нь
-// "active" эсвэл огнооны хослол дээр orderBy хийх composite index шаардлагатай болдог —
-// banner тоо цөөхөн байдаг тул бүгдийг татаад client дээр шүүх/эрэмбэлэх нь энгийн бөгөөд найдвартай.
-async function loadHomeBanner() {
-  const slot = document.getElementById("homeBannerSlot");
-  if (!slot || !db) return;
-  try {
-    const snap = await db.collection("banners").where("active", "==", true).get();
-    const today = new Date().toISOString().slice(0, 10);
-    const valid = snap.docs
-      .map(d => ({ id: d.id, ...d.data() }))
-      .filter(b => (!b.startDate || b.startDate <= today) && (!b.endDate || b.endDate >= today))
-      .filter(b => b.placement === "home-top" && b.imageUrl)
-      .sort((a, b) => (b.priority || 0) - (a.priority || 0));
-    if (!valid.length) { slot.innerHTML = ""; return; }
-    renderHomeBanner(valid[0]);
-    trackBannerEvent(valid[0].id, "impression");
-  } catch (e) {
-    console.warn("loadHomeBanner error:", e);
-    slot.innerHTML = "";
-  }
-}
-
-// Banner-ийн үзэлт/даралтыг бүртгэнэ. ЗӨВХӨН нэгтгэсэн тоо гаргах зорилготой —
-// хэрэглэгчийн ID, IP, хөтчийн ул мөр зэрэг хувийн мэдээлэл ОГТ хадгалахгүй.
-// Бүтэлгүйтвэл чимээгүй өнгөрнө: статистик бүртгэгдэхгүй байх нь banner харагдахгүй
-// байхаас хамаагүй дээр.
-function trackBannerEvent(bannerId, type) {
-  try {
-    if (!db || !bannerId) return;
-    db.collection("bannerEvents").add({
-      bannerId, type,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    }).catch(() => {});
-  } catch (e) { /* no-op */ }
-}
-
-function renderHomeBanner(b) {
-  const slot = document.getElementById("homeBannerSlot");
-  if (!slot) return;
-  const hasMobile = !!b.mobileImageUrl;
-  const inner = `
-    <span class="home-banner-label">Зар сурталчилгаа</span>
-    ${hasMobile ? `<img class="home-banner-img home-banner-img-mobile" src="${escapeHtml(b.mobileImageUrl)}" alt="${escapeHtml(b.title || "")}" loading="eager">` : ""}
-    <img class="home-banner-img home-banner-img-desktop" src="${escapeHtml(b.imageUrl)}" alt="${escapeHtml(b.title || "")}" loading="eager">`;
-  slot.innerHTML = b.targetUrl
-    ? `<a class="home-banner${hasMobile ? " has-mobile" : ""}" href="${escapeHtml(b.targetUrl)}" target="_blank" rel="noopener sponsored" onclick="trackBannerEvent('${escapeHtml(b.id)}','click')">${inner}</a>`
-    : `<div class="home-banner${hasMobile ? " has-mobile" : ""}">${inner}</div>`;
-}
+// ===== НҮҮР ХУУДАС =====
+// Banner-ийн логик нь js/banner.js дотор — бүх хуудсанд нийтлэг тул тусад нь гаргасан.
 
 // Бүх тоог бодит dataset-ээс тооцно — HTML дотор ямар ч тоо hardcode хийгээгүй тул
 // контент нэмэгдэх/хасагдахад UI автоматаар зөв тоо харуулна. Байрлалын индекс (statNums[0])

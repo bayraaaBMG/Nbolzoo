@@ -27,9 +27,9 @@ const CMS_SOURCES = {
     idKey: "id",
     label: () => CMS_TYPE_LABELS.gifts,
     list: () => (typeof gifts !== "undefined" ? gifts : null),
-    title: x => x.name || x.title,
-    meta: x => `${x.category || "-"}${x.price ? " · " + x.price : ""}`,
-    fields: [["name", "Нэр", "text"], ["desc", "Тайлбар", "textarea"]],
+    title: x => x.title,
+    meta: x => `${x.cat || "-"}${x.price ? " · " + x.price : ""}`,
+    fields: [["title", "Нэр", "text"], ["desc", "Тайлбар", "textarea"], ["price", "Үнийн санал", "text"], ["why", "Яагаад", "textarea"]],
   },
 };
 

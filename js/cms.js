@@ -18,11 +18,11 @@
 // Ингэснээр нэг хуудас = НЭМЭЛТ 1 уншилт, dataset хөндөгдөхгүй, буцаах нь хялбар
 // (override-ийг устгахад анхны контент яг хэвээрээ эргэж ирнэ).
 
-const CMS_TYPES = ["ub", "aimags", "gifts", "expert", "movies"];
-const CMS_TYPE_LABELS = {
-  ub: "УБ 365 санаа", aimags: "Аймгууд", gifts: "Бэлэг",
-  expert: "Зөвлөгөө", movies: "Кино",
-};
+// Зөвхөн ХАВТГАЙ жагсаалт хэлбэртэй, id-тай контентыг энд удирдана.
+// "Зөвлөгөө" (js/expert.js) нь жагсаалт биш, үе шат/тест зэрэг өөр өөр бүтэцтэй тул
+// энэ загварт таарахгүй. "Кино" нь аль хэдийн Firestore дээр тусдаа CRUD таб-тай.
+const CMS_TYPES = ["ub", "aimags", "gifts"];
+const CMS_TYPE_LABELS = { ub: "УБ 365 санаа", aimags: "Аймгууд", gifts: "Бэлэг" };
 
 // Нэг хуудсанд нэг төрөл л хэрэгтэй тул process бүрт cache хийнэ.
 const _cmsCache = {};
@@ -116,4 +116,30 @@ async function cmsSaveOverride(type, patch) {
     }
   }
   delete _cmsCache[type]; // дараагийн уншилт шинэчилсэн утгыг авна
+}
+
+// Нийтийн хуудсанд override-ийг ХЭРЭГЖҮҮЛЭХ.
+//
+// Дараалал: хуудас эхлээд эх өгөгдлөөрөө ШУУД зурагдана (хоосон дэлгэц, spinner байхгүй),
+// дараа нь override ирэхэд массивыг ШИНЭЧЛЭЭД дахин зурна. Ингэснээр:
+//   - Firestore удаан/унтарсан ч хуудас бүрэн ажиллана (fail-open)
+//   - SEO/LCP-д нөлөөгүй — анхны render нь одоогийнхтой яг адилхан хурдан
+//
+// Массивыг ОРЛУУЛАХГҮЙ, БАЙРАН ДЭЭР нь (splice) шинэчилдэг нь санаатай: allUbIdeas,
+// aimagsClean, gifts зэргийг олон файл шууд нэрээр нь ашигладаг тул шинэ массив
+// оноовол тэдгээр лавлагаа хуучин өгөгдөл дээр үлдэж, зөрөх байсан.
+async function cmsHydrate(type, targetArray, idKey, rerender) {
+  try {
+    if (!Array.isArray(targetArray)) return;
+    const ov = await cmsLoadOverride(type);
+    const changed = (ov.hidden || []).length || (ov.order || []).length
+      || Object.keys(ov.edits || {}).length || (ov.added || []).length;
+    if (!changed) return;                       // өөрчлөлт байхгүй бол дахин зурах шаардлагагүй
+    const merged = cmsApply(targetArray, ov, idKey);
+    targetArray.splice(0, targetArray.length, ...merged);
+    if (typeof rerender === "function") rerender();
+  } catch (e) {
+    // Override хэрэгжихгүй байх нь хуудас эвдрэхээс хамаагүй дээр.
+    console.warn("cmsHydrate(" + type + ") failed:", e);
+  }
 }

@@ -200,6 +200,7 @@
 <script src="js/couple.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/core.js"></script>
+<script src="js/cms.js"></script>
 <script src="js/ub.js"></script>
 <script src="js/site-settings.js"></script>
 <script src="js/main.js"></script>
@@ -207,6 +208,8 @@
 ubReadUrl();
 renderUbIdeas();
 nbHydrateIcons();
+// Admin-аас нуусан/өөрчилсөн зүйл байвал ирэхэд нь дахин зурна (эхний render хүлээхгүй).
+cmsHydrate("ub", allUbIdeas, "id", () => { renderUbIdeas(); nbHydrateIcons(); });
 </script>
 
 </body>

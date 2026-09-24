@@ -197,11 +197,13 @@
 <script src="js/couple.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/core.js"></script>
+<script src="js/cms.js"></script>
 <script src="js/gifts.js"></script>
 <script src="js/site-settings.js"></script>
 <script src="js/main.js"></script>
 <script>
 showGiftTab('gifts');
+cmsHydrate("gifts", gifts, "id", () => { if (currentGiftCat) renderGifts(); });
 </script>
 
 </body>

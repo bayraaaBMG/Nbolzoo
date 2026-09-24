@@ -22,6 +22,8 @@ const NB_ICONS = {
   chevron: '<path d="m6 9 6 6 6-6"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  store: '<path d="M4 9h16l-1 11H5z"/><path d="M4 9 6 4h12l2 5"/><path d="M9.5 13.5h5"/>',
+  plus: '<path d="M12 5v14"/><path d="M5 12h14"/>',
   dice: '<rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><circle cx="8.5" cy="8.5" r="1.1"/><circle cx="15.5" cy="15.5" r="1.1"/><circle cx="12" cy="12" r="1.1"/>',
 };
 

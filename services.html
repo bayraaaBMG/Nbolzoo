@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Бэлгийн санаа - NBolzoo</title>
+<title>Үйлчилгээний жагсаалт | NBolzoo</title>
 <!-- OG Meta Tags - Social Share -->
-<meta property="og:title" content="Бэлгийн санаа - NBolzoo">
-<meta property="og:description" content="247 бэлгийн санаа, 28 гэрлэх санал + заавар.">
-<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Three_Bars_(1).jpg/960px-Three_Bars_(1).jpg">
-<meta property="og:url" content="https://nbolzoo.vercel.app/gifts.html">
+<meta property="og:title" content="Үйлчилгээний жагсаалт | NBolzoo">
+<meta property="og:description" content="Болзоонд тохирох үйлчилгээний нэгдсэн жагсаалт.">
+<meta property="og:image" content="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1200&h=630&fit=crop&auto=format">
+<meta property="og:url" content="https://nbolzoo.vercel.app/services.html">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Бэлгийн санаа - NBolzoo">
-<meta name="twitter:description" content="247 бэлгийн санаа, 28 гэрлэх санал + заавар.">
-<meta name="description" content="247 бэлгийн санаа, 28 гэрлэх санал + заавар.">
-<link rel="canonical" href="https://nbolzoo.vercel.app/gifts.html">
+<meta name="twitter:title" content="Хадгалсан санаанууд - NBolzoo">
+<meta name="twitter:description" content="Таны дуртай гэж тэмдэглэсэн болзооны санаанууд.">
+<meta name="description" content="Болзоонд тохирох ресторан, үйл ажиллагаа, бэлэг, гэрэл зурагчны үйлчилгээ. Бизнесээ бүртгүүлэх боломжтой.">
+<link rel="canonical" href="https://nbolzoo.vercel.app/services.html">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -52,15 +52,15 @@
         </div>
       </li>
       <li class="nav-group">
-        <button type="button" class="nav-link nav-group-btn active" aria-expanded="false" aria-haspopup="true" aria-controls="navGroup-tools">
+        <button type="button" class="nav-link nav-group-btn" aria-expanded="false" aria-haspopup="true" aria-controls="navGroup-tools">
           <span class="nav-ico" data-icon="tools"></span>Хэрэгслүүд<span class="nav-caret" data-icon="chevron" data-icon-size="14"></span>
         </button>
         <div class="nav-dropdown" id="navGroup-tools" role="menu">
           <a class="nav-dropdown-link" data-page="urilga" onclick="navigate('urilga')"><span class="nav-ico" data-icon="mail"></span>Урилга</a>
           <a class="nav-dropdown-link" data-page="games" onclick="navigate('games')"><span class="nav-ico" data-icon="gamepad"></span>Тоглоом</a>
-          <a class="nav-dropdown-link active" data-page="gifts" onclick="navigate('gifts')" aria-current="page"><span class="nav-ico" data-icon="gift"></span>Бэлэг</a>
+          <a class="nav-dropdown-link" data-page="gifts" onclick="navigate('gifts')"><span class="nav-ico" data-icon="gift"></span>Бэлэг</a>
           <a class="nav-dropdown-link" data-page="movies" onclick="navigate('movies')"><span class="nav-ico" data-icon="film"></span>Кино</a>
-          <a class="nav-dropdown-link" data-page="services" onclick="navigate('services')"><span class="nav-ico" data-icon="store"></span>Үйлчилгээ</a>
+          <a class="nav-dropdown-link active" data-page="services" onclick="navigate('services')" aria-current="page"><span class="nav-ico" data-icon="store"></span>Үйлчилгээ</a>
         </div>
       </li>
       <li><a class="nav-link" data-page="community" onclick="navigate('community')"><span class="nav-ico" data-icon="users"></span>Нийгэмлэг</a></li>
@@ -101,9 +101,9 @@
     <a onclick="navigate('expert');closeMobileMenu()"><span class="nav-ico" data-icon="gem"></span>Зөвлөгөө</a>
     <a onclick="navigate('urilga');closeMobileMenu()"><span class="nav-ico" data-icon="mail"></span>Урилга</a>
     <a onclick="navigate('games');closeMobileMenu()"><span class="nav-ico" data-icon="gamepad"></span>Тоглоом</a>
-    <a onclick="navigate('gifts');closeMobileMenu()" class="active" aria-current="page"><span class="nav-ico" data-icon="gift"></span>Бэлэг</a>
+    <a onclick="navigate('gifts');closeMobileMenu()"><span class="nav-ico" data-icon="gift"></span>Бэлэг</a>
     <a onclick="navigate('movies');closeMobileMenu()"><span class="nav-ico" data-icon="film"></span>Кино</a>
-    <a onclick="navigate('services');closeMobileMenu()"><span class="nav-ico" data-icon="store"></span>Үйлчилгээ</a>
+    <a onclick="navigate('services');closeMobileMenu()" class="active" aria-current="page"><span class="nav-ico" data-icon="store"></span>Үйлчилгээ</a>
     <a onclick="navigate('community');closeMobileMenu()"><span class="nav-ico" data-icon="users"></span>Нийгэмлэг</a>
     <a onclick="navigate('saved');closeMobileMenu()"><span class="nav-ico" data-icon="heart"></span>Хадгалсан</a>
   </div>
@@ -116,34 +116,23 @@
 
 
 <main>
-  <div id="page-gifts" class="page active">
+  <div id="page-services" class="page active">
     <div class="container">
-      <div class="expert-hero" style="background: linear-gradient(135deg, #B8451F, #D85A30);">
-        <span class="expert-badge">🎁 247 бэлгийн санаа</span>
-        <h1>Бие биедээ юу бэлэглэх вэ?</h1>
-        <p>Хайртай хүндээ зориулсан 247 чанартай бэлгийн санаа, 10 ангилалаар. Мөнгөний дүн биш, санаа чухал. Доороос гэрлэх санал тавих 28 санаа ч бий.</p>
+      <div class="services-head">
+        <h1>🏪 Үйлчилгээний жагсаалт</h1>
+        <p>Болзоогоо зохион байгуулахад тусалах бизнес, үйлчилгээнүүд. Бүгд шалгагдсаны дараа нийтэд нээлттэй болно.</p>
+        <button class="btn btn-primary" type="button" onclick="openServiceForm()">
+          <span class="nav-ico" data-icon="plus"></span>Үйлчилгээгээ бүртгүүлэх
+        </button>
       </div>
 
-      <div style="display:flex; gap:10px; margin-bottom:20px;">
-        <button type="button" class="btn btn-primary" onclick="showGiftTab('gifts')" id="giftTabBtn">🎁 Бэлгийн санаа (247)</button>
-        <button type="button" class="btn btn-ghost" onclick="showGiftTab('proposals')" id="proposalTabBtn">💍 Гэрлэх санал + заавар (28)</button>
-      </div>
-
-      <div id="giftsContent">
-        <div class="gift-cat-tabs" id="giftCatTabs"></div>
-        <div class="gift-grid" id="giftGrid"></div>
-      </div>
-
-      <div id="proposalsContent" style="display:none;">
-        <div style="background:linear-gradient(135deg,var(--primary-extra-soft),#fff);border:1px solid var(--primary-soft);border-radius:12px;padding:16px 20px;margin-bottom:20px;">
-          <p style="font-size:14px;line-height:1.7;color:var(--text);margin-bottom:6px;">💍 <strong>Гэрлэх санал тавих</strong> — амьдралын хамгийн чухал мөчүүдийн нэг. Доорх санаанууд Монгол орчин, соёлд тохирсон, дэлгэрэнгүй зааваруудтай.</p>
-          <p style="font-size:13px;color:var(--text-light);">📖 "Дэлгэрэнгүй заавар харах" дарахад: <strong>юу бэлдэх · алхам алхмаар · яг юу хэлэх</strong> бүгд гарна.</p>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;" id="proposalGrid"></div>
-      </div>
+      <!-- Ангилал нь бодит өгөгдлөөс гарна (js/services.js) — hardcode хийгээгүй. -->
+      <div class="filters" id="serviceFilters"></div>
+      <div id="serviceFormSlot"></div>
+      <div id="myServices"></div>
+      <div class="cards-grid" id="servicesGrid"></div>
     </div>
   </div>
-
 </main>
 
 <button type="button" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Дээш буцах">↑</button>
@@ -197,12 +186,13 @@
 <script src="js/couple.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/core.js"></script>
-<script src="js/gifts.js"></script>
+<script src="js/ub.js"></script>
+<script src="js/services.js"></script>
 <script src="js/site-settings.js"></script>
 <script src="js/main.js"></script>
 <script>
-showGiftTab('gifts');
+  renderServices();
+  if (typeof nbHydrateIcons === "function") nbHydrateIcons();
 </script>
-
 </body>
 </html>

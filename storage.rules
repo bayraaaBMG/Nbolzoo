@@ -4,6 +4,13 @@ service firebase.storage {
 
     function isSignedIn() { return request.auth != null; }
     function isAdmin() { return isSignedIn() && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid)); }
+    // Эрхийн түвшинг Firestore-оос уншина — firestore.rules-ийн staffRole()-тэй ижил эх сурвалж.
+    // Moderator зураг байршуулах эрхгүй (зөвхөн нуух/хянах ажилтай) тул banner/movie/service
+    // зурагт admin+ шаардана.
+    function staffRole() {
+      return isAdmin() ? firestore.get(/databases/(default)/documents/admins/$(request.auth.uid)).data.role : '';
+    }
+    function isStaffAtLeastAdmin() { return staffRole() in ['owner', 'admin']; }
     function isImage() { return request.resource.contentType.matches('image/.*'); }
     function underSize(mb) { return request.resource.size < mb * 1024 * 1024; }
     function isCoupleMember(coupleId) {
@@ -35,13 +42,28 @@ service firebase.storage {
     // Ad/promo banner images (desktop + mobile) — admin only, 5MB cap
     match /banners/{fileName} {
       allow read: if true;
-      allow write: if isAdmin() && isImage() && underSize(5);
+      allow write: if isStaffAtLeastAdmin() && isImage() && underSize(5);
     }
 
     // Movie posters — admin only, 8MB cap
     match /movies/{movieId}/{fileName} {
       allow read: if true;
-      allow write: if isAdmin() && isImage() && underSize(8);
+      allow write: if isStaffAtLeastAdmin() && isImage() && underSize(8);
+    }
+
+    // Үйлчилгээ/бизнесийн лого, зураг — зөвхөн бүртгүүлж буй эзэн нь өөрийн хавтас руугаа
+    // байршуулна (uid-ээр түлхүүрлэсэн, profiles/ posts/ -той ижил хэв маяг), 5MB хязгаар.
+    // Admin+ нь хянах явцад зураг солих шаардлага гарвал бичиж чадна.
+    match /services/{uid}/{fileName} {
+      allow read: if true;
+      allow write: if isImage() && underSize(5)
+        && (isStaffAtLeastAdmin() || (isSignedIn() && request.auth.uid == uid));
+    }
+
+    // CMS-ээр admin-аас нэмсэн/солисон контентын зураг — зөвхөн admin+.
+    match /cms/{fileName=**} {
+      allow read: if true;
+      allow write: if isStaffAtLeastAdmin() && isImage() && underSize(8);
     }
 
     // Couple memory photos — only the 2 linked members, 8MB cap

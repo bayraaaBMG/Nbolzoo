@@ -52,11 +52,12 @@
           <a class="nav-dropdown-link" data-page="games" onclick="navigate('games')"><span class="nav-ico" data-icon="gamepad"></span>Тоглоом</a>
           <a class="nav-dropdown-link" data-page="gifts" onclick="navigate('gifts')"><span class="nav-ico" data-icon="gift"></span>Бэлэг</a>
           <a class="nav-dropdown-link" data-page="movies" onclick="navigate('movies')"><span class="nav-ico" data-icon="film"></span>Кино</a>
+          <a class="nav-dropdown-link" data-page="services" onclick="navigate('services')"><span class="nav-ico" data-icon="store"></span>Үйлчилгээ</a>
         </div>
       </li>
       <li><a class="nav-link" data-page="community" onclick="navigate('community')"><span class="nav-ico" data-icon="users"></span>Нийгэмлэг</a></li>
       <li><a class="nav-link" data-page="saved" onclick="navigate('saved')"><span class="nav-ico" data-icon="heart"></span>Хадгалсан</a></li>
-      <li><a class="nav-link active" id="navAdminLink" data-page="admin" onclick="navigate('admin')" style="display:none;"><span class="nav-ico" data-icon="settings"></span>Админ</a></li>
+      <li><a class="nav-link active" id="navAdminLink" data-page="admin" onclick="navigate('admin')" aria-current="page" style="display:none;"><span class="nav-ico" data-icon="settings"></span>Админ</a></li>
     </ul>
     <div class="nav-actions">
       <div id="navAuthButtons">
@@ -94,6 +95,7 @@
     <a onclick="navigate('games');closeMobileMenu()"><span class="nav-ico" data-icon="gamepad"></span>Тоглоом</a>
     <a onclick="navigate('gifts');closeMobileMenu()"><span class="nav-ico" data-icon="gift"></span>Бэлэг</a>
     <a onclick="navigate('movies');closeMobileMenu()"><span class="nav-ico" data-icon="film"></span>Кино</a>
+    <a onclick="navigate('services');closeMobileMenu()"><span class="nav-ico" data-icon="store"></span>Үйлчилгээ</a>
     <a onclick="navigate('community');closeMobileMenu()"><span class="nav-ico" data-icon="users"></span>Нийгэмлэг</a>
     <a onclick="navigate('saved');closeMobileMenu()"><span class="nav-ico" data-icon="heart"></span>Хадгалсан</a>
   </div>
@@ -111,28 +113,22 @@
       <h1 style="margin-bottom:20px;">⚙️ Админ удирдлагын самбар</h1>
       <div id="adminGate"></div>
       <div id="adminPanel" class="admin-shell" style="display:none;">
-        <nav class="admin-tabs">
-          <div class="admin-tab active" data-tab="overview" onclick="showAdminTab('overview')">📊 Тойм</div>
-          <div class="admin-tab" data-tab="users" onclick="showAdminTab('users')">🧑‍🤝‍🧑 Хэрэглэгчид</div>
-          <div class="admin-tab" data-tab="posts" onclick="showAdminTab('posts')">📝 Нийтлэлүүд</div>
-          <div class="admin-tab" data-tab="comments" onclick="showAdminTab('comments')">💬 Сэтгэгдэл</div>
-          <div class="admin-tab" data-tab="reports" onclick="showAdminTab('reports')">🚩 Гомдол/Хяналт</div>
-          <div class="admin-tab" data-tab="suggestions" onclick="showAdminTab('suggestions')">🎬 Кино саналууд</div>
-          <div class="admin-tab" data-tab="banners" onclick="showAdminTab('banners')">📢 Banner</div>
-          <div class="admin-tab" data-tab="invites" onclick="showAdminTab('invites')">💌 Урилгууд</div>
-          <div class="admin-tab" data-tab="movies" onclick="showAdminTab('movies')">🎞 Контент (кино)</div>
-          <div class="admin-tab" data-tab="activity" onclick="showAdminTab('activity')">📜 Түүх</div>
-        </nav>
+        <nav class="admin-tabs" id="adminTabs" aria-label="Админ цэс"></nav>
         <div class="admin-main">
           <div class="admin-tab-content" id="admin-overview"></div>
+          <div class="admin-tab-content" id="admin-cms" style="display:none;"></div>
           <div class="admin-tab-content" id="admin-users" style="display:none;"></div>
           <div class="admin-tab-content" id="admin-posts" style="display:none;"></div>
           <div class="admin-tab-content" id="admin-comments" style="display:none;"></div>
           <div class="admin-tab-content" id="admin-reports" style="display:none;"></div>
           <div class="admin-tab-content" id="admin-suggestions" style="display:none;"></div>
+          <div class="admin-tab-content" id="admin-services" style="display:none;"></div>
           <div class="admin-tab-content" id="admin-banners" style="display:none;"></div>
           <div class="admin-tab-content" id="admin-invites" style="display:none;"></div>
           <div class="admin-tab-content" id="admin-movies" style="display:none;"></div>
+          <div class="admin-tab-content" id="admin-theme" style="display:none;"></div>
+          <div class="admin-tab-content" id="admin-navigation" style="display:none;"></div>
+          <div class="admin-tab-content" id="admin-homepage" style="display:none;"></div>
           <div class="admin-tab-content" id="admin-activity" style="display:none;"></div>
         </div>
       </div>
@@ -192,7 +188,18 @@
 <script src="js/ui.js"></script>
 <script src="js/core.js"></script>
 <script src="js/movies.js"></script>
+<!-- CMS таб жинхэнэ контентыг жагсаахын тулд эх dataset-үүд хэрэгтэй.
+     Зөвхөн admin хуудсанд ачаална — нийтийн хуудсуудын жин өөрчлөгдөхгүй. -->
+<script src="js/ub.js"></script>
+<script src="js/aimags.js"></script>
+<script src="js/gifts.js"></script>
+<script src="js/roles.js"></script>
+<script src="js/cms.js"></script>
 <script src="js/admin.js"></script>
+<script src="js/admin-cms.js"></script>
+<script src="js/admin-services.js"></script>
+<script src="js/admin-settings.js"></script>
+<script src="js/site-settings.js"></script>
 <script src="js/main.js"></script>
 <script>
 function onAuthStateResolved() { initAdminDashboard(); }

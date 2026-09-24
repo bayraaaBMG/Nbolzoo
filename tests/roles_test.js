@@ -78,5 +78,23 @@ t('admin can manage plain user', ctx.nbCanManageUserWithRole(null), true);
 as('moderator');
 t('mod cannot manage anyone',    ctx.nbCanManageUserWithRole(null), false);
 
-console.log('\nroles: ' + pass + ' passed, ' + fail + ' failed');
+
+// --- Admin UI нь эрхгүй товчийг зурахгүй байгаа эсэх (эх кодын шалгалт) ---
+// "Дарахад л алдаа өгдөг" товч харуулах нь буруу UX бөгөөд эрхийн загварыг
+// төөрөгдүүлнэ. Устгах бүх товч nbCan() -ийн ард байх ёстой.
+const adminSrc = require('fs').readFileSync('js/admin.js', 'utf8');
+[
+  ['adminDeletePost', 'moderation.delete'],
+  ['adminDeleteComment', 'moderation.delete'],
+  ['adminDeleteBanner', 'banners.manage'],
+  ['adminToggleBannerActive', 'banners.manage'],
+].forEach(([fn, perm]) => {
+  // Товчны мөрөөс өмнөх 400 тэмдэгтэд тохирох эрхийн шалгалт байх ёстой
+  const i = adminSrc.indexOf('onclick="' + fn);
+  const before = i > 0 ? adminSrc.slice(Math.max(0, i - 400), i) : '';
+  const gated = /nbCan\(|canManage/.test(before);
+  if (gated) { pass++; console.log('  ok  ' + fn + ' button is permission-gated'); }
+  else { fail++; console.log('  FAIL ' + fn + ' button is NOT permission-gated'); }
+});
+console.log('\nroles (incl. UI gating): ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

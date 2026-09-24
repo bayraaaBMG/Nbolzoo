@@ -279,8 +279,8 @@ async function renderAdminPosts() {
           <div class="admin-card-meta">❤️ ${p.likeCount||0} · 💬 ${p.commentCount||0}</div>
         </div>
         <div class="admin-card-actions">
-          <button class="btn btn-outline" type="button" onclick="adminTogglePostHidden('${d.id}', ${!p.hidden})">${p.hidden ? "Харуулах" : "Нуух"}</button>
-          <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeletePost('${d.id}')">🗑 Устгах</button>
+          <button class="btn btn-outline btn-sm" type="button" onclick="adminTogglePostHidden('${d.id}', ${!p.hidden})">${p.hidden ? "Харуулах" : "Нуух"}</button>
+          ${nbCan("moderation.delete") ? `<button class="btn btn-outline btn-sm" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeletePost('${d.id}')">🗑 Устгах</button>` : ""}
         </div>
       </div>`;
     }).join("");
@@ -325,8 +325,8 @@ async function renderAdminComments() {
           <div class="admin-card-meta">Пост: ${escapeHtml(c.postId||"-")}</div>
         </div>
         <div class="admin-card-actions">
-          <button class="btn btn-outline" type="button" onclick="adminToggleCommentHidden('${d.id}', ${!c.hidden})">${c.hidden ? "Харуулах" : "Нуух"}</button>
-          <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeleteComment('${d.id}','${c.postId||""}')">🗑 Устгах</button>
+          <button class="btn btn-outline btn-sm" type="button" onclick="adminToggleCommentHidden('${d.id}', ${!c.hidden})">${c.hidden ? "Харуулах" : "Нуух"}</button>
+          ${nbCan("moderation.delete") ? `<button class="btn btn-outline btn-sm" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeleteComment('${d.id}','${c.postId||""}')">🗑 Устгах</button>` : ""}
         </div>
       </div>`;
     }).join("");
@@ -380,7 +380,7 @@ async function renderAdminReports() {
         </div>
         <div class="admin-card-actions">
           <button class="btn btn-outline" type="button" onclick="adminResolveReport('${r._dbId}','${r.targetType}','${r.targetId}',${r.postId ? `'${r.postId}'` : "null"},'hide')">Нуух</button>
-          <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminResolveReport('${r._dbId}','${r.targetType}','${r.targetId}',${r.postId ? `'${r.postId}'` : "null"},'delete')">🗑 Устгах</button>
+          ${nbCan("moderation.delete") ? `<button class="btn btn-outline btn-sm" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminResolveReport('${r._dbId}','${r.targetType}','${r.targetId}',${r.postId ? `'${r.postId}'` : "null"},'delete')">🗑 Устгах</button>` : ""}
           <button class="btn btn-outline" type="button" onclick="adminResolveReport('${r._dbId}','${r.targetType}','${r.targetId}',${r.postId ? `'${r.postId}'` : "null"},'dismiss')">Татгалзах</button>
         </div>
       </div>`).join("");
@@ -544,7 +544,11 @@ const ADMIN_BANNER_PLACEMENTS = [
 
 async function renderAdminBanners() {
   const el = document.getElementById("admin-banners");
-  el.innerHTML = adminAddBannerFormHtml() + `<div id="adminBannersList"><div class="admin-loading">Ачаалж байна...</div></div>`;
+  // Moderator зөвхөн харна — нэмэх маягт болон үйлдлийн товчийг огт зурахгүй
+  // (rules нь дүрмээр татгалзах ч, хэзээ ч ажиллахгүй товч харуулах нь буруу).
+  const canManage = nbCan("banners.manage");
+  el.innerHTML = (canManage ? adminAddBannerFormHtml() : `<div class="admin-note">Та зөвхөн харах эрхтэй.</div>`)
+    + `<div id="adminBannersList"><div class="admin-loading">Ачаалж байна...</div></div>`;
   try {
     const snap = await db.collection("banners").orderBy("priority", "desc").get();
     const list = snap.docs.map(d => ({ _dbId: d.id, ...d.data() }));
@@ -579,8 +583,8 @@ async function renderAdminBanners() {
               ${stats[b._dbId] ? `<div class="admin-card-meta">👁 ${stats[b._dbId].imp} үзэлт · 🖱 ${stats[b._dbId].clk} даралт${stats[b._dbId].imp ? " · CTR " + ((stats[b._dbId].clk / stats[b._dbId].imp) * 100).toFixed(1) + "%" : ""}</div>` : ""}
             </div>
             <div class="admin-card-actions">
-              <button class="btn btn-outline" type="button" onclick="adminToggleBannerActive('${b._dbId}', ${!b.active})">${b.active ? "Идэвхгүй болгох" : "Идэвхжүүлэх"}</button>
-              <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeleteBanner('${b._dbId}')">🗑 Устгах</button>
+              ${canManage ? `<button class="btn btn-outline btn-sm" type="button" onclick="adminToggleBannerActive('${b._dbId}', ${!b.active})">${b.active ? "Идэвхгүй болгох" : "Идэвхжүүлэх"}</button>
+              <button class="btn btn-outline btn-sm" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeleteBanner('${b._dbId}')">🗑 Устгах</button>` : ""}
             </div>
           </div>`;
         }).join("")

@@ -4,7 +4,21 @@ service cloud.firestore {
 
     function isSignedIn() { return request.auth != null; }
     function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+    // admins/{uid} байгаа эсэх = ямар нэг эрхтэй ажилтан (owner|admin|moderator).
+    // Хуучин код бүхэлдээ isAdmin()-г ашигладаг тул ҮҮНИЙГ ХЭВЭЭР үлдээв — гэхдээ одоо
+    // moderator ч мөн үүнд багтана, тиймээс ХУДАЛДАХ/УСТГАХ зэрэг эрхийг доорх
+    // isStaffAtLeastAdmin() -ээр тусад нь шалгана.
     function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    // Тухайн ажилтны эрхийн түвшин ('owner'|'admin'|'moderator'). Эрхгүй бол ''.
+    function staffRole() {
+      return isAdmin() ? get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role : '';
+    }
+    // owner эсвэл admin — бүрэн удирдах эрх (устгах, хэрэглэгч хориглох, тохиргоо).
+    function isStaffAtLeastAdmin() { return staffRole() in ['owner', 'admin']; }
+    // Зөвхөн үндсэн эзэн.
+    function isStaffOwner() { return staffRole() == 'owner'; }
+    // Moderator бол зөвхөн НУУХ эрхтэй — устгах, хориглох, тохиргоо өөрчлөх эрхгүй.
+    function isModerator() { return staffRole() == 'moderator'; }
     // The single hardcoded root account. Verified via the Firebase Auth ID token's email
     // claim, which Firebase itself issues/verifies server-side — this is NOT a spoofable
     // frontend-only check. Used ONLY to bootstrap the very first admins/{uid} doc (see
@@ -26,9 +40,10 @@ service cloud.firestore {
       allow create: if isOwner(uid);
       // Admins may edit any profile (moderation) EXCEPT they may never ban/suspend the root
       // owner account — protects it from being blocked by a compromised or careless admin.
-      allow update: if isOwner(uid) || (isAdmin() &&
+      // Хориглох/профайл засах нь admin+ эрх. Moderator хэрэглэгч хориглож ЧАДАХГҮЙ.
+      allow update: if isOwner(uid) || (isStaffAtLeastAdmin() &&
         !(resource.data.email == 'bbayraaa20@gmail.com' && request.resource.data.banned == true));
-      allow delete: if isAdmin() && resource.data.email != 'bbayraaa20@gmail.com';
+      allow delete: if isStaffAtLeastAdmin() && resource.data.email != 'bbayraaa20@gmail.com';
     }
 
     // ---- posts/{postId} : community feed. Besides the original fields, a post may now
@@ -52,12 +67,14 @@ service cloud.firestore {
       // anyone signed-in may update ONLY likeCount/commentCount/helpfulCount (maintained via
       // transactions from toggleLike/addComment/toggleHelpful) — author/content/hidden stay
       // immutable for non-owner non-admins.
+      // Moderator-т ЗӨВХӨН `hidden` талбарыг өөрчлөх эрх — контентыг засах/устгах эрхгүй.
       allow update: if isSignedIn() && (
         resource.data.authorId == request.auth.uid ||
-        isAdmin() ||
+        isStaffAtLeastAdmin() ||
+        (isModerator() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hidden'])) ||
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'commentCount', 'helpfulCount'])
       );
-      allow delete: if isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
+      allow delete: if isSignedIn() && (resource.data.authorId == request.auth.uid || isStaffAtLeastAdmin());
     }
 
     // ---- helpfulVotes/{uid_postId} : the distinct "👍 Хэрэгтэй зөвлөгөө" reaction, kept as
@@ -92,8 +109,9 @@ service cloud.firestore {
       allow create: if isSignedIn() && !isBanned() && request.resource.data.authorId == request.auth.uid;
       // Content itself is immutable even for the author (no silent edits) — only an admin may
       // toggle the `hidden` moderation flag, and ONLY that field.
+      // `hidden` toggle нь бүх ажилтанд (moderator оруулаад) нээлттэй — энэ нь тэдний үндсэн ажил.
       allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hidden']);
-      allow delete: if isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
+      allow delete: if isSignedIn() && (resource.data.authorId == request.auth.uid || isStaffAtLeastAdmin());
     }
 
     // ---- likes/{uid_targetId} : one doc per (user, post|idea) ----
@@ -143,15 +161,15 @@ service cloud.firestore {
     // ---- movies/{movieId} : curated catalog, admin-only writes ----
     match /movies/{movieId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isStaffAtLeastAdmin();
     }
 
     // ---- movieSuggestions/{suggestionId} : public "add a movie" goes here for review ----
     match /movieSuggestions/{suggestionId} {
       allow read: if isSignedIn() && (resource.data.submittedBy == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && request.resource.data.submittedBy == request.auth.uid;
-      allow update: if isAdmin();
-      allow delete: if isSignedIn() && (resource.data.submittedBy == request.auth.uid || isAdmin());
+      allow update: if isStaffAtLeastAdmin();
+      allow delete: if isSignedIn() && (resource.data.submittedBy == request.auth.uid || isStaffAtLeastAdmin());
     }
 
     // ---- admins/{uid} : existence = is admin. doc shape {email, name, role: 'owner'|'admin',
@@ -163,12 +181,21 @@ service cloud.firestore {
     // (never 'owner') can ever be created via the isAdmin() branch below. ----
     match /admins/{uid} {
       allow read: if isSignedIn();
+      // Эрхийн шатлал (js/roles.js-ийн nbCanAssignRole-тай ЯГ ижил байх ёстой):
+      //   owner → 'admin' эсвэл 'moderator' олгож/хасч чадна
+      //   admin → ЗӨВХӨН 'moderator' олгож/хасч чадна (өөрөөсөө дээш эрх олгож чадахгүй,
+      //           мөн өөр admin-ыг хасч чадахгүй — хоёр admin харилцан хасахаас сэргийлнэ)
+      //   moderator → хэнд ч эрх олгож/хасч чадахгүй
       allow create: if isSignedIn() && (
         (request.auth.uid == uid && isOwnerEmail() && request.resource.data.role == 'owner')
-        || (isAdmin() && request.resource.data.role == 'admin' && request.resource.data.addedBy == request.auth.uid)
+        || (isStaffOwner() && request.resource.data.role in ['admin', 'moderator']
+            && request.resource.data.addedBy == request.auth.uid)
+        || (staffRole() == 'admin' && request.resource.data.role == 'moderator'
+            && request.resource.data.addedBy == request.auth.uid)
       );
       allow update: if false; // role changes are always delete+recreate, never an in-place edit
-      allow delete: if isAdmin() && resource.data.role != 'owner';
+      allow delete: if (isStaffOwner() && resource.data.role != 'owner')
+        || (staffRole() == 'admin' && resource.data.role == 'moderator');
     }
 
     // ---- coupleInvites/{code} : short pairing code, doc id IS the code (like invites, secret-by-id).
@@ -242,8 +269,8 @@ service cloud.firestore {
       allow create: if isSignedIn()
         && request.resource.data.reporterId == request.auth.uid
         && request.resource.data.status == 'pending';
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow update: if isAdmin();   // moderator ч гомдол шийдвэрлэж болно
+      allow delete: if isStaffAtLeastAdmin();
     }
 
     // ---- adminLog/{logId} : append-only audit trail of admin moderation actions (who did
@@ -261,7 +288,7 @@ service cloud.firestore {
     // OR anonymous visitor may read (the public site renders active banners with no auth). ----
     match /banners/{bannerId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isStaffAtLeastAdmin();
     }
 
     // ---- invites/{inviteId} : Урилга feature. Sender must be signed in to create;
@@ -287,6 +314,60 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'response'])
         && request.resource.data.status == 'responded';
       allow delete: if isSignedIn() && resource.data.senderUid == request.auth.uid;
+    }
+
+    // ==================== ШИНЭ: CMS / MARKETPLACE / SETTINGS ====================
+
+    // ---- contentOverrides/{contentType} : "overlay CMS". Сайтын редакцийн контент
+    // (УБ 365 санаа, аймгууд, бэлэг, зөвлөгөө) нь js/*.js файлд эх сурвалж хэвээр байна —
+    // энэ collection нь зөвхөн ДАВХАРЛАСАН өөрчлөлтийг хадгална: нуух, дараалал солих,
+    // талбар засах, шинэ зүйл нэмэх. Ингэснээр баталгаажсан dataset (source/verifiedAt)
+    // хэвээр үлдэж, хуудас бүр нэмэлт 1 л уншилтаар удирдагдана.
+    // Doc id = контентын төрөл: 'ub' | 'aimags' | 'gifts' | 'expert' | 'movies'.
+    // Doc shape: { hidden: [id...], order: [id...], edits: {id: {...}}, added: [{...}], updatedBy, updatedAt }
+    match /contentOverrides/{contentType} {
+      allow read: if true;                       // нийтийн хуудас render хийхэд хэрэгтэй
+      allow write: if isStaffAtLeastAdmin();     // moderator контент засахгүй
+    }
+
+    // ---- services/{serviceId} : бизнес/үйлчилгээний каталог. Хэрэглэгч өөрөө бүртгүүлж,
+    // admin хянаж зөвшөөрнө. ТӨЛБӨР, ЗАХИАЛГА ОРООГҮЙ — зөвхөн жагсаалт.
+    // status: 'pending' | 'approved' | 'rejected'
+    match /services/{serviceId} {
+      // Нийтэд зөвхөн зөвшөөрөгдсөн нь харагдана. Өөрийн илгээсэн хүсэлтээ эзэн нь,
+      // бүгдийг нь ажилтан харна. Firestore нь энэ шалгалтад тэнцээгүй doc-ийг query-ийн
+      // үр дүнгээс чимээгүй хасдаг тул client-д итгэх шаардлагагүй.
+      allow read: if resource.data.status == 'approved'
+        || (isSignedIn() && (resource.data.ownerUid == request.auth.uid || isAdmin()));
+      // Бүртгүүлэхэд ЗААВАЛ 'pending' байна — хэрэглэгч өөрийгөө шууд зөвшөөрөх боломжгүй.
+      allow create: if isSignedIn() && !isBanned()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.status == 'pending';
+      // Эзэн нь засаж болно, гэхдээ status-аа өөрчилж ЧАДАХГҮЙ (дахин хянуулах ёстой).
+      // Ажилтан (admin+) хянаж зөвшөөрөх/татгалзах эрхтэй.
+      allow update: if isStaffAtLeastAdmin()
+        || (isSignedIn() && resource.data.ownerUid == request.auth.uid
+            && request.resource.data.status == resource.data.status);
+      allow delete: if isStaffAtLeastAdmin()
+        || (isSignedIn() && resource.data.ownerUid == request.auth.uid);
+    }
+
+    // ---- siteSettings/{key} : сайтын дэлхийн тохиргоо. key = 'theme' | 'navigation' | 'homepage'.
+    // Нийтэд уншигдана (хуудас бүр өнгө/цэсээ эндээс авна), зөвхөн admin+ бичнэ.
+    match /siteSettings/{key} {
+      allow read: if true;
+      allow write: if isStaffAtLeastAdmin();
+    }
+
+    // ---- bannerEvents/{eventId} : banner-ийн харагдалт/даралтын түүхий бүртгэл.
+    // Зочин (нэвтрээгүй ч) бичиж чадна — эс бөгөөс зөвхөн нэвтэрсэн хүний тоо бүртгэгдэж
+    // статистик гажна. Уншихыг ЗӨВХӨН ажилтанд нээсэн (нийтийн feed биш).
+    // Засах/устгах бүрэн хаалттай — энэ нь зөвхөн нэмэгддэг бүртгэл.
+    match /bannerEvents/{eventId} {
+      allow read: if isAdmin();
+      allow create: if request.resource.data.type in ['impression', 'click']
+        && request.resource.data.bannerId is string;
+      allow update, delete: if false;
     }
   }
 }

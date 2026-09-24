@@ -60,6 +60,7 @@
           <a class="nav-dropdown-link" data-page="games" onclick="navigate('games')"><span class="nav-ico" data-icon="gamepad"></span>Тоглоом</a>
           <a class="nav-dropdown-link" data-page="gifts" onclick="navigate('gifts')"><span class="nav-ico" data-icon="gift"></span>Бэлэг</a>
           <a class="nav-dropdown-link" data-page="movies" onclick="navigate('movies')"><span class="nav-ico" data-icon="film"></span>Кино</a>
+          <a class="nav-dropdown-link" data-page="services" onclick="navigate('services')"><span class="nav-ico" data-icon="store"></span>Үйлчилгээ</a>
         </div>
       </li>
       <li><a class="nav-link" data-page="community" onclick="navigate('community')"><span class="nav-ico" data-icon="users"></span>Нийгэмлэг</a></li>
@@ -102,6 +103,7 @@
     <a onclick="navigate('games');closeMobileMenu()"><span class="nav-ico" data-icon="gamepad"></span>Тоглоом</a>
     <a onclick="navigate('gifts');closeMobileMenu()"><span class="nav-ico" data-icon="gift"></span>Бэлэг</a>
     <a onclick="navigate('movies');closeMobileMenu()"><span class="nav-ico" data-icon="film"></span>Кино</a>
+    <a onclick="navigate('services');closeMobileMenu()"><span class="nav-ico" data-icon="store"></span>Үйлчилгээ</a>
     <a onclick="navigate('community');closeMobileMenu()"><span class="nav-ico" data-icon="users"></span>Нийгэмлэг</a>
     <a onclick="navigate('saved');closeMobileMenu()"><span class="nav-ico" data-icon="heart"></span>Хадгалсан</a>
   </div>
@@ -115,10 +117,10 @@
 
 <main>
   <div id="page-home" class="page active">
-    <div id="homeBannerSlot"></div>
-    <section class="hero">
+    <div id="homeBannerSlot" data-home-section="banner"></div>
+    <section class="hero" data-home-section="hero">
       <div class="hero-content">
-        <h1>Өнөөдөр хамт хаашаа явах вэ? 💕</h1>
+        <h1 id="heroTitle">Өнөөдөр хамт хаашаа явах вэ? 💕</h1>
         <p id="heroSubtitle">Монголын анхны болзооны санааны платформ — Улаанбаатар болон 21 аймгийн болзооны санаанууд</p>
         <div class="search-box">
           <input type="text" placeholder="Жишээ: Зайсан, кафе, төсөв 50,000₮" id="searchInput" aria-label="Болзооны санаа хайх" onkeypress="if(event.key==='Enter')performSearch()"/>
@@ -140,7 +142,7 @@
 
     <!-- NBolzoo-ийн гол loop. Энд статистик, сэтгэгдэл зохиогоогүй — доорх алхам бүр
          сайт дээр бодитоор ажилладаг үйлдэл рүү холбогдоно. -->
-    <section class="how-it-works" aria-labelledby="howTitle">
+    <section class="how-it-works" aria-labelledby="howTitle" data-home-section="howItWorks">
       <div class="how-inner">
         <div class="how-head">
           <h2 id="howTitle">Яаж ажилладаг вэ?</h2>
@@ -176,39 +178,51 @@
     </section>
 
     <div class="container">
+      <section data-home-section="today">
       <div class="section-title">
         <h2>📅 Өнөөдрийн болзоо</h2>
         <a onclick="navigate('ub')">Бүгдийг харах →</a>
       </div>
       <div class="cards-grid" id="featuredGrid"></div>
+      </section>
 
+      <section data-home-section="budget">
       <div class="section-title">
         <h2>💰 Төсвөөр хайх</h2>
       </div>
       <div class="filters" id="budgetChips"></div>
+      </section>
 
+      <section data-home-section="mood">
       <div class="section-title">
         <h2>🎭 Мэдрэмжээр хайх</h2>
         <a onclick="navigate('ub')">Бүгдийг харах →</a>
       </div>
       <div class="filters" id="moodChips"></div>
       <div class="cards-grid" id="moodGrid"></div>
+      </section>
 
+      <section data-home-section="editorial">
       <div class="section-title">
         <h2>⭐ Редакцын сонголт</h2>
       </div>
       <div class="cards-grid" id="editorialGrid"></div>
+      </section>
 
+      <section data-home-section="aimags">
       <div class="section-title">
         <h2>🌄 Аймагт хамт явах уу?</h2>
         <a onclick="navigate('aimags')">21 аймаг үзэх →</a>
       </div>
       <div class="aimag-grid" id="featuredAimags"></div>
+      </section>
 
+      <section data-home-section="games">
       <div class="section-title">
         <h2>🎮 Хамтдаа тоглож, урилга илгээцгээе</h2>
       </div>
       <div class="promo-row" id="gamesInvitePromo"></div>
+      </section>
 
       <div class="section-title">
         <h2>👥 Нийгэмлэгт нэгдээрэй</h2>
@@ -272,7 +286,9 @@
 <script src="js/core.js"></script>
 <script src="js/ub.js"></script>
 <script src="js/aimags.js"></script>
+<script src="js/cms.js"></script>
 <script src="js/home.js"></script>
+<script src="js/site-settings.js"></script>
 <script src="js/main.js"></script>
 <script>
 renderFeatured();

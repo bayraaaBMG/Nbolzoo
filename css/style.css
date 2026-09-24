@@ -2346,3 +2346,164 @@ select:focus-visible, [tabindex]:focus-visible {
 .promo-card p { font-size: 13px; opacity: 0.9; margin-bottom: 14px; line-height: 1.5; }
 .promo-card .btn { background: rgba(255,255,255,0.18); color: white; }
 .promo-card .btn:hover { background: rgba(255,255,255,0.28); }
+
+/* ===================================================================
+   ADMIN v2 + CMS + ҮЙЛЧИЛГЭЭ + ТОХИРГОО
+   Одоо байгаа .admin-* загварыг СОЛИХГҮЙ, зөвхөн дээр нь нэмнэ.
+   Бүх өнгө :root хувьсагчаар — admin өнгө солиход энэ хэсэг дагаж өөрчлөгдөнө.
+   =================================================================== */
+
+/* ---- Sidebar: бүлэглэсэн цэс ---- */
+.admin-tabs { display: flex; flex-direction: column; gap: 14px; flex-shrink: 0; width: 220px; }
+.admin-tab-group { display: flex; flex-direction: column; gap: 2px; }
+.admin-tab-group-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text-lighter); padding: 0 12px 4px;
+}
+.admin-tabs .admin-tab {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  border: 0; background: none; font: inherit; text-align: left; cursor: pointer;
+}
+.admin-tab-ico { font-size: 15px; line-height: 1; flex-shrink: 0; }
+
+/* ---- Overview ---- */
+.admin-welcome { margin-bottom: 22px; }
+.admin-welcome h2 { font-size: 21px; margin: 0 0 4px; }
+.admin-welcome p { margin: 0; font-size: 14px; color: var(--text-light); }
+.admin-section { margin-bottom: 30px; }
+.admin-section-title { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
+.admin-section-note { font-size: 12px; color: var(--text-light); margin-top: 10px; }
+.admin-stat-link { cursor: pointer; transition: border-color .15s, transform .15s; }
+.admin-stat-link:hover, .admin-stat-link:focus-visible { border-color: var(--primary); transform: translateY(-2px); }
+
+.admin-todo-list { display: flex; flex-direction: column; gap: 8px; }
+.admin-todo {
+  display: flex; align-items: center; gap: 11px; width: 100%;
+  padding: 14px 16px; border-radius: 10px; cursor: pointer; font: inherit; text-align: left;
+  background: var(--accent-soft); border: 1px solid var(--accent); color: var(--text);
+}
+.admin-todo:hover { filter: brightness(.97); }
+.admin-todo-ico { font-size: 18px; }
+.admin-todo-arrow { margin-left: auto; color: var(--accent); font-weight: 700; }
+.admin-allclear {
+  padding: 16px; border-radius: 10px; font-size: 14px;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--success) 35%, transparent);
+}
+.admin-recent { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.admin-recent-row {
+  display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap;
+  font-size: 13px; padding: 9px 12px; background: var(--white);
+  border: 1px solid var(--border); border-radius: 8px;
+}
+.admin-recent-row time { margin-left: auto; font-size: 12px; color: var(--text-lighter); }
+
+/* ---- Нийтлэг жижиг элемент ---- */
+.btn-sm { font-size: 12px; padding: 7px 11px; }
+.admin-search {
+  width: 100%; padding: 11px 14px; margin-bottom: 10px; font: inherit;
+  border: 1px solid var(--border); border-radius: 9px; background: var(--white);
+}
+.admin-search:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.admin-list-count { font-size: 12px; color: var(--text-light); margin-bottom: 10px; }
+.admin-card-dim { opacity: .55; }
+.admin-card-thumb { width: 72px; height: 54px; object-fit: cover; border-radius: 7px; flex-shrink: 0; background: var(--primary-extra-soft); }
+.admin-role-badge { font-size: 11px; font-weight: 700; white-space: nowrap; }
+.admin-role-owner { color: var(--gold); }
+.admin-role-admin { color: var(--primary); }
+.admin-role-moderator { color: var(--text-light); }
+
+/* ---- CMS ---- */
+.cms-types { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+.cms-type {
+  padding: 8px 14px; border-radius: 999px; font: inherit; font-size: 13px; cursor: pointer;
+  background: var(--white); border: 1px solid var(--border); color: var(--text-light);
+}
+.cms-type:hover { border-color: var(--primary); color: var(--primary); }
+.cms-type.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+.cms-toolbar { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+.cms-toolbar .admin-search { flex: 1; min-width: 200px; }
+.cms-flag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+.cms-flag-hidden { background: #fee2e2; color: #b91c1c; }
+.cms-flag-edited { background: var(--primary-extra-soft); color: var(--primary-dark); }
+.cms-flag-added { background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success); }
+.cms-pager { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; font-size: 13px; }
+.cms-edit {
+  margin-top: 18px; padding: 18px; border-radius: 11px;
+  background: var(--white); border: 2px solid var(--primary);
+}
+.cms-edit h4 { margin: 0 0 14px; font-size: 15px; }
+.cms-edit-actions { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 14px; }
+
+/* ---- Тохиргоо: өнгө / цэс ---- */
+.theme-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 8px; }
+.theme-row { background: var(--white); border: 1px solid var(--border); border-radius: 9px; padding: 13px; }
+.theme-row label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.theme-inputs { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.theme-inputs input[type=color] { width: 44px; height: 32px; padding: 0; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; background: none; }
+.theme-inputs code { font-size: 11px; color: var(--text-lighter); }
+
+.nav-cfg-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.nav-cfg-row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: var(--white); border: 1px solid var(--border); border-radius: 9px; padding: 11px 13px;
+}
+.nav-cfg-row code { font-size: 12px; color: var(--text-lighter); min-width: 80px; }
+.nav-cfg-row input[type=text] { flex: 1; min-width: 150px; padding: 8px 11px; font: inherit; font-size: 13px; border: 1px solid var(--border); border-radius: 7px; }
+.nav-cfg-toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.nav-cfg-toggle input { width: auto; }
+
+/* ---- Үйлчилгээний хуудас ---- */
+.services-head { margin-bottom: 22px; }
+.services-head h1 { margin: 0 0 8px; }
+.services-head p { color: var(--text-light); margin: 0 0 16px; max-width: 62ch; }
+.service-card .card-body { display: flex; flex-direction: column; gap: 6px; }
+.service-contact { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; font-size: 13px; }
+.service-contact a { color: var(--primary); text-decoration: none; }
+.service-contact a:hover { text-decoration: underline; }
+
+.service-form {
+  background: var(--white); border: 2px solid var(--primary);
+  border-radius: 13px; padding: 22px; margin-bottom: 26px;
+}
+.service-form h3 { margin: 0 0 6px; font-size: 17px; }
+.service-form-note { font-size: 13px; color: var(--text-light); margin: 0 0 16px; }
+.service-form-status { min-height: 20px; font-size: 13px; margin-top: 8px; }
+
+.my-services { background: var(--primary-extra-soft); border-radius: 11px; padding: 16px; margin-bottom: 26px; }
+.my-services h3 { margin: 0 0 12px; font-size: 15px; }
+.my-service-row {
+  display: flex; align-items: center; gap: 11px; flex-wrap: wrap;
+  padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+}
+.my-service-row:last-child { border-bottom: 0; }
+.my-service-status { font-size: 12px; font-weight: 600; }
+.my-service-status.status-pending { color: var(--gold); }
+.my-service-status.status-approved { color: var(--success); }
+.my-service-status.status-rejected { color: #ef4444; }
+.my-service-note { flex-basis: 100%; font-size: 12px; color: var(--text-light); }
+.my-service-row .btn { margin-left: auto; }
+
+/* ---- Responsive: sidebar нь нарийн дэлгэц дээр дээд талын хэвтээ цэс болно ---- */
+@media (max-width: 860px) {
+  .admin-shell { flex-direction: column; gap: 18px; }
+  .admin-tabs {
+    width: 100%; flex-direction: row; flex-wrap: nowrap; gap: 16px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 6px;
+  }
+  .admin-tab-group { flex-direction: row; align-items: center; gap: 4px; flex-shrink: 0; }
+  .admin-tab-group-label { padding: 0 6px 0 0; border-right: 1px solid var(--border); align-self: stretch; display: flex; align-items: center; }
+  .admin-tabs .admin-tab { width: auto; white-space: nowrap; }
+  .admin-card { flex-wrap: wrap; }
+  .admin-card-actions { width: 100%; flex-wrap: wrap; }
+  /* Мобайлд хүрэх талбай хангалттай том байх ёстой */
+  .admin-card-actions .btn, .cms-type { min-height: 40px; }
+}
+@media (max-width: 520px) {
+  .admin-stats-grid { grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 10px; }
+  .admin-stat { padding: 15px 10px; }
+  .admin-stat-num { font-size: 22px; }
+  .theme-grid { grid-template-columns: 1fr; }
+  .nav-cfg-row { gap: 8px; }
+  .service-form { padding: 16px; }
+}

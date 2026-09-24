@@ -824,7 +824,7 @@ function renderCard(idea) {
         <div class="card-footer">
           <span class="card-price">${idea.priceText}</span>
           <span class="card-likes ${isLiked?'liked':''}" onclick="event.stopPropagation();toggleLike(${idea.id})" role="button" tabindex="0" aria-label="Таалагдсан">
-            ${isLiked?'❤️':'🤍'} ${idea.likes + (isLiked?1:0)}
+            ${isLiked?'❤️ Хадгалсан':'🤍 Хадгалах'}
           </span>
         </div>
       </div>
@@ -857,7 +857,6 @@ function openIdeaModal(id) {
         <div class="modal-meta-item">📅 <strong>${idea.day}-р өдөр</strong></div>
         <div class="modal-meta-item">📍 <strong>${idea.location}</strong></div>
         <div class="modal-meta-item">💸 <strong>${idea.priceText}</strong></div>
-        <div class="modal-meta-item">❤️ <strong>${idea.likes + (isLiked?1:0)}</strong></div>
       </div>
       ${(idea.category || idea.season) ? `
       <div class="modal-tags">

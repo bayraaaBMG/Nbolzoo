@@ -60,6 +60,7 @@
           <a class="nav-dropdown-link" data-page="games" onclick="navigate('games')"><span class="nav-ico" data-icon="gamepad"></span>Тоглоом</a>
           <a class="nav-dropdown-link active" data-page="gifts" onclick="navigate('gifts')" aria-current="page"><span class="nav-ico" data-icon="gift"></span>Бэлэг</a>
           <a class="nav-dropdown-link" data-page="movies" onclick="navigate('movies')"><span class="nav-ico" data-icon="film"></span>Кино</a>
+          <a class="nav-dropdown-link" data-page="services" onclick="navigate('services')"><span class="nav-ico" data-icon="store"></span>Үйлчилгээ</a>
         </div>
       </li>
       <li><a class="nav-link" data-page="community" onclick="navigate('community')"><span class="nav-ico" data-icon="users"></span>Нийгэмлэг</a></li>
@@ -102,6 +103,7 @@
     <a onclick="navigate('games');closeMobileMenu()"><span class="nav-ico" data-icon="gamepad"></span>Тоглоом</a>
     <a onclick="navigate('gifts');closeMobileMenu()" class="active" aria-current="page"><span class="nav-ico" data-icon="gift"></span>Бэлэг</a>
     <a onclick="navigate('movies');closeMobileMenu()"><span class="nav-ico" data-icon="film"></span>Кино</a>
+    <a onclick="navigate('services');closeMobileMenu()"><span class="nav-ico" data-icon="store"></span>Үйлчилгээ</a>
     <a onclick="navigate('community');closeMobileMenu()"><span class="nav-ico" data-icon="users"></span>Нийгэмлэг</a>
     <a onclick="navigate('saved');closeMobileMenu()"><span class="nav-ico" data-icon="heart"></span>Хадгалсан</a>
   </div>
@@ -195,10 +197,13 @@
 <script src="js/couple.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/core.js"></script>
+<script src="js/cms.js"></script>
 <script src="js/gifts.js"></script>
+<script src="js/site-settings.js"></script>
 <script src="js/main.js"></script>
 <script>
 showGiftTab('gifts');
+cmsHydrate("gifts", gifts, "id", () => { if (currentGiftCat) renderGifts(); });
 </script>
 
 </body>

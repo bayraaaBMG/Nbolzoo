@@ -8,7 +8,7 @@ function checkAdminAccess() {
     gate.style.display = "block"; panel.style.display = "none";
     return false;
   }
-  if (!currentUser.isAdmin) {
+  if (!nbCan("dashboard.view")) {
     gate.innerHTML = `<div class="admin-denied">⛔ Танд админ эрх байхгүй байна.<br><a onclick="navigate('home')" style="cursor:pointer;text-decoration:underline;font-size:14px;">← Нүүр хуудас руу буцах</a></div>`;
     gate.style.display = "block"; panel.style.display = "none";
     return false;
@@ -25,7 +25,10 @@ function checkAdminAccess() {
 function initAdminDashboard() {
   try {
     if (!checkAdminAccess()) return;
-    showAdminTab("overview");
+    const wanted = new URLSearchParams(location.search).get("tab");
+    const first = adminVisibleTabs()[0];
+    if (!first) { document.getElementById("adminGate").innerHTML = `<div class="admin-denied">⛔ Танд ямар ч хэсэгт хандах эрх алга.</div>`; document.getElementById("adminGate").style.display = "block"; document.getElementById("adminPanel").style.display = "none"; return; }
+    showAdminTab(wanted || first.items[0].id);
   } catch (e) {
     // Dashboard хэзээ ч бүрмөсөн хоосон үлдэж болохгүй — юу ч гэнэт эвдэрсэн ч
     // хэрэглэгчид ойлгомжтой алдаа, сэргээх зөвлөмжтэйгээр харуулна.
@@ -38,19 +41,76 @@ function initAdminDashboard() {
   }
 }
 
+// Таб бүр ямар эрх шаардахыг НЭГ газар тодорхойлсон — цэс, чиглүүлэлт хоёулаа эндээс
+// уншина, тиймээс "цэсэнд харагдахгүй ч URL-ээр шууд орох" гэсэн зөрүү үүсэхгүй.
+// Эрхийн жинхэнэ хамгаалалт нь firestore.rules дээр — энэ нь зөвхөн UI.
+const ADMIN_TABS = [
+  { group: "Ерөнхий", items: [
+    { id: "overview",   label: "Тойм",             icon: "📊", perm: "dashboard.view", render: () => renderAdminOverview() },
+    { id: "activity",   label: "Үйл ажиллагаа",    icon: "📜", perm: "audit.read",     render: () => renderAdminActivity() },
+  ]},
+  { group: "Контент", items: [
+    { id: "cms",        label: "Контент удирдлага", icon: "🗂", perm: "content.read",   render: () => renderAdminCms() },
+    { id: "movies",     label: "Кино каталог",      icon: "🎞", perm: "content.edit",   render: () => renderAdminMovies() },
+    { id: "suggestions",label: "Кино саналууд",     icon: "🎬", perm: "content.edit",   render: () => renderAdminSuggestions() },
+  ]},
+  { group: "Модерац", items: [
+    { id: "reports",    label: "Гомдол",            icon: "🚩", perm: "moderation.reports", render: () => renderAdminReports() },
+    { id: "posts",      label: "Нийтлэлүүд",        icon: "📝", perm: "moderation.hide",    render: () => renderAdminPosts() },
+    { id: "comments",   label: "Сэтгэгдэл",         icon: "💬", perm: "moderation.hide",    render: () => renderAdminComments() },
+  ]},
+  { group: "Маркетинг", items: [
+    { id: "services",   label: "Үйлчилгээ",         icon: "🏪", perm: "services.read",  render: () => renderAdminServices() },
+    { id: "banners",    label: "Banner / Зар",      icon: "📢", perm: "banners.read",   render: () => renderAdminBanners() },
+    { id: "invites",    label: "Урилгууд",          icon: "💌", perm: "content.read",   render: () => renderAdminInvites() },
+  ]},
+  { group: "Хэрэглэгч", items: [
+    { id: "users",      label: "Хэрэглэгчид",       icon: "🧑‍🤝‍🧑", perm: "users.read", render: () => renderAdminUsers() },
+  ]},
+  { group: "Тохиргоо", items: [
+    { id: "theme",      label: "Өнгө / Загвар",     icon: "🎨", perm: "settings.theme",      render: () => renderAdminTheme() },
+    { id: "navigation", label: "Цэс",               icon: "🧭", perm: "settings.navigation", render: () => renderAdminNavigation() },
+    { id: "homepage",   label: "Нүүр хуудас",       icon: "🏠", perm: "settings.homepage",   render: () => renderAdminHomepage() },
+  ]},
+];
+
+function adminTabById(id) {
+  for (const g of ADMIN_TABS) { const t = g.items.find(i => i.id === id); if (t) return t; }
+  return null;
+}
+function adminVisibleTabs() {
+  return ADMIN_TABS
+    .map(g => ({ group: g.group, items: g.items.filter(i => nbCan(i.perm)) }))
+    .filter(g => g.items.length);
+}
+
+// Цэсийг эрхийн дагуу зурна. Moderator-т зөвхөн хяналтын таб харагдана.
+function renderAdminTabs(active) {
+  const nav = document.getElementById("adminTabs");
+  if (!nav) return;
+  nav.innerHTML = adminVisibleTabs().map(g => `
+    <div class="admin-tab-group">
+      <div class="admin-tab-group-label">${escapeHtml(g.group)}</div>
+      ${g.items.map(i => `<button type="button" class="admin-tab${i.id === active ? " active" : ""}" data-tab="${i.id}" onclick="showAdminTab('${i.id}')">
+        <span class="admin-tab-ico" aria-hidden="true">${i.icon}</span>${escapeHtml(i.label)}
+      </button>`).join("")}
+    </div>`).join("");
+}
+
 function showAdminTab(tab) {
-  document.querySelectorAll(".admin-tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+  const t = adminTabById(tab);
+  // Эрхгүй таб руу орохыг оролдвол (URL-ээр эсвэл хуучин bookmark-аар) чимээгүй
+  // зөвшөөрөгдсөн эхний таб руу буцаана.
+  if (!t || !nbCan(t.perm)) {
+    const first = adminVisibleTabs()[0];
+    if (!first) return;
+    if (first.items[0].id === tab) return;
+    return showAdminTab(first.items[0].id);
+  }
+  renderAdminTabs(tab);
   document.querySelectorAll(".admin-tab-content").forEach(c => c.style.display = c.id === "admin-" + tab ? "block" : "none");
-  if (tab === "overview") renderAdminOverview();
-  else if (tab === "users") renderAdminUsers();
-  else if (tab === "posts") renderAdminPosts();
-  else if (tab === "comments") renderAdminComments();
-  else if (tab === "reports") renderAdminReports();
-  else if (tab === "suggestions") renderAdminSuggestions();
-  else if (tab === "banners") renderAdminBanners();
-  else if (tab === "invites") renderAdminInvites();
-  else if (tab === "movies") renderAdminMovies();
-  else if (tab === "activity") renderAdminActivity();
+  try { history.replaceState(null, "", "admin.html?tab=" + encodeURIComponent(tab)); } catch (e) {}
+  t.render();
 }
 
 // Every moderation/write action funnels through here so the Activity log tab has a
@@ -74,6 +134,12 @@ const ADMIN_ACTION_LABELS = {
   admin_grant: "Admin эрх олгосон", admin_revoke: "Admin эрх хассан",
   banner_add: "Banner нэмсэн", banner_toggle: "Banner идэвх өөрчилсөн", banner_delete: "Banner устгасан",
   report_hide: "Гомдлыг шийдэж контент нуусан", report_delete: "Гомдлыг шийдэж контент устгасан", report_dismiss: "Гомдлыг татгалзсан",
+  moderator_grant: "Moderator эрх олгосон", moderator_revoke: "Moderator эрх хассан",
+  cms_hide: "Контент нуусан", cms_show: "Контент дахин харуулсан", cms_edit: "Контент засварласан",
+  cms_reorder: "Контентын дараалал өөрчилсөн", cms_add: "Шинэ контент нэмсэн", cms_reset: "Контентын өөрчлөлтийг буцаасан",
+  service_approve: "Үйлчилгээ зөвшөөрсөн", service_reject: "Үйлчилгээ татгалзсан", service_delete: "Үйлчилгээ устгасан",
+  settings_theme: "Өнгөний тохиргоо хадгалсан", settings_navigation: "Цэсний тохиргоо хадгалсан",
+  settings_homepage: "Нүүр хуудсын тохиргоо хадгалсан", settings_reset: "Тохиргоог анхны байдалд буцаасан",
 };
 
 // ---------- Кино саналууд (movieSuggestions) ----------
@@ -213,8 +279,8 @@ async function renderAdminPosts() {
           <div class="admin-card-meta">❤️ ${p.likeCount||0} · 💬 ${p.commentCount||0}</div>
         </div>
         <div class="admin-card-actions">
-          <button class="btn btn-outline" type="button" onclick="adminTogglePostHidden('${d.id}', ${!p.hidden})">${p.hidden ? "Харуулах" : "Нуух"}</button>
-          <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeletePost('${d.id}')">🗑 Устгах</button>
+          <button class="btn btn-outline btn-sm" type="button" onclick="adminTogglePostHidden('${d.id}', ${!p.hidden})">${p.hidden ? "Харуулах" : "Нуух"}</button>
+          ${nbCan("moderation.delete") ? `<button class="btn btn-outline btn-sm" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeletePost('${d.id}')">🗑 Устгах</button>` : ""}
         </div>
       </div>`;
     }).join("");
@@ -259,8 +325,8 @@ async function renderAdminComments() {
           <div class="admin-card-meta">Пост: ${escapeHtml(c.postId||"-")}</div>
         </div>
         <div class="admin-card-actions">
-          <button class="btn btn-outline" type="button" onclick="adminToggleCommentHidden('${d.id}', ${!c.hidden})">${c.hidden ? "Харуулах" : "Нуух"}</button>
-          <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeleteComment('${d.id}','${c.postId||""}')">🗑 Устгах</button>
+          <button class="btn btn-outline btn-sm" type="button" onclick="adminToggleCommentHidden('${d.id}', ${!c.hidden})">${c.hidden ? "Харуулах" : "Нуух"}</button>
+          ${nbCan("moderation.delete") ? `<button class="btn btn-outline btn-sm" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeleteComment('${d.id}','${c.postId||""}')">🗑 Устгах</button>` : ""}
         </div>
       </div>`;
     }).join("");
@@ -314,7 +380,7 @@ async function renderAdminReports() {
         </div>
         <div class="admin-card-actions">
           <button class="btn btn-outline" type="button" onclick="adminResolveReport('${r._dbId}','${r.targetType}','${r.targetId}',${r.postId ? `'${r.postId}'` : "null"},'hide')">Нуух</button>
-          <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminResolveReport('${r._dbId}','${r.targetType}','${r.targetId}',${r.postId ? `'${r.postId}'` : "null"},'delete')">🗑 Устгах</button>
+          ${nbCan("moderation.delete") ? `<button class="btn btn-outline btn-sm" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminResolveReport('${r._dbId}','${r.targetType}','${r.targetId}',${r.postId ? `'${r.postId}'` : "null"},'delete')">🗑 Устгах</button>` : ""}
           <button class="btn btn-outline" type="button" onclick="adminResolveReport('${r._dbId}','${r.targetType}','${r.targetId}',${r.postId ? `'${r.postId}'` : "null"},'dismiss')">Татгалзах</button>
         </div>
       </div>`).join("");
@@ -345,52 +411,115 @@ async function adminResolveReport(reportId, targetType, targetId, postId, action
 }
 
 // ---------- User management (+ owner-only admin grant/revoke) ----------
+let adminUsersCache = [];
+let adminUserQuery = "";
+
 async function renderAdminUsers() {
   const el = document.getElementById("admin-users");
   el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>`;
-  const isOwner = currentUser.adminRole === "owner";
   try {
     const usersSnap = await db.collection("users").orderBy("createdAt", "desc").limit(100).get();
-    // Fetched separately from usersSnap on purpose: this is a secondary, owner-only
-    // enhancement (admin badges/grant-revoke buttons) — if it fails for any reason, the
-    // user list itself must still render, just without those extras.
+    // usersSnap-аас ТУСАД нь татаж байгаа нь санаатай: эрхийн тэмдэг/товч бол нэмэлт
+    // боломж — энэ нь ямар ч шалтгаанаар унасан ч хэрэглэгчийн жагсаалт өөрөө
+    // (зөвхөн тэмдэггүйгээр) хэвийн харагдах ёстой.
     let adminsSnap = null;
-    if (isOwner) {
-      try { adminsSnap = await db.collection("admins").get(); }
-      catch (e) { console.warn("admins list fetch failed:", e); }
-    }
+    try { adminsSnap = await db.collection("admins").get(); }
+    catch (e) { console.warn("admins list fetch failed:", e); }
     const adminMap = {};
     if (adminsSnap) adminsSnap.docs.forEach(d => { adminMap[d.id] = d.data(); });
-    const rows = usersSnap.docs.map(d => {
-      const u = d.data();
-      const adminInfo = adminMap[d.id];
-      const isOwnerRow = adminInfo && adminInfo.role === "owner";
-      let roleBadge = "";
-      if (isOwnerRow) roleBadge = ' <span style="color:var(--gold)">👑 Owner</span>';
-      else if (adminInfo) roleBadge = ' <span style="color:var(--primary)">🛡️ Admin</span>';
-      let adminBtn = "";
-      if (isOwner && !isOwnerRow) {
-        adminBtn = adminInfo
-          ? `<button class="btn btn-outline" type="button" onclick="adminRevokeAdmin('${d.id}')">🛡️ Admin эрх хасах</button>`
-          : `<button class="btn btn-outline" type="button" onclick="adminGrantAdmin('${d.id}')">🛡️ Admin болгох</button>`;
-      }
-      return `<div class="admin-card">
-        <div class="admin-card-main">
-          <strong>${escapeHtml(u.name)}</strong>${roleBadge} ${u.banned ? '<span style="color:#ef4444">(хориглосон)</span>' : ''}
-          <div class="admin-card-meta">${escapeHtml(u.email||"")} · uid: ${d.id}</div>
-        </div>
-        <div class="admin-card-actions">
-          ${!isOwnerRow ? `<button class="btn btn-outline" type="button" onclick="toggleUserBan('${d.id}', ${!u.banned})">${u.banned ? '✓ Хориг арилгах' : '🚫 Хориглох'}</button>` : ''}
-          ${adminBtn}
-        </div>
-      </div>`;
-    }).join("");
-    const note = isOwner
-      ? `<div class="admin-note">Та үндсэн Owner тул хэрэглэгчид admin эрх олгох/хасах боломжтой. Owner эрхийг хэн ч (өөрөө оролцоод) хасах боломжгүй.</div>`
-      : `<div class="admin-note">Шинэ admin нэмэх/хасах эрх зөвхөн үндсэн Owner-д байна.</div>`;
-    el.innerHTML = note + rows;
+
+    adminUsersCache = usersSnap.docs.map(d => Object.assign({ uid: d.id }, d.data(), { _role: (adminMap[d.id] || {}).role || null }));
+    renderAdminUsersList();
   } catch (e) {
     el.innerHTML = `<div class="admin-empty">Алдаа: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function adminFilterUsers(q) { adminUserQuery = (q || "").trim().toLowerCase(); renderAdminUsersList(); }
+
+function renderAdminUsersList() {
+  const el = document.getElementById("admin-users");
+  const q = adminUserQuery;
+  const list = q
+    ? adminUsersCache.filter(u => (u.name || "").toLowerCase().includes(q) || (u.email || "").toLowerCase().includes(q) || u.uid.toLowerCase().includes(q))
+    : adminUsersCache;
+
+  const rows = list.map(u => {
+    const role = u._role;
+    const roleBadge = role ? ` <span class="admin-role-badge admin-role-${role}">${NB_ROLE_LABELS[role]}</span>` : "";
+    // Товч бүрийг nbCan* -аар шалгаж зурна. Энэ нь зөвхөн UI — бодит хориг rules дээр.
+    const canManage = nbCanManageUserWithRole(role);
+    const actions = [];
+    if (canManage && nbCan("users.ban")) {
+      actions.push(`<button class="btn btn-outline btn-sm" type="button" onclick="toggleUserBan('${u.uid}', ${!u.banned})">${u.banned ? "✓ Хориг арилгах" : "🚫 Хориглох"}</button>`);
+    }
+    if (role === null && nbCanAssignRole("moderator")) {
+      actions.push(`<button class="btn btn-outline btn-sm" type="button" onclick="adminSetRole('${u.uid}','moderator')">🔍 Moderator болгох</button>`);
+    }
+    if (role === null && nbCanAssignRole("admin")) {
+      actions.push(`<button class="btn btn-outline btn-sm" type="button" onclick="adminSetRole('${u.uid}','admin')">🛡️ Admin болгох</button>`);
+    }
+    if (role === "moderator" && nbCanAssignRole("moderator")) {
+      if (nbCanAssignRole("admin")) actions.push(`<button class="btn btn-outline btn-sm" type="button" onclick="adminSetRole('${u.uid}','admin')">⬆ Admin болгох</button>`);
+      actions.push(`<button class="btn btn-outline btn-sm" type="button" onclick="adminRevokeRole('${u.uid}','moderator')">Эрх хасах</button>`);
+    }
+    if (role === "admin" && nbCanAssignRole("admin")) {
+      actions.push(`<button class="btn btn-outline btn-sm" type="button" onclick="adminRevokeRole('${u.uid}','admin')">Admin эрх хасах</button>`);
+    }
+    return `<div class="admin-card">
+      <div class="admin-card-main">
+        <strong>${escapeHtml(u.name || "(нэргүй)")}</strong>${roleBadge} ${u.banned ? '<span style="color:#ef4444">(хориглосон)</span>' : ""}
+        <div class="admin-card-meta">${escapeHtml(u.email || "")} · uid: ${escapeHtml(u.uid)}</div>
+      </div>
+      <div class="admin-card-actions">${actions.join("")}</div>
+    </div>`;
+  }).join("");
+
+  const note = nbRole() === "owner"
+    ? "Та Owner тул Admin болон Moderator эрх олгож/хасч чадна. Owner эрхийг хэн ч (та өөрөө ч) хасах боломжгүй."
+    : nbRole() === "admin"
+      ? "Та зөвхөн Moderator эрх олгож/хасч чадна. Admin эрх олгох нь зөвхөн Owner-т байна."
+      : "Та зөвхөн харах эрхтэй.";
+
+  el.innerHTML = `
+    <div class="admin-note">${escapeHtml(note)}</div>
+    <input class="admin-search" type="search" placeholder="Нэр, имэйл, uid-аар хайх..." value="${escapeHtml(adminUserQuery)}" oninput="adminFilterUsers(this.value)" aria-label="Хэрэглэгч хайх">
+    <div class="admin-list-count">${list.length} / ${adminUsersCache.length} хэрэглэгч</div>
+    ${rows || `<div class="admin-empty">Тохирох хэрэглэгч олдсонгүй</div>`}`;
+}
+
+// Эрх олгох. Owner эрх ЭНД ХЭЗЭЭ Ч олгогдохгүй (зөвхөн bootstrap-аар үүсдэг).
+async function adminSetRole(uid, role) {
+  if (!nbCanAssignRole(role)) return showToast("⚠️ Танд энэ эрхийг олгох боломж алга");
+  if (!confirm(`Энэ хэрэглэгчид ${role === "admin" ? "Admin" : "Moderator"} эрх олгох уу?`)) return;
+  try {
+    const userSnap = await db.collection("users").doc(uid).get();
+    const u = userSnap.exists ? userSnap.data() : {};
+    // Түвшин солиход эхлээд хуучныг устгана — admins/{uid} дээр in-place update
+    // зориуд хаалттай (rules: allow update: if false), тиймээс үргэлж delete+create.
+    try { await db.collection("admins").doc(uid).delete(); } catch (e) {}
+    await db.collection("admins").doc(uid).set({
+      email: u.email || "", name: u.name || "", role,
+      addedBy: currentUser.uid, addedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    logAdminAction(role === "admin" ? "admin_grant" : "moderator_grant", uid, u.name || "");
+    showToast("✅ Эрх олгогдлоо");
+    renderAdminUsers();
+  } catch (e) {
+    showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
+  }
+}
+
+async function adminRevokeRole(uid, role) {
+  if (!nbCanAssignRole(role)) return showToast("⚠️ Танд энэ эрхийг хасах боломж алга");
+  if (!confirm("Энэ хэрэглэгчийн эрхийг хасах уу?")) return;
+  try {
+    await db.collection("admins").doc(uid).delete();
+    logAdminAction(role === "admin" ? "admin_revoke" : "moderator_revoke", uid);
+    showToast("✅ Эрх хасагдлаа");
+    renderAdminUsers();
+  } catch (e) {
+    showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
   }
 }
 
@@ -405,47 +534,37 @@ async function toggleUserBan(uid, banned) {
   }
 }
 
-async function adminGrantAdmin(uid) {
-  if (currentUser.adminRole !== "owner") return showToast("⚠️ Зөвхөн Owner шинэ admin нэмэх боломжтой");
-  if (!confirm("Энэ хэрэглэгчид admin эрх олгох уу?")) return;
-  try {
-    const userSnap = await db.collection("users").doc(uid).get();
-    const u = userSnap.exists ? userSnap.data() : {};
-    await db.collection("admins").doc(uid).set({
-      email: u.email || "", name: u.name || "", role: "admin",
-      addedBy: currentUser.uid, addedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
-    logAdminAction("admin_grant", uid, u.name || "");
-    showToast("✅ Admin эрх олгогдлоо");
-    renderAdminUsers();
-  } catch (e) {
-    showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
-  }
-}
-
-async function adminRevokeAdmin(uid) {
-  if (currentUser.adminRole !== "owner") return showToast("⚠️ Зөвхөн Owner admin эрх хасах боломжтой");
-  if (!confirm("Энэ хэрэглэгчийн admin эрхийг хасах уу?")) return;
-  try {
-    await db.collection("admins").doc(uid).delete();
-    logAdminAction("admin_revoke", uid);
-    showToast("✅ Admin эрх хасагдлаа");
-    renderAdminUsers();
-  } catch (e) {
-    showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || ""));
-  }
-}
-
 // ---------- Ad/promo banners (нүүр хуудасны дээд хэсэг) ----------
-const ADMIN_BANNER_PLACEMENTS = [{ id: "home-top", label: "Нүүр хуудасны дээд хэсэг" }];
+// Байршил бүр нийтийн хуудсанд БОДИТООР байгаа slot-той тохирно. Шинэ байршил
+// нэмэхдээ тухайн хуудсанд slot-ыг нь мөн нэмэх ёстой — эс бөгөөс сонгож болох ч
+// хэзээ ч харагдахгүй "хуурамч" сонголт болно.
+const ADMIN_BANNER_PLACEMENTS = [
+  { id: "home-top", label: "Нүүр хуудасны дээд хэсэг" },
+];
 
 async function renderAdminBanners() {
   const el = document.getElementById("admin-banners");
-  el.innerHTML = adminAddBannerFormHtml() + `<div id="adminBannersList"><div class="admin-loading">Ачаалж байна...</div></div>`;
+  // Moderator зөвхөн харна — нэмэх маягт болон үйлдлийн товчийг огт зурахгүй
+  // (rules нь дүрмээр татгалзах ч, хэзээ ч ажиллахгүй товч харуулах нь буруу).
+  const canManage = nbCan("banners.manage");
+  el.innerHTML = (canManage ? adminAddBannerFormHtml() : `<div class="admin-note">Та зөвхөн харах эрхтэй.</div>`)
+    + `<div id="adminBannersList"><div class="admin-loading">Ачаалж байна...</div></div>`;
   try {
     const snap = await db.collection("banners").orderBy("priority", "desc").get();
     const list = snap.docs.map(d => ({ _dbId: d.id, ...d.data() }));
     const today = new Date().toISOString().slice(0, 10);
+    // Үзэлт/даралтын тоог banner тус бүрээр count() -оор авна. Бүтэлгүйтвэл тухайн
+    // banner-ийн статистикийг ОГТ харуулахгүй — 0 гэж худал бичихгүй.
+    const stats = {};
+    await Promise.all(list.map(async b => {
+      const [imp, clk] = await Promise.allSettled([
+        db.collection("bannerEvents").where("bannerId", "==", b._dbId).where("type", "==", "impression").count().get(),
+        db.collection("bannerEvents").where("bannerId", "==", b._dbId).where("type", "==", "click").count().get(),
+      ]);
+      if (imp.status === "fulfilled" && clk.status === "fulfilled") {
+        stats[b._dbId] = { imp: imp.value.data().count, clk: clk.value.data().count };
+      }
+    }));
     document.getElementById("adminBannersList").innerHTML = list.length
       ? list.map(b => {
           const expired = (b.startDate && b.startDate > today) || (b.endDate && b.endDate < today);
@@ -461,10 +580,11 @@ async function renderAdminBanners() {
                 · Ач холбогдол: ${b.priority ?? 0}
                 · ${escapeHtml(b.startDate || "хугацаагүй")} – ${escapeHtml(b.endDate || "хугацаагүй")}
               </div>
+              ${stats[b._dbId] ? `<div class="admin-card-meta">👁 ${stats[b._dbId].imp} үзэлт · 🖱 ${stats[b._dbId].clk} даралт${stats[b._dbId].imp ? " · CTR " + ((stats[b._dbId].clk / stats[b._dbId].imp) * 100).toFixed(1) + "%" : ""}</div>` : ""}
             </div>
             <div class="admin-card-actions">
-              <button class="btn btn-outline" type="button" onclick="adminToggleBannerActive('${b._dbId}', ${!b.active})">${b.active ? "Идэвхгүй болгох" : "Идэвхжүүлэх"}</button>
-              <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeleteBanner('${b._dbId}')">🗑 Устгах</button>
+              ${canManage ? `<button class="btn btn-outline btn-sm" type="button" onclick="adminToggleBannerActive('${b._dbId}', ${!b.active})">${b.active ? "Идэвхгүй болгох" : "Идэвхжүүлэх"}</button>
+              <button class="btn btn-outline btn-sm" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeleteBanner('${b._dbId}')">🗑 Устгах</button>` : ""}
             </div>
           </div>`;
         }).join("")
@@ -564,38 +684,113 @@ async function adminDeleteBanner(id) {
 // Promise.allSettled (NOT Promise.all): one collection's count failing — e.g. a brand-new
 // collection whose rules haven't been published yet — must show "-" for THAT stat, not
 // blank the whole Overview tab. Each stat degrades independently.
+//
+// Бүх тоо БОДИТ эх сурвалжаас гарна: Firestore-ийн count() aggregation, эсвэл ачаалагдсан
+// dataset-ийн урт. Ямар ч тоо hardcode хийгээгүй, санаа зохиогоогүй.
+
+// Тухайн хуудсанд ачаалагдсан dataset-ээс контентын хэмжээг тооцно. Хэрэв ямар нэг
+// dataset ачаалагдаагүй бол тэр мөрийг ОГТ харуулахгүй (0 гэж худал бичихгүй).
+function adminContentCounts() {
+  const out = [];
+  if (typeof allUbIdeas !== "undefined") out.push(["УБ 365 санаа", allUbIdeas.length]);
+  if (typeof aimagsClean !== "undefined") {
+    out.push(["Аймаг", aimagsClean.length]);
+    out.push(["Онцлох газар", aimagsClean.reduce((n, a) => n + (a.wonders ? a.wonders.length : 0), 0)]);
+    out.push(["Аймгийн санаа", aimagsClean.reduce((n, a) => n + (a.dates ? a.dates.length : 0), 0)]);
+  }
+  if (typeof gifts !== "undefined") out.push(["Бэлэг", gifts.length]);
+  return out;
+}
+
 async function renderAdminOverview() {
   const el = document.getElementById("admin-overview");
   el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>`;
-  const queries = [
-    ["Хэрэглэгч", () => db.collection("users").count().get()],
-    ["Пост", () => db.collection("posts").count().get()],
-    ["Сэтгэгдэл", () => db.collection("comments").count().get()],
-    ["Нэмсэн кино", () => db.collection("movies").count().get()],
-    ["Хадгалсан санаа", () => db.collection("saved").count().get()],
-    ["Урилга", () => db.collection("invites").count().get()],
+
+  const counts = [
+    ["Хэрэглэгч", "users", () => db.collection("users").count().get(), "users"],
+    ["Пост", "posts", () => db.collection("posts").count().get(), "posts"],
+    ["Сэтгэгдэл", "comments", () => db.collection("comments").count().get(), "comments"],
+    ["Нэмсэн кино", "movies", () => db.collection("movies").count().get(), "movies"],
+    ["Хадгалсан санаа", "saved", () => db.collection("saved").count().get(), null],
+    ["Урилга", "invites", () => db.collection("invites").count().get(), "invites"],
   ];
-  const results = await Promise.allSettled(queries.map(([, fn]) => fn()));
-  const [pendingSuggResult, pendingReportResult] = await Promise.allSettled([
-    db.collection("movieSuggestions").where("status", "==", "pending").count().get(),
-    db.collection("reports").where("status", "==", "pending").count().get(),
+  const pending = [
+    ["🎬", "хүлээгдэж буй кино санал", "suggestions", () => db.collection("movieSuggestions").where("status", "==", "pending").count().get()],
+    ["🚩", "хүлээгдэж буй гомдол", "reports", () => db.collection("reports").where("status", "==", "pending").count().get()],
+    ["🏪", "хянагдаагүй үйлчилгээ", "services", () => db.collection("services").where("status", "==", "pending").count().get()],
+  ];
+
+  const [countRes, pendingRes, bannerRes, logRes] = await Promise.all([
+    Promise.allSettled(counts.map(c => c[2]())),
+    Promise.allSettled(pending.map(p => p[3]())),
+    Promise.allSettled([db.collection("banners").where("active", "==", true).count().get()]),
+    Promise.allSettled([db.collection("adminLog").orderBy("createdAt", "desc").limit(5).get()]),
   ]);
-  const statsHtml = queries.map(([label], i) => {
-    const r = results[i];
-    const val = r.status === "fulfilled" ? r.value.data().count : "-";
-    return `<div class="admin-stat"><div class="admin-stat-num">${val}</div><div class="admin-stat-label">${label}</div></div>`;
+
+  const statsHtml = counts.map(([label, , , tab], i) => {
+    const r = countRes[i];
+    const val = r.status === "fulfilled" ? r.value.data().count.toLocaleString("mn-MN") : "-";
+    const clickable = tab && nbCan(adminTabById(tab) ? adminTabById(tab).perm : "");
+    return `<div class="admin-stat${clickable ? " admin-stat-link" : ""}"${clickable ? ` role="button" tabindex="0" onclick="showAdminTab('${tab}')"` : ""}>
+      <div class="admin-stat-num">${val}</div><div class="admin-stat-label">${escapeHtml(label)}</div></div>`;
   }).join("");
-  const pendingSuggCount = pendingSuggResult.status === "fulfilled" ? pendingSuggResult.value.data().count : 0;
-  const pendingReportCount = pendingReportResult.status === "fulfilled" ? pendingReportResult.value.data().count : 0;
-  const anyFailed = results.some(r => r.status === "rejected") || pendingSuggResult.status === "rejected" || pendingReportResult.status === "rejected";
+
+  const activeBanners = bannerRes[0].status === "fulfilled" ? bannerRes[0].value.data().count : null;
+
+  // "Анхаарал шаардсан" — зөвхөн БОДИТООР хүлээгдэж буй зүйл байвал л гарна.
+  const todo = pending.map(([icon, label, tab], i) => {
+    const r = pendingRes[i];
+    if (r.status !== "fulfilled") return null;
+    const n = r.value.data().count;
+    if (!n) return null;
+    const t = adminTabById(tab);
+    if (!t || !nbCan(t.perm)) return null;
+    return `<button type="button" class="admin-todo" onclick="showAdminTab('${tab}')">
+      <span class="admin-todo-ico" aria-hidden="true">${icon}</span>
+      <span><strong>${n}</strong> ${escapeHtml(label)}</span><span class="admin-todo-arrow" aria-hidden="true">→</span></button>`;
+  }).filter(Boolean);
+
+  const contentRows = adminContentCounts();
+  const contentHtml = contentRows.length ? `
+    <section class="admin-section">
+      <h3 class="admin-section-title">Сайтын контент</h3>
+      <div class="admin-stats-grid">
+        ${contentRows.map(([l, n]) => `<div class="admin-stat"><div class="admin-stat-num">${n.toLocaleString("mn-MN")}</div><div class="admin-stat-label">${escapeHtml(l)}</div></div>`).join("")}
+      </div>
+      <p class="admin-section-note">Эдгээр тоо ачаалагдсан өгөгдлөөс шууд гарч байна. Нуух / дараалал солих / засахыг «Контент удирдлага» хэсгээс хийнэ.</p>
+    </section>` : "";
+
+  const logSnap = logRes[0].status === "fulfilled" ? logRes[0].value : null;
+  const recentHtml = (logSnap && !logSnap.empty && nbCan("audit.read")) ? `
+    <section class="admin-section">
+      <h3 class="admin-section-title">Сүүлийн үйл ажиллагаа</h3>
+      <div class="admin-recent">
+        ${logSnap.docs.map(d => { const l = d.data(); return `<div class="admin-recent-row">
+          <strong>${escapeHtml(l.actorName || "?")}</strong>
+          <span>${escapeHtml(ADMIN_ACTION_LABELS[l.action] || l.action)}</span>
+          <time>${timeAgo(l.createdAt)}</time></div>`; }).join("")}
+      </div>
+      <button type="button" class="btn btn-outline btn-sm" onclick="showAdminTab('activity')">Бүх түүхийг харах</button>
+    </section>` : "";
+
+  const anyFailed = countRes.some(r => r.status === "rejected") || pendingRes.some(r => r.status === "rejected");
+
   el.innerHTML = `
-    <div class="admin-stats-grid">${statsHtml}</div>
-    ${anyFailed ? `<div class="admin-note" style="margin-top:16px;">⚠️ Зарим тоо ачаалагдсангүй (Firestore rules шинэчлэгдээгүй байж болзошгүй) — "-" гэж харагдаж байна.</div>` : ""}
-    ${(pendingSuggCount > 0 || pendingReportCount > 0) ? `
-      <div class="admin-note" style="display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;">
-        ${pendingSuggCount > 0 ? `<span style="cursor:pointer;" onclick="showAdminTab('suggestions')">🎬 <strong>${pendingSuggCount}</strong> хүлээгдэж буй кино санал →</span>` : ""}
-        ${pendingReportCount > 0 ? `<span style="cursor:pointer;" onclick="showAdminTab('reports')">🚩 <strong>${pendingReportCount}</strong> хүлээгдэж буй гомдол →</span>` : ""}
-      </div>` : ""}`;
+    <div class="admin-welcome">
+      <h2>Сайн байна уу, ${escapeHtml(currentUser.name || "")}</h2>
+      <p>Таны эрх: <strong>${NB_ROLE_LABELS[nbRole()] || "—"}</strong></p>
+    </div>
+    ${todo.length ? `<section class="admin-section"><h3 class="admin-section-title">Анхаарал шаардсан</h3><div class="admin-todo-list">${todo.join("")}</div></section>`
+      : `<section class="admin-section"><div class="admin-allclear">✅ Хүлээгдэж буй хүсэлт, гомдол алга — бүгд цэвэр.</div></section>`}
+    <section class="admin-section">
+      <h3 class="admin-section-title">Үндсэн үзүүлэлт</h3>
+      <div class="admin-stats-grid">${statsHtml}
+        ${activeBanners !== null ? `<div class="admin-stat admin-stat-link" role="button" tabindex="0" onclick="showAdminTab('banners')"><div class="admin-stat-num">${activeBanners}</div><div class="admin-stat-label">Идэвхтэй banner</div></div>` : ""}
+      </div>
+      ${anyFailed ? `<div class="admin-note" style="margin-top:14px;">⚠️ Зарим тоо ачаалагдсангүй — Firestore rules шинэчлэгдээгүй байж болзошгүй. Ачаалагдаагүй нь "-" гэж харагдана.</div>` : ""}
+    </section>
+    ${contentHtml}
+    ${recentHtml}`;
 }
 
 // ---------- Invitations overview (read-only — senders own/manage their own invites) ----------

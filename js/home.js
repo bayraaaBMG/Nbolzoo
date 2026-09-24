@@ -16,10 +16,25 @@ async function loadHomeBanner() {
       .sort((a, b) => (b.priority || 0) - (a.priority || 0));
     if (!valid.length) { slot.innerHTML = ""; return; }
     renderHomeBanner(valid[0]);
+    trackBannerEvent(valid[0].id, "impression");
   } catch (e) {
     console.warn("loadHomeBanner error:", e);
     slot.innerHTML = "";
   }
+}
+
+// Banner-ийн үзэлт/даралтыг бүртгэнэ. ЗӨВХӨН нэгтгэсэн тоо гаргах зорилготой —
+// хэрэглэгчийн ID, IP, хөтчийн ул мөр зэрэг хувийн мэдээлэл ОГТ хадгалахгүй.
+// Бүтэлгүйтвэл чимээгүй өнгөрнө: статистик бүртгэгдэхгүй байх нь banner харагдахгүй
+// байхаас хамаагүй дээр.
+function trackBannerEvent(bannerId, type) {
+  try {
+    if (!db || !bannerId) return;
+    db.collection("bannerEvents").add({
+      bannerId, type,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    }).catch(() => {});
+  } catch (e) { /* no-op */ }
 }
 
 function renderHomeBanner(b) {
@@ -31,7 +46,7 @@ function renderHomeBanner(b) {
     ${hasMobile ? `<img class="home-banner-img home-banner-img-mobile" src="${escapeHtml(b.mobileImageUrl)}" alt="${escapeHtml(b.title || "")}" loading="eager">` : ""}
     <img class="home-banner-img home-banner-img-desktop" src="${escapeHtml(b.imageUrl)}" alt="${escapeHtml(b.title || "")}" loading="eager">`;
   slot.innerHTML = b.targetUrl
-    ? `<a class="home-banner${hasMobile ? " has-mobile" : ""}" href="${escapeHtml(b.targetUrl)}" target="_blank" rel="noopener sponsored">${inner}</a>`
+    ? `<a class="home-banner${hasMobile ? " has-mobile" : ""}" href="${escapeHtml(b.targetUrl)}" target="_blank" rel="noopener sponsored" onclick="trackBannerEvent('${escapeHtml(b.id)}','click')">${inner}</a>`
     : `<div class="home-banner${hasMobile ? " has-mobile" : ""}">${inner}</div>`;
 }
 
@@ -52,7 +67,9 @@ function updateHeroStats() {
     if (v !== undefined) el.textContent = v.toLocaleString("mn-MN");
   });
   const sub = document.getElementById("heroSubtitle");
-  if (sub) {
+  // Admin нүүр хуудсын тохиргоонд гараар бичвэр өгсөн бол түүнийг дарж бичихгүй
+  // (js/site-settings.js нь dataset.locked тавьдаг).
+  if (sub && sub.dataset.locked !== "1") {
     sub.textContent = `Улаанбаатарт ${stats.ub} санаа, ${stats.aimags} аймагт ${stats.aimagIdeas} санаа — нийт ${stats.total}`;
   }
 }

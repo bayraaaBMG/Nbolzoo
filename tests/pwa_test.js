@@ -24,10 +24,27 @@ t('SW ignores non-GET requests', /req\.method !== "GET"/.test(sw));
 t('SW ignores cross-origin requests', /url\.origin !== self\.location\.origin/.test(sw));
 
 // --- Хуудас нь network-first байх ёстой (шинэчлэлт хоцрохгүй) ---
-const navBlock = sw.slice(sw.indexOf('navigate'), sw.indexOf('isStaticAsset(url)', sw.indexOf('navigate')));
-t('HTML is network-first, not cache-first', navBlock.indexOf('fetch(req)') < navBlock.indexOf('caches.match'),
-  'fetch at ' + navBlock.indexOf('fetch(req)') + ', cache at ' + navBlock.indexOf('caches.match'));
-t('HTML falls back to cache when offline', /\.catch\(\(\)\s*=>[\s\S]{0,120}caches\.match/.test(navBlock));
+const navBlock = sw.slice(sw.indexOf('req.mode === "navigate"'), sw.indexOf('isVersionCoupled(url)', sw.indexOf('req.mode === "navigate"')));
+t('HTML is network-first', /networkFirst\(req, SHELL_CACHE/.test(navBlock));
+t('HTML falls back to the homepage offline', /"\/index\.html"/.test(navBlock));
+
+// --- РЕГРЕСС: CSS/JS нь ХЭЗЭЭ Ч хуудаснаас хоцрохгүй ---
+// Өмнө нь CSS/JS stale-while-revalidate байсан тул deploy бүрийн дараах эхний
+// ачаалалт "шинэ HTML + хуучин CSS" болж зохион байгуулалт эвдэрдэг байв.
+t('CSS/JS are version-coupled', /function isVersionCoupled[\s\S]{0,160}css\|js/.test(sw));
+t('CSS/JS use network-first', /isVersionCoupled\(url\)\)\s*\{\s*event\.respondWith\(networkFirst/.test(sw));
+// Зөвхөн isVersionCoupled САЛААНЫ дотрыг шалгана — дараагийн (isMedia) салаа нь
+// stale-while-revalidate хэрэглэдэг тул өргөн хүрээтэй regex худал унана.
+const vcStart = sw.indexOf('if (isVersionCoupled(url))');
+const vcBranch = sw.slice(vcStart, sw.indexOf('if (isMedia(url))', vcStart));
+t('CSS/JS are NOT stale-while-revalidate', !/const fresh/.test(vcBranch));
+t('CSS/JS branch returns immediately', /return;/.test(vcBranch));
+t('only media uses stale-while-revalidate', /function isMedia[\s\S]{0,160}(svg|png|woff)/.test(sw));
+t('media list excludes css and js', (() => {
+  const m = sw.slice(sw.indexOf('function isMedia'), sw.indexOf('}', sw.indexOf('function isMedia')));
+  return !/css/.test(m) && !/js/.test(m);
+})());
+t('cache version was bumped past v3', /VERSION = "nb-v([4-9]|\d{2,})"/.test(sw));
 
 // --- Cache бичилт бүр унаж болохыг тооцсон байх ---
 t('cache writes cannot reject the response', (sw.match(/\.catch\(\(\) => \{\}\)/g) || []).length >= 2);

@@ -1,24 +1,25 @@
 // ===== NBolzoo service worker =====
 //
-// ХУУЧИН ХУВИЛБАР ямар ч cache хийдэггүй, бүх хүсэлтийг шууд сүлжээгээр дамжуулдаг
-// байсан. Тэр нь "хуучирсан контент харагдах" эрсдэлийг арилгасан боловч PWA-г
-// утгагүй болгосон: суулгасан апп нь интернэт тасрахад ХООСОН цагаан хуудас болдог.
-//
-// Одоо стратеги нь контентын төрлөөр ХУВААГДАНА:
+// Стратеги нь контентын төрлөөр хуваагдана:
 //
 //   1. Хуудас (HTML)        → network-first. Сүлжээ байвал ҮРГЭЛЖ шинийг авна,
-//                             зөвхөн тасарсан үед cache-аас үзүүлнэ. Ингэснээр
-//                             шинэчлэлт хэзээ ч хоцрохгүй.
-//   2. Статик файл (CSS/JS/ → stale-while-revalidate. Шууд cache-аас гаргаад
-//      зураг/фонт/аудио)      арын талд шинэчилнэ. Хуудас нь ҮРГЭЛЖ сүлжээнээс
-//                             шинээр ирдэг тул шинэ HTML + хуучин JS гэсэн зөрүү
-//                             дараагийн ачаалалд засагдана.
-//   3. Firebase / Firestore → cache-д ОРОХГҮЙ, шууд сүлжээгээр. Бодит цагийн
-//      / Google / gstatic      өгөгдлийг хэзээ ч хуучирсан хувилбараар үзүүлэхгүй.
+//                             зөвхөн тасарсан үед cache-аас үзүүлнэ.
+//   2. CSS / JS             → network-first (cache нь зөвхөн офлайн нөөц).
+//   3. Зураг / фонт / аудио → stale-while-revalidate. Эдгээр нь хуудасны
+//                             хувилбартай холбоогүй тул хуучин хувилбар нь
+//                             зохион байгуулалтыг эвдэхгүй.
+//   4. Firebase / Google    → cache-д ОРОХГҮЙ, шууд сүлжээгээр.
+//      / gstatic / /admin
 //
-// Админ хуудсыг зориуд cache-д хийхгүй — тэр нь бүхэлдээ бодит цагийн өгөгдөл.
+// ЯАГААД CSS/JS нь network-first вэ (ӨМНӨ stale-while-revalidate байсан):
+//   HTML нь network-first учраас deploy болмогц ШИНЭ HTML ирдэг. Харин CSS/JS
+//   нь stale-while-revalidate байсан тул cache-ээс ХУУЧИН хувилбар гардаг байв.
+//   Үр дүнд нь deploy бүрийн дараах ПЕРВЫЙ ачаалалт бүр "шинэ HTML + хуучин CSS"
+//   болж, зохион байгуулалт бүрэн эвдэрдэг байсан — бодитоор тохиолдсон.
+//   CSS/JS нь HTML-ийн хувилбартай САЛШГҮЙ холбоотой тул тэдгээрийг хэзээ ч
+//   HTML-ээс хоцруулж болохгүй.
 
-const VERSION = "nb-v3";
+const VERSION = "nb-v4";
 const SHELL_CACHE = VERSION + "-shell";
 const ASSET_CACHE = VERSION + "-assets";
 
@@ -50,42 +51,55 @@ function isLiveData(url) {
     || url.pathname.startsWith("/admin");
 }
 
-function isStaticAsset(url) {
-  return /\.(css|js|svg|png|jpe?g|webp|woff2?|mp3|ico|json)$/i.test(url.pathname);
+// Хуудасны хувилбартай САЛШГҮЙ холбоотой — хэзээ ч хоцрох ёсгүй.
+function isVersionCoupled(url) {
+  return /\.(css|js)$/i.test(url.pathname);
+}
+
+// Хувилбараас хамааралгүй — хуучин хувилбар нь зохион байгуулалтыг эвдэхгүй.
+function isMedia(url) {
+  return /\.(svg|png|jpe?g|webp|gif|avif|woff2?|ttf|mp3|ogg|ico)$/i.test(url.pathname);
+}
+
+// Сүлжээнээс авч, амжилттай бол cache-д хуулна. Cache бичилт унасан ч
+// хариултыг хэзээ ч тасалдуулахгүй.
+function networkFirst(req, cacheName, fallback) {
+  return fetch(req)
+    .then(res => {
+      if (res && res.ok) {
+        const copy = res.clone();
+        caches.open(cacheName).then(c => c.put(req, copy)).catch(() => {});
+      }
+      return res;
+    })
+    .catch(() => caches.match(req).then(hit => hit || (fallback ? caches.match(fallback) : undefined)));
 }
 
 self.addEventListener("fetch", event => {
   const req = event.request;
-  // POST/PUT зэрэг нь хэзээ ч cache-д орохгүй; өөр домэйны хүсэлтийг хөндөхгүй.
+  // POST/PUT зэрэг нь хэзээ ч cache-д орохгүй.
   if (req.method !== "GET") return;
 
   let url;
   try { url = new URL(req.url); } catch (e) { return; }
-  if (url.origin !== self.location.origin) {
-    // Гадаад домэйн: Firebase/Google бол шууд өнгөрүүлнэ (ямар ч оролцоогүй).
-    return;
-  }
+  // Гадаад домэйныг огт хөндөхгүй (Firebase/Google/CDN шууд өнгөрнө).
+  if (url.origin !== self.location.origin) return;
   if (isLiveData(url)) return;
 
-  // --- 1. Хуудас: network-first ---
+  // --- 1. Хуудас ---
   if (req.mode === "navigate" || (req.headers.get("accept") || "").includes("text/html")) {
-    event.respondWith(
-      fetch(req)
-        .then(res => {
-          const copy = res.clone();
-          caches.open(SHELL_CACHE).then(c => c.put(req, copy)).catch(() => {});
-          return res;
-        })
-        .catch(() =>
-          // Сүлжээ тасарсан: тухайн хуудас, эс бөгөөс нүүр хуудсыг үзүүлнэ.
-          caches.match(req).then(hit => hit || caches.match("/index.html"))
-        )
-    );
+    event.respondWith(networkFirst(req, SHELL_CACHE, "/index.html"));
     return;
   }
 
-  // --- 2. Статик файл: stale-while-revalidate ---
-  if (isStaticAsset(url)) {
+  // --- 2. CSS / JS: HTML-тэй хамт шинэчлэгдэх ёстой ---
+  if (isVersionCoupled(url)) {
+    event.respondWith(networkFirst(req, ASSET_CACHE));
+    return;
+  }
+
+  // --- 3. Зураг / фонт / аудио: stale-while-revalidate ---
+  if (isMedia(url)) {
     event.respondWith(
       caches.match(req).then(hit => {
         const fresh = fetch(req)
@@ -96,12 +110,12 @@ self.addEventListener("fetch", event => {
             }
             return res;
           })
-          .catch(() => hit);           // офлайн: cache-д байгаагаар хангана
+          .catch(() => hit);
         return hit || fresh;
       })
     );
     return;
   }
 
-  // --- 3. Бусад: шууд сүлжээгээр, хөндөхгүй ---
+  // --- 4. Бусад: шууд сүлжээгээр, хөндөхгүй ---
 });

@@ -1097,7 +1097,9 @@ let invDeferredInstallPrompt = null;
 
 function pwaShowInstallButtons() {
   if (document.getElementById("pwaInstallBtn")) return; // давхардуулахгүй
-  const navActions = document.querySelector(".nav-actions");
+  // Utility bar-д тусгай slot байвал тэнд (header-ийн дээд давхар), байхгүй бол
+  // хуучнаар .nav-actions дотор — хоёр ч арга ажиллана.
+  const navActions = document.getElementById("pwaInstallSlot") || document.querySelector(".nav-actions");
   if (navActions) {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -1106,7 +1108,7 @@ function pwaShowInstallButtons() {
     btn.style.cssText = "font-size:13px;padding:8px 12px;";
     btn.textContent = "📲 Апп суулгах";
     btn.onclick = pwaTriggerInstall;
-    navActions.insertBefore(btn, navActions.firstChild);
+    navActions.appendChild(btn);
   }
   const mobileActions = document.querySelector(".mobile-nav-actions");
   if (mobileActions) {

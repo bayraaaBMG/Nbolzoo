@@ -31,43 +31,51 @@
 <body>
 
 <header class="header">
-  <nav class="nav">
-    <div class="logo" onclick="navigate('home')">
-      <img src="logo.svg" alt="NBolzoo" class="logo-icon" width="42" height="42">
-      <div>
-        <span class="logo-text">NBolzoo</span>
-        <span class="logo-tagline">.mn · болзооны санаа</span>
-      </div>
+<!-- NB:HEADER:START — tools/build-header.js үүсгэдэг. ГАРААР ЗАСАХГҮЙ. -->
+<!-- 1-Р ДАВХАР: utility bar.
+     Утас, Facebook, Instagram нь ЗОХИОМОЛ байж болохгүй тул HTML-д хоосон
+     үлдээж, admin "Footer" тохиргооноос бөглөгдвөл л харагдана
+     (js/site-settings.js → applyContactSetting). Тохируулаагүй бол энэ хэсэг
+     бүрэн нуугдана — хуурамч холбоос хэзээ ч гарахгүй. -->
+<div class="utility-bar" id="utilityBar">
+  <div class="utility-inner">
+    <div class="utility-group">
+      <a class="utility-link" id="utilPhone" hidden></a>
+      <span class="utility-slot" id="pwaInstallSlot"></span>
     </div>
-    <ul class="nav-menu">
-      <li><a class="nav-link active" data-page="home" onclick="navigate('home')" aria-current="page"><span class="nav-ico" data-icon="home"></span>Нүүр</a></li>
-      <li class="nav-group">
-        <button type="button" class="nav-link nav-group-btn" aria-expanded="false" aria-haspopup="true" aria-controls="navGroup-ideas">
-          <span class="nav-ico" data-icon="compass"></span>Санаанууд<span class="nav-caret" data-icon="chevron" data-icon-size="14"></span>
-        </button>
-        <div class="nav-dropdown" id="navGroup-ideas" role="menu">
-          <a class="nav-dropdown-link" data-page="ub" onclick="navigate('ub')"><span class="nav-ico" data-icon="city"></span>УБ 365</a>
-          <a class="nav-dropdown-link" data-page="aimags" onclick="navigate('aimags')"><span class="nav-ico" data-icon="mountain"></span>21 аймаг</a>
-          <a class="nav-dropdown-link" data-page="expert" onclick="navigate('expert')"><span class="nav-ico" data-icon="gem"></span>Зөвлөгөө</a>
-        </div>
-      </li>
-      <li class="nav-group">
-        <button type="button" class="nav-link nav-group-btn" aria-expanded="false" aria-haspopup="true" aria-controls="navGroup-tools">
-          <span class="nav-ico" data-icon="tools"></span>Хэрэгслүүд<span class="nav-caret" data-icon="chevron" data-icon-size="14"></span>
-        </button>
-        <div class="nav-dropdown" id="navGroup-tools" role="menu">
-          <a class="nav-dropdown-link" data-page="urilga" onclick="navigate('urilga')"><span class="nav-ico" data-icon="mail"></span>Урилга</a>
-          <a class="nav-dropdown-link" data-page="games" onclick="navigate('games')"><span class="nav-ico" data-icon="gamepad"></span>Тоглоом</a>
-          <a class="nav-dropdown-link" data-page="gifts" onclick="navigate('gifts')"><span class="nav-ico" data-icon="gift"></span>Бэлэг</a>
-          <a class="nav-dropdown-link" data-page="movies" onclick="navigate('movies')"><span class="nav-ico" data-icon="film"></span>Кино</a>
-          <a class="nav-dropdown-link" data-page="services" onclick="navigate('services')"><span class="nav-ico" data-icon="store"></span>Үйлчилгээ</a>
-        </div>
-      </li>
-      <li><a class="nav-link" data-page="community" onclick="navigate('community')"><span class="nav-ico" data-icon="users"></span>Нийгэмлэг</a></li>
-      <li><a class="nav-link" data-page="saved" onclick="navigate('saved')"><span class="nav-ico" data-icon="heart"></span>Хадгалсан</a></li>
-      <li><a class="nav-link" id="navAdminLink" data-page="admin" onclick="navigate('admin')" style="display:none;"><span class="nav-ico" data-icon="settings"></span>Админ</a></li>
-    </ul>
+    <div class="utility-group">
+      <a class="utility-link" id="utilFacebook" target="_blank" rel="noopener" hidden>Facebook</a>
+      <a class="utility-link" id="utilInstagram" target="_blank" rel="noopener" hidden>Instagram</a>
+      <a class="utility-link" onclick="navigate('community')">Тусламж</a>
+      <a class="utility-link" href="mailto:info@nbolzoo.mn">Санал хүсэлт</a>
+    </div>
+  </div>
+</div>
+
+<!-- 2-Р ДАВХАР: logo · хайлт · хэрэглэгч.
+     .nav-actions класс хэвээр — js/core.js нь PWA товчийг, js/auth.js нь
+     нэвтрэлтийн төлвийг түүнээс хайдаг. -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" data-page="home" onclick="navigate('home')" role="button" tabindex="0" aria-label="Нүүр хуудас" aria-current="page">
+      <img src="logo.svg" alt="" class="logo-icon" width="40" height="40">
+      <span class="logo-wrap">
+        <span class="logo-text">NBolzoo</span>
+        <span class="logo-tagline">.mn</span>
+      </span>
+    </a>
+
+    <div class="header-search">
+      <span class="header-search-ico" data-icon="search" data-icon-size="18" aria-hidden="true"></span>
+      <input type="search" id="searchInput" placeholder="Санаа, газар, аймаг хайх..."
+             aria-label="Болзооны санаа хайх" onkeypress="if(event.key==='Enter')performSearch()">
+      <button class="btn btn-accent header-search-btn" type="button" onclick="performSearch()">Хайх</button>
+    </div>
+
     <div class="nav-actions">
+      <a class="header-saved" data-page="saved" onclick="navigate('saved')" aria-label="Хадгалсан">
+        <span class="nav-ico" data-icon="heart" data-icon-size="19"></span><span class="header-saved-text">Хадгалсан</span>
+      </a>
       <div id="navAuthButtons">
         <button type="button" class="btn btn-ghost" onclick="openAuth('login')">Нэвтрэх</button>
         <button type="button" class="btn btn-primary" onclick="openAuth('signup')">Бүртгүүлэх</button>
@@ -82,16 +90,33 @@
       </div>
       <button type="button" class="mobile-menu-btn" onclick="openMobileMenu()" title="Цэс нээх" aria-label="Цэс нээх"><span class="nav-ico" data-icon="menu" data-icon-size="20"></span></button>
     </div>
-  </nav>
+  </div>
 </header>
 
+<!-- 3-Р ДАВХАР: ангиллын цэс. Хэвтээ, нарийн дэлгэц дээр чирж харна.
+     js/site-settings.js нь цэсний тохиргоог .cat-nav-inner -ээр хэрэгжүүлнэ.
+     Хуучин .nav-menu класс ЗОРИУДААР хэрэглээгүй — түүний загвар .cat-link-тэй зөрчилддөг. -->
+<nav class="cat-nav" aria-label="Хэсгүүд">
+  <div class="cat-nav-inner">
+        <a class="cat-link" data-page="ub" onclick="navigate('ub')"><span class="cat-ico" data-icon="city" data-icon-size="19"></span><span>УБ 365</span></a>
+        <a class="cat-link" data-page="aimags" onclick="navigate('aimags')"><span class="cat-ico" data-icon="mountain" data-icon-size="19"></span><span>21 аймаг</span></a>
+        <a class="cat-link" data-page="expert" onclick="navigate('expert')"><span class="cat-ico" data-icon="gem" data-icon-size="19"></span><span>Зөвлөгөө</span></a>
+        <a class="cat-link" data-page="urilga" onclick="navigate('urilga')"><span class="cat-ico" data-icon="mail" data-icon-size="19"></span><span>Урилга</span></a>
+        <a class="cat-link" data-page="games" onclick="navigate('games')"><span class="cat-ico" data-icon="gamepad" data-icon-size="19"></span><span>Тоглоом</span></a>
+        <a class="cat-link" data-page="gifts" onclick="navigate('gifts')"><span class="cat-ico" data-icon="gift" data-icon-size="19"></span><span>Бэлэг</span></a>
+        <a class="cat-link" data-page="movies" onclick="navigate('movies')"><span class="cat-ico" data-icon="film" data-icon-size="19"></span><span>Кино</span></a>
+        <a class="cat-link" data-page="services" onclick="navigate('services')"><span class="cat-ico" data-icon="store" data-icon-size="19"></span><span>Үйлчилгээ</span></a>
+        <a class="cat-link" data-page="community" onclick="navigate('community')"><span class="cat-ico" data-icon="users" data-icon-size="19"></span><span>Нийгэмлэг</span></a>
+        <a class="cat-link" id="navAdminLink" data-page="admin" onclick="navigate('admin')" style="display:none;"><span class="cat-ico" data-icon="settings" data-icon-size="19"></span><span>Админ</span></a>
+  </div>
+</nav>
+
+<!-- Мобайл drawer — ангиллын цэс нарийн дэлгэц дээр чирэгддэг тул энд бүх
+     холбоос + нэвтрэлт байна. -->
 <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
 <div class="mobile-nav-drawer" id="mobileNavDrawer">
   <div class="mobile-nav-header">
-    <div class="logo">
-      <img src="logo.svg" alt="NBolzoo" class="logo-icon" style="width:34px;height:34px;" width="34" height="34">
-      <span class="logo-text" style="font-size:18px;">NBolzoo</span>
-    </div>
+    <span class="logo-text">NBolzoo</span>
     <button type="button" class="mobile-nav-close" onclick="closeMobileMenu()" aria-label="Цэс хаах">✕</button>
   </div>
   <div class="mobile-nav-items">
@@ -113,33 +138,53 @@
     <button type="button" class="btn btn-primary" style="width:100%" onclick="openAuth('signup');closeMobileMenu()">Бүртгүүлэх</button>
   </div>
 </div>
-
+<!-- NB:HEADER:END -->
 
 <main>
   <div id="page-home" class="page active">
     <div id="homeBannerSlot" data-home-section="banner" data-banner-slot="home-hero"></div>
+    <!-- HERO: зүүн талд quick-filter карт, баруун талд carousel.
+         Бүтэн өргөнтэй цэнхэр градиентийг зориудаар хассан — цэнхэр нь зөвхөн
+         accent (товч, badge, идэвхтэй холбоос) болж үлдсэн.
+         Carousel-ийн слайд бүр нь БОДИТ контент рүү чиглэнэ: зохиомол promo,
+         "хямдрал", "шинэ онцлох" гэх мэт байхгүй — js/home.js нь слайдыг
+         бодит dataset-ээс (өнөөдрийн санаа, улирал, редакцын сонголт) бүтээнэ. -->
     <section class="hero" data-home-section="hero">
-      <div class="hero-content">
-        <h1 id="heroTitle">Өнөөдөр хамт хаашаа явах вэ? 💕</h1>
-        <p id="heroSubtitle">Монголын анхны болзооны санааны платформ — Улаанбаатар болон 21 аймгийн болзооны санаанууд</p>
-        <div class="search-box">
-          <input type="text" placeholder="Жишээ: Зайсан, кафе, төсөв 50,000₮" id="searchInput" aria-label="Болзооны санаа хайх" onkeypress="if(event.key==='Enter')performSearch()"/>
-          <button class="btn btn-accent" onclick="performSearch()" type="button">Хайх</button>
+      <div class="hero-grid">
+        <div class="hero-promo">
+          <h1 id="heroTitle">Өнөөдөр хамт хаашаа явах вэ?</h1>
+          <p id="heroSubtitle">Монголын болзооны санааны платформ — Улаанбаатар болон 21 аймаг</p>
+          <div class="hero-quick">
+            <span class="hero-quick-label">Хурдан сонголт</span>
+            <div class="hero-quick-chips" id="heroQuickChips"></div>
+          </div>
+          <div class="hero-actions">
+            <button class="btn btn-accent" onclick="openRandomIdea()" type="button">
+              <span class="nav-ico" data-icon="dice" data-icon-size="17"></span>Санамсаргүй санаа
+            </button>
+            <!-- Admin нүүр хуудсын тохиргоонд CTA нэр + холбоос өгвөл энд товч нэмэгдэнэ. -->
+            <span id="heroCtaSlot"></span>
+          </div>
         </div>
-        <div style="margin-top: 14px;">
-          <button class="btn btn-random" onclick="openRandomIdea()" type="button"><span class="nav-ico" data-icon="dice"></span>Санамсаргүй санаа авах</button>
-          <!-- Admin нүүр хуудсын тохиргоонд CTA нэр + холбоос өгвөл энд товч нэмэгдэнэ.
-               Өгөөгүй бол энэ хэсэг бүрэн хоосон үлдэнэ (хоосон зай ч гарахгүй). -->
-          <span id="heroCtaSlot"></span>
+
+        <div class="hero-carousel" id="heroCarousel" aria-roledescription="carousel" aria-label="Онцлох санаанууд">
+          <div class="hero-slides" id="heroSlides"></div>
+          <button type="button" class="hero-nav prev" onclick="heroSlide(-1)" aria-label="Өмнөх">‹</button>
+          <button type="button" class="hero-nav next" onclick="heroSlide(1)" aria-label="Дараах">›</button>
+          <div class="hero-dots" id="heroDots" role="tablist" aria-label="Слайд сонгох"></div>
         </div>
-        <div class="hero-stats">
-          <!-- Тоонуудыг hardcode хийхгүй: updateHeroStats() бодит dataset-ээс тооцоод бөглөнө.
-               Ингэснээр контент өөрчлөгдөхөд тоо хэзээ ч хуучирахгүй. -->
-          <div class="hero-stat"><span class="hero-stat-num" data-stat="total">—</span><span class="hero-stat-label">болзооны санаа</span></div>
-          <div class="hero-stat"><span class="hero-stat-num" data-stat="ub">—</span><span class="hero-stat-label">УБ-д жилийн өдөр</span></div>
-          <div class="hero-stat"><span class="hero-stat-num" data-stat="aimags">—</span><span class="hero-stat-label">аймаг</span></div>
-          <div class="hero-stat"><span class="hero-stat-num" data-stat="aimagIdeas">—</span><span class="hero-stat-label">аймгийн санаа</span></div>
-        </div>
+      </div>
+    </section>
+
+    <!-- TRUST STRIP: бүх тоо бодит dataset-ээс (updateHeroStats). Hardcode хийгээгүй
+         тул контент өөрчлөгдөхөд хэзээ ч хуучирахгүй. -->
+    <section class="trust-strip" data-home-section="trust" aria-label="Платформын тойм">
+      <div class="trust-inner">
+        <div class="trust-item"><strong data-stat="total">—</strong><span>болзооны санаа</span></div>
+        <div class="trust-item"><strong data-stat="aimags">—</strong><span>аймаг хамарсан</span></div>
+        <div class="trust-item"><strong data-stat="free">—</strong><span>үнэгүй санаа</span></div>
+        <div class="trust-item"><strong>QR</strong><span>урилга илгээх</span></div>
+        <div class="trust-item"><strong data-stat="aimagIdeas">—</strong><span>аймгийн санаа</span></div>
       </div>
     </section>
 
@@ -303,6 +348,8 @@
 <script src="js/site-settings.js"></script>
 <script src="js/main.js"></script>
 <script>
+renderHeroCarousel();
+renderHeroQuickChips();
 renderFeatured();
 renderBudgetSection();
 renderMoodSection();

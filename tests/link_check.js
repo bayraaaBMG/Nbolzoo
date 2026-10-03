@@ -64,7 +64,11 @@ t('services nav link on every page', noSvc.length === 0, noSvc.join(', '));
 const NOT_IN_NAV = ['privacy.html', 'terms.html'];
 for (const p of pages) {
   const h = fs.readFileSync(p, 'utf8');
-  const navBlock = h.slice(h.indexOf('<ul class="nav-menu">'), h.indexOf('</ul>', h.indexOf('<ul class="nav-menu">')));
+  // Гурван давхаргат header: идэвхтэй холбоос нь ангиллын цэсэнд (cat-link),
+  // logo дээр (нүүр) эсвэл header-ийн баруун талд (Хадгалсан) байж болно —
+  // тиймээс header-ийн БҮХ блокийг шалгана.
+  const a0 = h.indexOf('NB:HEADER:START');
+  const navBlock = a0 < 0 ? '' : h.slice(a0, h.indexOf('mobile-nav-drawer', a0));
   const n = (navBlock.match(/aria-current="page"/g) || []).length;
   const want = NOT_IN_NAV.includes(p) ? 0 : 1;
   t(p + ' has ' + want + ' active nav link', n === want, 'found ' + n);

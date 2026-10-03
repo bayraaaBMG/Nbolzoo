@@ -12,6 +12,8 @@ function updateHeroStats() {
     ub: allUbIdeas.length,
     aimags: aimagsClean.length,
     aimagIdeas: totalAimagIdeas,
+    // Үнэгүй санааны тоо — price === 0 гэсэн БОДИТ талбараас. Таамаглал биш.
+    free: allUbIdeas.filter(i => i.price === 0).length,
   };
   document.querySelectorAll("[data-stat]").forEach(el => {
     const v = stats[el.dataset.stat];
@@ -133,4 +135,127 @@ function renderPromoSections() {
         <button class="btn" type="button" onclick="event.stopPropagation();navigate('community')">Нийгэмлэг рүү орох →</button>
       </div>`;
   }
+}
+
+// ===== HERO CAROUSEL =====
+// Слайд бүр нь БОДИТ контент рүү чиглэнэ. Зохиомол "хямдрал", "шинэ бүтээгдэхүүн",
+// "онцгой санал" гэх мэт promo ОГТ байхгүй — слайдыг dataset-ээс өөрөөс нь бүтээнэ:
+//   1. Өнөөдрийн санаа (жилийн өдрөөр)
+//   2. Одоогийн улирлын санаа
+//   3. Редакцын сонголт (home.js-ийн байгаа логик)
+//   4. Санамсаргүй аймаг
+// Ингэснээр слайд хэзээ ч хуучирахгүй, хэзээ ч худал биш.
+
+let heroIdx = 0;
+let heroTimer = null;
+
+function currentSeason() {
+  const m = new Date().getMonth(); // 0-11
+  if (m <= 1 || m === 11) return "winter";
+  if (m <= 4) return "spring";
+  if (m <= 7) return "summer";
+  return "autumn";
+}
+
+function heroBuildSlides() {
+  if (typeof allUbIdeas === "undefined" || !allUbIdeas.length) return [];
+  const slides = [];
+  const season = currentSeason();
+
+  const today = allUbIdeas[(getDayOfYear() - 1) % allUbIdeas.length];
+  if (today) slides.push({ tag: "Өнөөдрийн санаа", idea: today });
+
+  const seasonal = allUbIdeas.filter(i => i.season === season && i.id !== (today && today.id));
+  if (seasonal.length) {
+    slides.push({ tag: (SEASON_LABEL[season] || season) + "-ийн сонголт", idea: seasonal[getDayOfYear() % seasonal.length] });
+  }
+
+  // Үнэгүй санаа — хамгийн их хэрэгтэй шүүлт тул тусад нь онцолно.
+  const free = allUbIdeas.filter(i => i.price === 0 && !slides.some(s => s.idea.id === i.id));
+  if (free.length) slides.push({ tag: "Үнэгүй", idea: free[getDayOfYear() % free.length] });
+
+  const rest = allUbIdeas.filter(i => !slides.some(s => s.idea.id === i.id));
+  if (rest.length) slides.push({ tag: "Редакцын сонголт", idea: rest[(getDayOfYear() * 7) % rest.length] });
+
+  return slides.slice(0, 4);
+}
+
+function renderHeroCarousel() {
+  const wrap = document.getElementById("heroSlides");
+  const dots = document.getElementById("heroDots");
+  if (!wrap) return;
+  const slides = heroBuildSlides();
+  if (!slides.length) {
+    // Dataset ачаалагдаагүй бол carousel-ийг бүхэлд нь нуух — хоосон хүрээ харуулахгүй.
+    const c = document.getElementById("heroCarousel");
+    if (c) c.style.display = "none";
+    return;
+  }
+
+  wrap.innerHTML = slides.map((s, i) => {
+    const img = getIdeaImg(s.idea.title, s.idea.category);
+    return `<article class="hero-slide${i === 0 ? " on" : ""}" role="tabpanel" aria-label="${escapeHtml(s.tag)}">
+      <div class="hero-slide-media${img ? "" : " media-fallback"}" style="background:${getColor(s.idea.id)}">
+        ${img ? `<img src="${img.u}" alt="" loading="${i === 0 ? "eager" : "lazy"}" decoding="async" onerror="imgFallback(this)">` : ""}
+        <span class="hero-slide-emoji">${s.idea.emoji}</span>
+      </div>
+      <div class="hero-slide-body">
+        <span class="hero-slide-tag">${escapeHtml(s.tag)}</span>
+        <h3>${escapeHtml(s.idea.title)}</h3>
+        <p>${escapeHtml((s.idea.desc || "").slice(0, 90))}</p>
+        <div class="hero-slide-meta">
+          <span class="card-price">${escapeHtml(s.idea.priceText || "")}</span>
+          <button class="btn btn-primary btn-sm" type="button" onclick="openIdeaModal(${s.idea.id})">Үзэх</button>
+        </div>
+      </div>
+    </article>`;
+  }).join("");
+
+  if (dots) {
+    dots.innerHTML = slides.map((s, i) =>
+      `<button type="button" class="hero-dot${i === 0 ? " on" : ""}" role="tab" aria-selected="${i === 0}"
+        aria-label="${escapeHtml(s.tag)}" onclick="heroGo(${i})"></button>`).join("");
+  }
+  heroIdx = 0;
+  heroRestartTimer();
+}
+
+function heroGo(i) {
+  const slides = document.querySelectorAll(".hero-slide");
+  const dots = document.querySelectorAll(".hero-dot");
+  if (!slides.length) return;
+  heroIdx = (i + slides.length) % slides.length;
+  slides.forEach((s, n) => s.classList.toggle("on", n === heroIdx));
+  dots.forEach((d, n) => { d.classList.toggle("on", n === heroIdx); d.setAttribute("aria-selected", n === heroIdx); });
+  heroRestartTimer();
+}
+
+function heroSlide(dir) { heroGo(heroIdx + dir); }
+
+// Автомат эргэлт. Хэрэглэгч гараар сольсон бол тоолуурыг шинэчилнэ — эс бөгөөс
+// дарсны дараа шууд өөр слайд руу "үсэрч" эвгүй болно.
+// prefers-reduced-motion тохируулсан хүнд автомат эргэлт ОГТ ажиллахгүй.
+function heroRestartTimer() {
+  if (heroTimer) clearInterval(heroTimer);
+  try {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  } catch (e) { /* matchMedia байхгүй орчин — автомат эргэлтийг оруулахгүй */ return; }
+  heroTimer = setInterval(() => heroGo(heroIdx + 1), 6500);
+}
+
+// ===== HERO QUICK FILTER CHIPS =====
+// Шүүлтүүр бүр ub.html дээр БОДИТООР ажилладаг параметр рүү чиглэнэ.
+function renderHeroQuickChips() {
+  const el = document.getElementById("heroQuickChips");
+  if (!el || typeof allUbIdeas === "undefined") return;
+  const season = currentSeason();
+  const chips = [
+    ["Үнэгүй", "ub.html?budget=free"],
+    [SEASON_LABEL[season] || season, "ub.html?season=" + season],
+    ["Кафе", "ub.html?category=" + encodeURIComponent("кафе")],
+    ["Гадаа", "ub.html?category=" + encodeURIComponent("парк")],
+    ["21 аймаг", "aimags.html"],
+  ];
+  el.innerHTML = chips.map(([label, url]) =>
+    `<a class="hero-chip" href="${url}">${escapeHtml(label)}</a>`).join("");
 }

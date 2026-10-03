@@ -51,12 +51,30 @@ t('no orphan data-home-section in markup', inHtml.every(k => a.HOME_SECTIONS.som
 t('hero CTA slot exists', index.includes('id="heroCtaSlot"'));
 t('heroTitle id exists', index.includes('id="heroTitle"'));
 
-// --- 4. Footer: түлхүүр бүр БҮХ хуудсанд байгаа эсэх ---
+// --- 4. Footer: БИЧВЭР талбар бүх хуудсанд data-footer-тэй байгаа эсэх ---
+// phone / facebookUrl / instagramUrl нь footer-д БИШ, header-ийн utility bar-д
+// (id="utilPhone" гэх мэт) сууна — тиймээс тусад нь шалгана.
+const CONTACT_KEYS = { phone: 'utilPhone', facebookUrl: 'utilFacebook', instagramUrl: 'utilInstagram' };
 const pages = fs.readdirSync('.').filter(f => f.endsWith('.html'));
 a.FOOTER_FIELDS.forEach(([key]) => {
-  const missing = pages.filter(p => !fs.readFileSync(p, 'utf8').includes('data-footer="' + key + '"'));
-  t('footer key on every page — ' + key, missing.length === 0, missing.join(','));
+  if (CONTACT_KEYS[key]) {
+    const id = CONTACT_KEYS[key];
+    const missing = pages.filter(p => !fs.readFileSync(p, 'utf8').includes('id="' + id + '"'));
+    t('utility-bar slot on every page — ' + key, missing.length === 0, missing.join(','));
+    // Зохиомол холбоос гаргахгүйн тулд ЗААВАЛ hidden байж, тохируулсан үед л гарна.
+    const hasHidden = pages.every(p => new RegExp('id="' + id + '"[^>]*hidden').test(fs.readFileSync(p, 'utf8')));
+    t(key + ' slot starts hidden (no fake link)', hasHidden);
+  } else {
+    const missing = pages.filter(p => !fs.readFileSync(p, 'utf8').includes('data-footer="' + key + '"'));
+    t('footer key on every page — ' + key, missing.length === 0, missing.join(','));
+  }
 });
+// site-settings нь хоёр төрлийг хоёуланг хэрэгжүүлж байгаа эсэх
+const ssSrc = fs.readFileSync('js/site-settings.js', 'utf8');
+t('site-settings applies contact links', /function applyContactSetting/.test(ssSrc));
+// Утас/social холбоос нь href болж render хийгддэг тул схемийг эх үүсвэр дээр
+// шалгасан байх ёстой (javascript: гэх мэт схемийг таслана).
+t('contact hrefs are scheme-checked', ssSrc.includes('https?:') && ssSrc.includes('tel:'));
 
 // --- 5. Banner: admin-ийн байршил бүрд БОДИТ slot байгаа эсэх ---
 const adminSrc = fs.readFileSync('js/admin.js', 'utf8');

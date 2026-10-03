@@ -11,6 +11,7 @@ const SUITES = [
   ["cms integration", "tests/cms_integration.js", []],
   ["xss regression", "tests/xss_test.js", []],
   ["search", "tests/search_test.js", []],
+  ["header consistency", "tests/header_test.js", []],
   ["links & wiring", "tests/link_check.js", []],
   ["services catalogue", "tests/services_test.js", []],
   ["settings consistency", "tests/settings_test.js", []],

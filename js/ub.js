@@ -524,7 +524,7 @@ function ubToggle(kind, value) {
 // Зөвхөн хайлтын үгийг хасна — сонгосон шүүлтүүр хэвээр үлдэнэ.
 function ubClearQuery() {
   ubQuery = "";
-  const box = document.getElementById("ubSearchInput");
+  const box = document.getElementById("searchInput");
   if (box) box.value = "";
   currentPage = 1;
   ubSyncUrl();
@@ -533,7 +533,7 @@ function ubClearQuery() {
 
 function ubClearFilters() {
   ubQuery = "";
-  const box = document.getElementById("ubSearchInput");
+  const box = document.getElementById("searchInput");
   if (box) box.value = "";
   ubFilter.season.clear(); ubFilter.budget.clear(); ubFilter.category.clear();
   currentPage = 1;

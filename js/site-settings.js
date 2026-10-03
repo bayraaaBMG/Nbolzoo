@@ -18,7 +18,7 @@ async function applySiteSettings() {
   if (theme.status === "fulfilled") applyThemeSetting(theme.value);
   if (nav.status === "fulfilled") applyNavigationSetting(nav.value);
   if (home.status === "fulfilled") applyHomepageSetting(home.value);
-  if (footer.status === "fulfilled") applyFooterSetting(footer.value);
+  if (footer.status === "fulfilled") { applyFooterSetting(footer.value); applyContactSetting(footer.value); }
 }
 
 // ---------- Өнгө ----------
@@ -45,7 +45,6 @@ function applyNavigationSetting(snap) {
     const hidden = Array.isArray(d.hidden) ? d.hidden : [];
     const labels = d.labels || {};
     const icons = d.icons || {};
-    const groups = d.groups || {};
     const order = Array.isArray(d.order) ? d.order : [];
 
     // 1) Нуух / нэр / icon
@@ -70,51 +69,19 @@ function applyNavigationSetting(snap) {
     });
     if (typeof nbHydrateIcons === "function") nbHydrateIcons();
 
-    // 2) Бүлэг солих — холбоосыг өөр dropdown руу зөөнө.
-    //    Зөвхөн ДЭЭД цэсэнд хамаарна (мобайл цэс нь тэгш жагсаалт тул хөндөхгүй).
-    const menu = document.querySelector(".nav-menu");
-    if (menu) {
-      Object.keys(groups).forEach(key => {
-        const link = menu.querySelector(`[data-page="${CSS.escape(key)}"]`);
-        if (!link) return;
-        const target = groups[key];
-        const dest = target ? menu.querySelector("#navGroup-" + CSS.escape(target)) : menu;
-        if (!dest) return;
-        if (target) {
-          link.className = "nav-dropdown-link" + (link.classList.contains("active") ? " active" : "");
-          dest.appendChild(link);
-        } else {
-          // Дээд түвшинд гаргах: <li> дотор байрлуулна, эс бөгөөс flex зохион байгуулалт эвдэрнэ.
-          const li = document.createElement("li");
-          link.className = "nav-link" + (link.classList.contains("active") ? " active" : "");
-          li.appendChild(link);
-          menu.appendChild(li);
-        }
-      });
-    }
-
-    // 3) Дараалал — тухайн холбоосыг агуулсан дээд түвшний элементийг эрэмбэлнэ.
+    // 2) Дараалал — ангиллын цэс нь тэгш жагсаалт (dropdown байхгүй) тул
+    //    элементийг шууд эцэг рүүгээ дахин нэмэхэд дараалал солигдоно.
+    const menu = document.querySelector(".cat-nav-inner");
     if (order.length && menu) {
       order.forEach(key => {
         const link = menu.querySelector(`[data-page="${CSS.escape(key)}"]`);
-        if (!link) return;
-        const top = link.closest("li") || link;
-        if (top.parentElement === menu) menu.appendChild(top);
+        if (link && link.parentElement === menu) menu.appendChild(link);
       });
       // Админ холбоосыг үргэлж хамгийн сүүлд үлдээнэ.
       const adminLink = menu.querySelector('[data-page="admin"]');
-      if (adminLink) {
-        const top = adminLink.closest("li") || adminLink;
-        if (top.parentElement === menu) menu.appendChild(top);
-      }
+      if (adminLink && adminLink.parentElement === menu) menu.appendChild(adminLink);
     }
 
-    // 4) Бүх холбоос нь нуугдсан dropdown бол бүлгийг нь бүхэлд нь нуухгүй бол
-    //    хоосон товч үлдэнэ.
-    document.querySelectorAll(".nav-group").forEach(g => {
-      const links = Array.from(g.querySelectorAll(".nav-dropdown-link"));
-      g.style.display = (links.length && links.every(l => l.style.display === "none")) || !links.length ? "none" : "";
-    });
   } catch (e) { console.warn("applyNavigationSetting failed:", e); }
 }
 
@@ -191,4 +158,27 @@ function applyFooterSetting(snap) {
       if (texts[key]) el.textContent = texts[key];
     });
   } catch (e) { console.warn("applyFooterSetting failed:", e); }
+}
+
+// ---------- Utility bar-ийн холбоо барих холбоос ----------
+// Утас, Facebook, Instagram нь ЗОХИОМОЛ байж болохгүй. HTML-д hidden байдлаар
+// хоосон сууж, admin "Footer" тохиргооноос бодит утга өгвөл л харагдана.
+// Тохируулаагүй бол тэр холбоос ОГТ гарахгүй — хуурамч холбоос хэзээ ч үзүүлэхгүй.
+function applyContactSetting(snap) {
+  try {
+    if (!snap.exists) return;
+    const t = snap.data().texts || {};
+    const set = (id, value, href) => {
+      const el = document.getElementById(id);
+      if (!el || !value) return;
+      // Гадаад холбоос нь зөвхөн http(s) эсвэл tel: байж болно.
+      if (href && !/^(https?:\/\/|tel:)/i.test(href)) return;
+      el.textContent = value;
+      if (href) el.href = href;
+      el.hidden = false;
+    };
+    if (t.phone) set("utilPhone", "☎ " + t.phone, "tel:" + String(t.phone).replace(/[^\d+]/g, ""));
+    if (t.facebookUrl) set("utilFacebook", "Facebook", t.facebookUrl);
+    if (t.instagramUrl) set("utilInstagram", "Instagram", t.instagramUrl);
+  } catch (e) { console.warn("applyContactSetting failed:", e); }
 }

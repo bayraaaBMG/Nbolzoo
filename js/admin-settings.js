@@ -187,7 +187,8 @@ const NAV_PAGES = [
   ["community", "Нийгэмлэг", "users", ""],
   ["saved", "Хадгалсан", "heart", ""],
 ];
-const NAV_GROUPS = [["", "Дээд түвшин (бүлэггүй)"], ["ideas", "Санаанууд"], ["tools", "Хэрэгслүүд"]];
+// NAV_GROUPS хассан: гурван давхаргат header-т ангиллын цэс нь ТЭГШ жагсаалт,
+// dropdown байхгүй. Юу ч хийдэггүй тохиргоо харуулахаас татгалзав.
 // Сонгож болох icon-ууд нь js/ui.js-д БОДИТООР байгаа нэрс — байхгүй нэр сонговол
 // хоосон дөрвөлжин гарах тул эх сурвалжаас нь авна.
 function navIconChoices() { return typeof NB_ICONS !== "undefined" ? Object.keys(NB_ICONS) : []; }
@@ -197,14 +198,14 @@ let navCfgCache = null;
 async function renderAdminNavigation() {
   const el = document.getElementById("admin-navigation");
   el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>`;
-  let cfg = { hidden: [], labels: {}, icons: {}, groups: {}, order: [] };
+  let cfg = { hidden: [], labels: {}, icons: {}, order: [] };
   try {
     const snap = await db.collection("siteSettings").doc("navigation").get();
     if (snap.exists) {
       const d = snap.data();
       cfg = {
         hidden: Array.isArray(d.hidden) ? d.hidden : [],
-        labels: d.labels || {}, icons: d.icons || {}, groups: d.groups || {},
+        labels: d.labels || {}, icons: d.icons || {},
         order: Array.isArray(d.order) ? d.order : [],
       };
     }
@@ -243,10 +244,9 @@ function renderAdminNavigationBody() {
     </div>
     <div class="nav-cfg-list">
       ${pages.map((p, i) => {
-        const [key, def, defIcon, defGroup] = p;
+        const [key, def, defIcon] = p;
         const hidden = cfg.hidden.includes(key);
         const icon = cfg.icons[key] || defIcon;
-        const group = cfg.groups[key] !== undefined ? cfg.groups[key] : defGroup;
         return `<div class="nav-cfg-row">
           <div class="nav-cfg-order">
             <button class="btn btn-outline btn-sm btn-icon" type="button" title="Дээш" ${i === 0 ? "disabled" : ""} onclick="adminNavMove('${key}',-1)">↑</button>
@@ -261,9 +261,6 @@ function renderAdminNavigationBody() {
           <select id="navIcon_${key}" aria-label="${escapeHtml(def)} icon">
             ${icons.map(ic => `<option value="${ic}"${ic === icon ? " selected" : ""}>${ic}</option>`).join("")}
           </select>
-          <select id="navGroup_${key}" aria-label="${escapeHtml(def)} бүлэг">
-            ${NAV_GROUPS.map(([g, gl]) => `<option value="${g}"${g === group ? " selected" : ""}>${escapeHtml(gl)}</option>`).join("")}
-          </select>
         </div>`;
       }).join("")}
     </div>
@@ -275,22 +272,20 @@ function renderAdminNavigationBody() {
 
 async function adminSaveNavigation() {
   if (!nbCan("settings.navigation")) return showToast("⚠️ Танд энэ эрх алга");
-  const hidden = [], labels = {}, icons = {}, groups = {};
-  NAV_PAGES.forEach(([key, def, defIcon, defGroup]) => {
+  const hidden = [], labels = {}, icons = {};
+  NAV_PAGES.forEach(([key, def, defIcon]) => {
     const show = document.getElementById("navShow_" + key);
     if (show && !show.checked) hidden.push(key);
     const l = document.getElementById("navLabel_" + key);
     if (l && l.value.trim() && l.value.trim() !== def) labels[key] = l.value.trim();
     const ic = document.getElementById("navIcon_" + key);
     if (ic && ic.value !== defIcon) icons[key] = ic.value;
-    const g = document.getElementById("navGroup_" + key);
-    if (g && g.value !== defGroup) groups[key] = g.value;
   });
   const order = navOrderedPages().map(p => p[0]);
   try {
     const prev = await db.collection("siteSettings").doc("navigation").get();
     await db.collection("siteSettings").doc("navigation").set({
-      hidden, labels, icons, groups, order,
+      hidden, labels, icons, order,
       updatedBy: currentUser.uid, updatedByName: currentUser.name,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
@@ -308,6 +303,7 @@ async function adminSaveNavigation() {
 const HOME_SECTIONS = [
   ["banner", "Зар сурталчилгааны banner"],
   ["hero", "Толгой хэсэг (hero)"],
+  ["trust", "Итгэлийн мөр (тоонууд)"],
   ["howItWorks", "«Яаж ажилладаг вэ?» хэсэг"],
   ["today", "Өнөөдрийн болзоо"],
   ["budget", "Төсвөөр хайх"],
@@ -448,6 +444,11 @@ async function adminSaveHomepage() {
 // ачаалагдаагүй ч HTML доторх анхны бичвэр хэвээр үлдэнэ.
 const FOOTER_FIELDS = [
   ["tagline", "Танилцуулга бичвэр", "textarea"],
+  // Эдгээр нь footer БОЛОН header-ийн дээд мөрт (utility bar) хоёуланд үйлчилнэ.
+  // Хоосон бол тэр холбоос ОГТ харагдахгүй — хуурамч холбоос гаргахгүйн тулд.
+  ["phone", "Утасны дугаар (utility bar)", "text"],
+  ["facebookUrl", "Facebook хаяг (https://...)", "text"],
+  ["instagramUrl", "Instagram хаяг (https://...)", "text"],
   ["email", "И-мэйл мөр", "text"],
   ["instagram", "Instagram мөр", "text"],
   ["facebook", "Facebook мөр", "text"],
@@ -470,6 +471,7 @@ async function renderAdminFooter() {
     <div class="admin-note">
       Footer-ийн бичвэрийг бүх хуудсанд нэг дор өөрчилнө. Хоосон орхивол кодод бичигдсэн анхны бичвэр хэвээр үлдэнэ.
       <br><strong>Анхаар:</strong> зөвхөн бодит, ажилладаг холбоо барих мэдээлэл оруулна уу.
+      Утас, Facebook, Instagram-ыг хоосон орхивол header-ийн дээд мөрт тэр холбоос <strong>огт харагдахгүй</strong>.
     </div>
     ${FOOTER_FIELDS.map(([key, label, type]) => `
       <div class="nav-cfg-row" style="align-items:flex-start">
@@ -498,6 +500,10 @@ async function adminSaveFooter() {
     const f = document.getElementById("ft_" + key);
     if (f && f.value.trim()) texts[key] = f.value.trim();
   });
+  for (const key of ["facebookUrl", "instagramUrl"]) {
+    const v = (texts[key] || "").trim();
+    if (v && !/^https?:\/\//i.test(v)) return showToast("⚠️ " + key + " нь http:// эсвэл https:// -ээр эхлэх ёстой");
+  }
   try {
     const prev = await db.collection("siteSettings").doc("footer").get();
     await db.collection("siteSettings").doc("footer").set({

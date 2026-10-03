@@ -634,13 +634,32 @@ function renderUbIdeas() {
     paginationHtml += `<button type="button" onclick="changeUbPage(${i})" class="${i===currentPage?'active':''}" ${i===currentPage?'aria-current="page"':''}>${i}</button>`;
   }
   paginationHtml += `<button type="button" onclick="changeUbPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>Дараах ›</button>`;
+  // Байрлалын тоолуур — "хэд дэх хуудас дээр байгаа" нь урт жагсаалтад хэрэгтэй.
+  paginationHtml += `<span class="pagination-count" aria-live="polite">${currentPage} / ${totalPages}</span>`;
   pag.innerHTML = paginationHtml;
 }
 
+// Хуудас солих. Хил давбал эхлэл/төгсгөл рүү ЭРГЭНЭ (loop) — нүүр хуудасны
+// rail-тай ижил зан үйл, ингэснээр хэрэглэгч "гацдаггүй".
 function changeUbPage(p) {
-  if(p < 1) return;
+  const total = Math.max(1, Math.ceil(ubApplyFilters(allUbIdeas).length / itemsPerPage));
+  if (p < 1) p = total;
+  else if (p > total) p = 1;
   currentPage = p;
   renderUbIdeas();
-  document.getElementById("page-ub").scrollIntoView({behavior:"smooth"});
+  document.getElementById("ubGrid").scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
+// Гарын товчлуур: ← → -ээр хуудас сольно. Бичиж байх үед (хайлт, textarea)
+// болон модал нээлттэй үед хөндөхгүй — эс бөгөөс бичих боломжгүй болно.
+document.addEventListener("keydown", e => {
+  if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+  const t = e.target;
+  if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+  const modal = document.getElementById("modal");
+  if (modal && modal.classList.contains("show")) return;
+  if (!document.getElementById("ubGrid")) return;
+  e.preventDefault();
+  changeUbPage(currentPage + (e.key === "ArrowRight" ? 1 : -1));
+});
 

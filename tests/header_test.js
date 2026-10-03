@@ -16,6 +16,7 @@ t('every page has a generated header', noHeader.length === 0, noHeader.join(',')
 
 // --- 2. Active төлвөөс бусдаар бүгд ижил ---
 const norm = s => s
+  .split(String.fromCharCode(13)).join('')
   .replace(/ class="(cat-link|header-saved) active"/g, ' class="$1"')
   .replace(/ class="active" aria-current="page"/g, '')
   .replace(/ aria-current="page"/g, '');

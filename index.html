@@ -368,6 +368,7 @@
 <script src="js/ub.js"></script>
 <script src="js/aimags.js"></script>
 <script src="js/cms.js"></script>
+<script src="js/rail.js"></script>
 <script src="js/home.js"></script>
 <script src="js/banner.js"></script>
 <script src="js/site-settings.js"></script>
@@ -382,6 +383,9 @@ renderEditorialPicks();
 renderFeaturedAimags();
 renderPromoSections();
 updateHeroStats();
+// Rail-ийг render-ийн ДАРАА үүсгэнэ — картууд DOM-д орсон байх ёстой.
+// Дараалал нь render хийсэн хэвээр, шинэ эрэмбэ зохиохгүй.
+nbRailAll(["featuredGrid", "moodGrid", "editorialGrid", "featuredAimags"]);
 </script>
 
 </body>

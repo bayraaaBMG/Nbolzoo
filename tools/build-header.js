@@ -184,7 +184,9 @@ for (const [file, activeKey] of Object.entries(ACTIVE)) {
     html = html.slice(0, a) + block + "\n\n" + html.slice(b);
   }
   if (CHECK) {
-    if (html !== fs.readFileSync(p, "utf8")) stale.push(file);
+    // Мөрийн төгсгөлийг (CRLF/LF) тэгшитгээд ЗӨВХӨН агуулгыг харьцуулна.
+    const norm = x => x.split(String.fromCharCode(13)).join("");
+    if (norm(html) !== norm(fs.readFileSync(p, "utf8"))) stale.push(file);
   } else {
     fs.writeFileSync(p, html);
     written++;

@@ -86,6 +86,9 @@ function renderMoodSection() {
   }).join("");
   const matches = allUbIdeas.filter(i => i.mood === homeMoodFilter).slice(0, 4);
   gridEl.innerHTML = matches.map(idea => renderCard(idea)).join("");
+  // Шүүлтүүр солигдоход жагсаалт өөрчлөгдсөн тул rail-ийг дахин барина
+  // (тоолуур, товчнууд шинэ жагсаалтад тохирно).
+  if (typeof nbRail === "function") nbRail("moodGrid");
 }
 function selectHomeMood(id) {
   homeMoodFilter = id;

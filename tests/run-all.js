@@ -18,6 +18,7 @@ const SUITES = [
   ["page texts cms", "tests/texts_test.js", []],
   ["reviews", "tests/reviews_test.js", []],
   ["hero / carousel", "tests/hero_test.js", []],
+  ["card rail (prev/next)", "tests/rail_test.js", []],
   ["responsive", "tests/responsive_test.js", []],
   ["pwa / offline", "tests/pwa_test.js", []],
   ["dataset integrity", "tests/data_check.js", []],

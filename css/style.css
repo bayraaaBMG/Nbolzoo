@@ -323,12 +323,31 @@ body {
 .how-step a { color: var(--primary); text-decoration: none; font-weight: 600; cursor: pointer; }
 .how-step a:hover { text-decoration: underline; }
 
+/* ===== Хэсгийн гарчиг =====
+   Эможигүй, гарчиг + нэг мөр дэд тайлбар + баруун талд "Бүгдийг үзэх". */
 .section-title {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 20px; margin-top: 24px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 16px; margin: 36px 0 16px;
 }
-.section-title h2 { font-size: 22px; font-weight: 700; color: var(--text); }
-.section-title a { color: var(--primary); text-decoration: none; font-size: 13px; font-weight: 600; cursor: pointer; }
+.section-title h2 {
+  font-size: clamp(18px, 2vw, 22px); font-weight: 800; color: var(--text);
+  margin: 0; letter-spacing: -.015em; line-height: 1.25;
+}
+.section-sub { margin: 4px 0 0; font-size: 13px; color: var(--text-light); line-height: 1.45; }
+.section-more {
+  display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+  color: var(--primary); text-decoration: none; font-size: 13.5px; font-weight: 700; cursor: pointer;
+  padding: 6px 2px;
+}
+.section-more:hover { text-decoration: underline; }
+.section-more span { transition: transform .15s; }
+.section-more:hover span { transform: translateX(3px); }
+
+@media (max-width: 560px) {
+  .section-title { margin: 26px 0 12px; align-items: flex-start; flex-direction: column; gap: 6px; }
+  .section-sub { font-size: 12.5px; }
+  .section-more { padding: 0; }
+}
 
 .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 
@@ -451,52 +470,137 @@ body {
   .filter-sheet-panel { padding-bottom: 28px; }
 }
 
+/* ===== КАРТ =====
+   Бүх карт ИЖИЛ бүтэцтэй: зургийн өндөр тогтмол, гарчиг 2 мөр, тайлбар 2 мөр.
+   Ингэснээр grid-ийн мөр бүр тэгшхэн болж, өмнөх "карт болгон өөр өндөртэй"
+   эвгүй харагдац арилна.
+
+   Төсөв нь зургийн дээр badge болж, хадгалах зүрх нь дээд баруун буланд —
+   жагсаалт гүйлгэж харахад хоёулаа шууд уншигдана. */
 .cards-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 20px; margin-bottom: 32px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(236px, 1fr));
+  gap: 18px;
+  margin-bottom: 8px;
 }
 
 .card {
-  background: white; border-radius: 16px; overflow: hidden;
-  border: 1px solid var(--border); cursor: pointer; transition: all 0.3s;
+  background: var(--white); border-radius: 14px; overflow: hidden;
+  border: 1px solid var(--border); cursor: pointer;
+  display: flex; flex-direction: column;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
-
 .card:hover {
-  transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,119,182,0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(27, 38, 59, .1);
   border-color: var(--primary-light);
 }
+.card:focus-visible {
+  outline: 2px solid var(--primary); outline-offset: 2px;
+  transform: translateY(-3px);
+}
 
+/* --- Зураг: өндөр ТОГТМОЛ --- */
 .card-image {
-  height: 140px; display: flex; align-items: center; justify-content: center;
-  font-size: 50px; position: relative;
+  position: relative; height: 186px; flex-shrink: 0; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.card-bg-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.card-img-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .28) 0%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, .34) 100%);
+}
+.card-emoji-over {
+  position: absolute; left: 13px; bottom: 11px; z-index: 2;
+  font-size: 27px; line-height: 1;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, .4));
+}
+/* Зураг байхгүй үед эможи нь картын гол дээр, том болж брэндийн fallback болно */
+.card-emoji-solo {
+  position: static; font-size: 52px; filter: none; opacity: .92;
+}
+.card-img-credit {
+  position: absolute; right: 8px; bottom: 7px; z-index: 2;
+  font-size: 9.5px; color: rgba(255, 255, 255, .82); letter-spacing: .02em;
 }
 
-.card-badge {
-  position: absolute; top: 10px; right: 10px; background: var(--accent);
-  color: white; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 12px;
+/* --- Төсвийн badge --- */
+.card-badge-price {
+  position: absolute; left: 11px; top: 11px; z-index: 3;
+  background: rgba(255, 255, 255, .96); color: var(--text);
+  font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 7px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .14); white-space: nowrap;
+  max-width: calc(100% - 66px); overflow: hidden; text-overflow: ellipsis;
 }
-.card-badge.gold { background: var(--gold); color: #4A3500; }
+.card-badge-price.free { background: var(--success); color: #fff; }
 
-.card-body { padding: 14px; }
-.card-day { font-size: 11px; color: var(--primary); font-weight: 600; margin-bottom: 4px; }
-.card-location { font-size: 12px; color: var(--text-light); margin-bottom: 6px; }
-.card-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; line-height: 1.3; }
-.card-desc { font-size: 12px; color: var(--text-light); line-height: 1.5; margin-bottom: 10px; min-height: 36px; }
+/* --- Хадгалах зүрх --- */
+.card-save {
+  position: absolute; right: 10px; top: 10px; z-index: 3;
+  width: 36px; height: 36px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+  background: rgba(255, 255, 255, .94); color: var(--text-light);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, .16);
+  transition: color .15s, transform .15s, background .15s;
+}
+.card-save:hover { transform: scale(1.1); color: var(--accent); background: #fff; }
+.card-save.on { color: var(--accent); }
+.card-save.on .nav-ico svg { fill: currentColor; }
+.card-save:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-.card-feeling {
-  background: var(--accent-soft); padding: 8px 10px; border-radius: 8px;
-  font-size: 11px; color: #993C1D; margin-bottom: 10px; line-height: 1.5;
-  border-left: 3px solid var(--accent);
+/* --- Бие --- */
+.card-body { padding: 13px 14px 15px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.card-meta {
+  display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap;
+  font-size: 11.5px; color: var(--text-light); min-height: 15px;
+}
+.card-day { color: var(--primary); font-weight: 700; flex-shrink: 0; }
+.card-location { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-title {
+  font-size: 15px; font-weight: 700; line-height: 1.34; margin: 0; color: var(--text);
+  /* ЯГ 2 мөр — бүх карт тэгш өндөртэй болно */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; min-height: calc(2 * 1.34em);
+}
+.card-desc {
+  font-size: 12.5px; color: var(--text-light); line-height: 1.5; margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.card-footer {
-  display: flex; justify-content: space-between; align-items: center;
-  padding-top: 10px; border-top: 1px solid var(--border);
+/* --- Брэндийн fallback (зураг байхгүй/эвдэрсэн) --- */
+.media-fallback { position: relative; }
+.media-fallback::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, .16), rgba(0, 0, 0, .1));
+  pointer-events: none;
 }
 
-.card-price { color: var(--accent); font-weight: 700; font-size: 13px; }
-.card-likes { color: var(--text-light); font-size: 12px; cursor: pointer; }
-.card-likes.liked { color: var(--accent); }
+@media (max-width: 860px) {
+  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(188px, 1fr)); gap: 14px; }
+  .card-image { height: 158px; }
+}
+@media (max-width: 560px) {
+  /* Утсан дээр 2 багана — нэг багана болговол гүйлгэх зай хэтэрхий урт болно */
+  .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+  .card { border-radius: 12px; }
+  .card-image { height: 128px; }
+  .card-emoji-solo { font-size: 40px; }
+  .card-body { padding: 10px 11px 12px; gap: 4px; }
+  .card-title { font-size: 13.5px; }
+  .card-desc { font-size: 11.5px; -webkit-line-clamp: 2; }
+  .card-badge-price { font-size: 11px; padding: 4px 8px; left: 8px; top: 8px; }
+  /* Хүрэх талбай 40px-ээс багасахгүй */
+  .card-save { width: 40px; height: 40px; right: 6px; top: 6px; }
+  .card-img-credit { display: none; }
+}
+@media (max-width: 360px) {
+  .cards-grid { grid-template-columns: 1fr; }
+  .card-image { height: 170px; }
+}
 
 .ai-box {
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
@@ -1400,45 +1504,6 @@ body {
 .booking-success .tick { font-size: 56px; margin-bottom: 12px; display: block; }
 
 /* IMAGE CARD STYLES */
-.card-bg-img {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; z-index: 0;
-  transition: transform 0.4s ease;
-}
-.card:hover .card-bg-img { transform: scale(1.05); }
-.card-img-overlay {
-  position: absolute; inset: 0; background: rgba(0,0,0,0.18); z-index: 1;
-}
-.card-emoji-over {
-  position: relative; z-index: 2; font-size: 36px;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
-}
-.card-img-credit {
-  position: absolute; bottom: 5px; left: 7px;
-  font-size: 9px; color: rgba(255,255,255,0.85);
-  background: rgba(0,0,0,0.4); padding: 1px 5px; border-radius: 3px;
-  z-index: 3; letter-spacing: 0.3px;
-}
-
-/* ===== Зураггүй үеийн брэндийн fallback =====
-   Тухайн санаанд найдвартай тохирох зураг байхгүй (эсвэл зураг ачаалагдаагүй) үед
-   ХОЛБОО ХАМААРАЛГҮЙ stock зураг тавихын оронд брэндийн градиент дээр тухайн санааны
-   өөрийнх нь эможийг том харуулна — худал байршил/газрын мэдэгдэл үүсэхгүй. */
-.media-fallback {
-  background-image:
-    radial-gradient(circle at 22% 18%, rgba(255,255,255,0.30) 0%, transparent 48%),
-    linear-gradient(135deg, var(--primary-soft) 0%, var(--primary-extra-soft) 55%, var(--accent-soft) 100%);
-  position: relative;
-}
-.media-fallback::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background-image: radial-gradient(rgba(0,119,182,0.13) 1px, transparent 1px);
-  background-size: 14px 14px;
-}
-.card-emoji-solo {
-  font-size: 44px; filter: none; z-index: 2;
-}
-.media-fallback .card-emoji-over { filter: drop-shadow(0 2px 5px rgba(0,0,0,0.14)); }
 .aimag-card-img-wrap {
   height: 110px; border-radius: 10px; overflow: hidden;
   margin-bottom: 10px; position: relative;
@@ -2866,4 +2931,85 @@ select:focus-visible, [tabindex]:focus-visible {
   .trust-item:nth-child(4), .trust-item:nth-child(5) { grid-column: auto; }
   .trust-item:nth-child(5) { grid-column: 1 / 3; }
   .trust-item strong { font-size: 17px; }
+}
+
+/* ===================================================================
+   LIST ХУУДАС: sticky шүүлтүүр · skeleton · хоосон төлөв
+   =================================================================== */
+
+/* --- Sticky шүүлтүүрийн мөр ---
+   Урт жагсаалт гүйлгэхэд шүүлтүүр дээр бэхлэгдэнэ. top нь header-ийн
+   өндрөөс хамаарна: desktop дээр sticky header 65px орчим. */
+.filter-toolbar {
+  position: sticky; top: 64px; z-index: 40;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 11px 0; margin-bottom: 14px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+/* Sticky үед хажуугийн зай руу дэвсгэрийг нь тэлнэ, эс бөгөөс картууд
+   шүүлтүүрийн хажуугаар "цухуйж" харагдана. */
+.filter-toolbar::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -100vw; right: -100vw;
+  background: var(--bg); z-index: -1;
+}
+
+/* --- Skeleton (ачаалж байх үеийн хүлээлт) ---
+   Хоосон цагаан зай биш, картын хэлбэрийг урьдчилж харуулна — ингэснээр
+   контент ирэхэд "үсрэх" (layout shift) мэдрэмж багасна. */
+.skeleton-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.skeleton-img { height: 186px; }
+.skeleton-body { padding: 13px 14px 15px; display: flex; flex-direction: column; gap: 8px; }
+.skeleton-line { height: 11px; border-radius: 5px; }
+.skeleton-line.w40 { width: 40%; }
+.skeleton-line.w90 { width: 90%; }
+.skeleton-line.w70 { width: 70%; }
+.skeleton-img, .skeleton-line {
+  background: linear-gradient(90deg, #EDF1F6 25%, #F6F8FB 50%, #EDF1F6 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.3s ease-in-out infinite;
+}
+@keyframes skeletonShimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+/* Хөдөлгөөн багасгахыг хүссэн хүнд анимацгүй, зүгээр саарал блок */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-img, .skeleton-line { animation: none; background: #EDF1F6; }
+}
+
+/* --- Хоосон төлөв --- */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center; padding: 44px 24px;
+  background: var(--white); border: 1px dashed var(--border); border-radius: 14px;
+}
+.empty-state-ico {
+  width: 54px; height: 54px; margin: 0 auto 14px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--primary-extra-soft); color: var(--primary);
+}
+.empty-state strong { display: block; font-size: 16px; margin-bottom: 6px; color: var(--text); }
+.empty-state p { font-size: 13.5px; color: var(--text-light); margin: 0 auto 16px; max-width: 46ch; line-height: 1.6; }
+.empty-state-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.empty-state-chips a, .empty-state-chips button {
+  padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer;
+  background: var(--primary-extra-soft); border: 1px solid transparent; color: var(--primary);
+  text-decoration: none; font-family: inherit;
+}
+.empty-state-chips a:hover, .empty-state-chips button:hover { border-color: var(--primary); }
+
+@media (max-width: 860px) {
+  .filter-toolbar { top: 56px; }
+}
+@media (max-width: 560px) {
+  /* Утсан дээр header нь 2 мөр болдог тул sticky-г болиулж, зүгээр урсгана —
+     эс бөгөөс дэлгэцийн хагасыг шүүлтүүр эзэлнэ. */
+  .filter-toolbar { position: static; padding: 8px 0; }
+  .filter-toolbar::before { display: none; }
+  .empty-state { padding: 32px 16px; }
+  .skeleton-img { height: 128px; }
 }

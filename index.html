@@ -228,15 +228,22 @@
     <div class="container">
       <section data-home-section="today">
       <div class="section-title">
-        <h2>📅 Өнөөдрийн болзоо</h2>
-        <a onclick="navigate('ub')">Бүгдийг харах →</a>
+        <div>
+          <h2>Өнөөдрийн болзоо</h2>
+          <p class="section-sub">Жилийн өдөр тутмын санаа — өнөөдөрт тохирсон сонголт</p>
+        </div>
+        <a class="section-more" onclick="navigate('ub')">Бүгдийг үзэх <span aria-hidden="true">→</span></a>
       </div>
       <div class="cards-grid" id="featuredGrid"></div>
       </section>
 
       <section data-home-section="budget">
       <div class="section-title">
-        <h2>💰 Төсвөөр хайх</h2>
+        <div>
+          <h2>Төсвөөр хайх</h2>
+          <p class="section-sub">Хэдэн төгрөгөөр ямар болзоо болох вэ</p>
+        </div>
+        <a class="section-more" onclick="navigate('ub')">Бүгдийг үзэх <span aria-hidden="true">→</span></a>
       </div>
       <div class="filters" id="budgetChips"></div>
       </section>
@@ -244,8 +251,11 @@
       <div data-banner-slot="home-mid"></div>
       <section data-home-section="mood">
       <div class="section-title">
-        <h2>🎭 Мэдрэмжээр хайх</h2>
-        <a onclick="navigate('ub')">Бүгдийг харах →</a>
+        <div>
+          <h2>Мэдрэмжээр хайх</h2>
+          <p class="section-sub">Ямар уур амьсгалтай болзоо хүсэж байна</p>
+        </div>
+        <a class="section-more" onclick="navigate('ub')">Бүгдийг үзэх <span aria-hidden="true">→</span></a>
       </div>
       <div class="filters" id="moodChips"></div>
       <div class="cards-grid" id="moodGrid"></div>
@@ -253,15 +263,22 @@
 
       <section data-home-section="editorial">
       <div class="section-title">
-        <h2>⭐ Редакцын сонголт</h2>
+        <div>
+          <h2>Редакцын сонголт</h2>
+          <p class="section-sub">Онцлон сонгосон санаанууд</p>
+        </div>
+        <a class="section-more" onclick="navigate('ub')">Бүгдийг үзэх <span aria-hidden="true">→</span></a>
       </div>
       <div class="cards-grid" id="editorialGrid"></div>
       </section>
 
       <section data-home-section="aimags">
       <div class="section-title">
-        <h2>🌄 Аймагт хамт явах уу?</h2>
-        <a onclick="navigate('aimags')">21 аймаг үзэх →</a>
+        <div>
+          <h2>Аймагт хамт явах уу?</h2>
+          <p class="section-sub">21 аймгийн онцлох газар, болзооны санаа</p>
+        </div>
+        <a class="section-more" onclick="navigate('aimags')">21 аймаг үзэх <span aria-hidden="true">→</span></a>
       </div>
       <div class="aimag-grid" id="featuredAimags"></div>
       </section>
@@ -269,13 +286,21 @@
       <div data-banner-slot="home-bottom"></div>
       <section data-home-section="games">
       <div class="section-title">
-        <h2>🎮 Хамтдаа тоглож, урилга илгээцгээе</h2>
+        <div>
+          <h2>Хамтдаа тоглож, урилга илгээе</h2>
+          <p class="section-sub">Хосын тоглоом, QR урилга — хоёулаа үнэгүй</p>
+        </div>
+        <a class="section-more" onclick="navigate('games')">Тоглоом үзэх <span aria-hidden="true">→</span></a>
       </div>
       <div class="promo-row" id="gamesInvitePromo"></div>
       </section>
 
       <div class="section-title">
-        <h2>👥 Нийгэмлэгт нэгдээрэй</h2>
+        <div>
+          <h2>Нийгэмлэгт нэгдээрэй</h2>
+          <p class="section-sub">Бусад хосын туршлагаас шинэ санаа ав</p>
+        </div>
+        <a class="section-more" onclick="navigate('community')">Нийгэмлэг <span aria-hidden="true">→</span></a>
       </div>
       <div class="promo-row" id="communityPromo"></div>
     </div>

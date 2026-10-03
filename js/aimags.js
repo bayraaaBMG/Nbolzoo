@@ -4651,18 +4651,18 @@ function renderAimagDetail(id) {
         <h3>💕 ${a.name}-д хийх ${a.dates.length} болзоо</h3>
         <div class="cards-grid" style="margin-top: 12px;">
           ${a.dates.map((d, idx) => `
-            <div class="card" onclick="openAimagDateModal(${a.id}, ${idx})">
-              <div class="card-image" style="background: ${getColor(idx)}">${d.emoji}</div>
-              <div class="card-body">
-                <div class="card-location">📍 ${a.name}</div>
-                <div class="card-title">${d.title}</div>
-                <div class="card-desc">${d.desc}</div>
-                <div class="card-feeling">💝 ${d.feeling.substring(0, 80)}...</div>
-                <div class="card-footer">
-                  <span class="card-price">${d.price}</span>
-                </div>
+            <article class="card" onclick="openAimagDateModal(${a.id}, ${idx})" role="button" tabindex="0"
+              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openAimagDateModal(${a.id}, ${idx})}">
+              <div class="card-image media-fallback" style="background: ${getColor(idx)}">
+                <span class="card-emoji-over card-emoji-solo">${d.emoji}</span>
+                ${d.price ? `<span class="card-badge-price">${escapeHtml(d.price)}</span>` : ""}
               </div>
-            </div>
+              <div class="card-body">
+                <div class="card-meta"><span class="card-location">${escapeHtml(a.name)}</span></div>
+                <h3 class="card-title">${escapeHtml(d.title)}</h3>
+                <p class="card-desc">${escapeHtml(d.desc || "")}</p>
+              </div>
+            </article>
           `).join("")}
         </div>
       </div>

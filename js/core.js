@@ -797,9 +797,6 @@ function imgFallback(el) {
 function renderCard(idea) {
   const isLiked = userLikes.has(idea.id);
   const imgInfo = getIdeaImg(idea.title, idea.category);
-  const badge = idea.day === 1
-    ? '<div class="card-badge gold" style="z-index:3">⭐ Шинэ жил</div>'
-    : '';
   // alt="" — зураг нь тухайн ангиллыг төлөөлсөн чимэглэл бөгөөд гарчиг нь яг доор нь
   // текстээр байгаа тул дэлгэц уншигчид давхардуулж уншуулахгүй (чимэглэлийн зургийн
   // стандарт хандлага). Зураг байхгүй үед эможи + градиентээс бүрдсэн брэндийн fallback.
@@ -807,28 +804,33 @@ function renderCard(idea) {
     ? `<img src="${imgInfo.u}" loading="lazy" decoding="async" alt="" class="card-bg-img" onerror="imgFallback(this)">
        <div class="card-img-overlay"></div>
        <span class="card-emoji-over">${idea.emoji}</span>
-       <span class="card-img-credit">${imgInfo.s==="Wikipedia CC"?"© Wikipedia CC":"Unsplash"}</span>`
+       <span class="card-img-credit">${imgInfo.s === "Wikipedia CC" ? "© Wikipedia CC" : "Unsplash"}</span>`
     : `<span class="card-emoji-over card-emoji-solo">${idea.emoji}</span>`;
+
+  // Төсвийн badge нь зургийн дээр — жагсаалтыг гүйлгэж харахад хамгийн хэрэгтэй
+  // мэдээлэл тул картын доод талд биш, шууд харагдах газарт тавив.
+  const free = idea.price === 0;
   return `
-    <div class="card" onclick="openIdeaModal(${idea.id})">
-      <div class="card-image${imgInfo ? "" : " media-fallback"}" style="background: ${getColor(idea.id)}; overflow:hidden;">
+    <article class="card" onclick="openIdeaModal(${idea.id})" role="button" tabindex="0"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openIdeaModal(${idea.id})}">
+      <div class="card-image${imgInfo ? "" : " media-fallback"}" style="background:${getColor(idea.id)}">
         ${imageContent}
-        ${badge}
+        <span class="card-badge-price${free ? " free" : ""}">${escapeHtml(idea.priceText || "")}</span>
+        <button type="button" class="card-save${isLiked ? " on" : ""}"
+          onclick="event.stopPropagation();toggleLike(${idea.id})"
+          aria-label="${isLiked ? "Хадгалснаас хасах" : "Хадгалах"}" aria-pressed="${isLiked}">
+          <span class="nav-ico" data-icon="heart" data-icon-size="17"></span>
+        </button>
       </div>
       <div class="card-body">
-        <div class="card-day">📅 ${idea.day}-р өдөр</div>
-        <div class="card-location">${idea.location}</div>
-        <div class="card-title">${idea.title}</div>
-        <div class="card-desc">${idea.desc}</div>
-        <div class="card-feeling">💝 ${idea.feeling.substring(0, 80)}...</div>
-        <div class="card-footer">
-          <span class="card-price">${idea.priceText}</span>
-          <span class="card-likes ${isLiked?'liked':''}" onclick="event.stopPropagation();toggleLike(${idea.id})" role="button" tabindex="0" aria-label="Таалагдсан">
-            ${isLiked?'❤️ Хадгалсан':'🤍 Хадгалах'}
-          </span>
+        <div class="card-meta">
+          <span class="card-day">${idea.day}-р өдөр</span>
+          ${idea.location ? `<span class="card-location">${escapeHtml(idea.location)}</span>` : ""}
         </div>
+        <h3 class="card-title">${escapeHtml(idea.title)}</h3>
+        <p class="card-desc">${escapeHtml(idea.desc || "")}</p>
       </div>
-    </div>`;
+    </article>`;
 }
 
 const SEASON_LABEL = { winter: "❄️ Өвөл", spring: "🌸 Хавар", summer: "☀️ Зун", autumn: "🍂 Намар" };
@@ -1173,3 +1175,37 @@ document.addEventListener("keydown", (e) => {
   el.click();
 });
 
+
+// ===== SKELETON / ХООСОН ТӨЛӨВ =====
+// Ачаалж байх хугацаанд хоосон цагаан зай биш, картын хэлбэрийг урьдчилж
+// харуулна — контент ирэхэд "үсрэх" мэдрэмж багасна.
+function skeletonCards(n) {
+  let out = "";
+  for (let i = 0; i < (n || 8); i++) {
+    out += `<div class="skeleton-card" aria-hidden="true">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-body">
+        <div class="skeleton-line w40"></div>
+        <div class="skeleton-line w90"></div>
+        <div class="skeleton-line w70"></div>
+      </div>
+    </div>`;
+  }
+  return out;
+}
+
+// Хоосон төлөв: зөвхөн "олдсонгүй" гэж бичихгүй, ДАРААГИЙН алхмыг санал болгоно.
+// chips: [[нэр, onclick эсвэл href], ...]
+function emptyState(title, hint, chips) {
+  const items = (chips || []).map(([label, action]) =>
+    action.startsWith("http") || action.endsWith(".html") || action.includes(".html?")
+      ? `<a href="${escapeHtml(action)}">${escapeHtml(label)}</a>`
+      : `<button type="button" onclick="${action}">${escapeHtml(label)}</button>`
+  ).join("");
+  return `<div class="empty-state">
+    <div class="empty-state-ico"><span class="nav-ico" data-icon="search" data-icon-size="24"></span></div>
+    <strong>${escapeHtml(title)}</strong>
+    ${hint ? `<p>${escapeHtml(hint)}</p>` : ""}
+    ${items ? `<div class="empty-state-chips">${items}</div>` : ""}
+  </div>`;
+}

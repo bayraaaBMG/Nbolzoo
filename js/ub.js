@@ -609,13 +609,20 @@ function renderUbIdeas() {
   const start = (currentPage - 1) * itemsPerPage;
   const pageItems = filtered.slice(start, start + itemsPerPage);
   
+  // Хоосон төлөвт ДАРААГИЙН алхмыг санал болгоно — зөвхөн "олдсонгүй" гэж
+  // бичих нь хэрэглэгчийг гацаана.
   document.getElementById("ubGrid").innerHTML = pageItems.length
     ? pageItems.map(renderCard).join("")
-    : `<div class="empty-state">
-         <strong>${ubQuery ? `«${escapeHtml(ubQuery)}» гэсэн хайлтад тохирох санаа олдсонгүй.` : "Сонгосон шүүлтүүрт тохирох санаа олдсонгүй."}</strong>
-         <p>${ubQuery ? "Өөр үгээр хайж, эсвэл шүүлтүүрээ цөөлж үзнэ үү." : "Шүүлтүүрээ цөөлж эсвэл бүгдийг цэвэрлээд дахин үзнэ үү."}</p>
-         ${ubActiveCount() ? `<button type="button" class="btn btn-primary" onclick="ubClearFilters()">Хайлт/шүүлтүүр цэвэрлэх</button>` : ""}
-       </div>`;
+    : emptyState(
+        ubQuery ? `«${ubQuery}» гэсэн хайлтад тохирох санаа олдсонгүй` : "Сонгосон шүүлтүүрт тохирох санаа олдсонгүй",
+        ubQuery ? "Өөр үгээр хайж, эсвэл доорхоос сонгож үзнэ үү." : "Шүүлтүүрээ цөөлж эсвэл доорхоос сонгож үзнэ үү.",
+        [
+          ...(ubActiveCount() ? [["Бүх шүүлтүүр цэвэрлэх", "ubClearFilters()"]] : []),
+          ["Үнэгүй санаа", "ub.html?budget=free"],
+          ["21 аймаг", "aimags.html"],
+          ["Санамсаргүй санаа", "openRandomIdea()"],
+        ]);
+  if (typeof nbHydrateIcons === "function") nbHydrateIcons(document.getElementById("ubGrid"));
 
   // Үр дүн нэг хуудсанд багтвал хуудаслалт харуулахгүй.
   const pag = document.getElementById("ubPagination");

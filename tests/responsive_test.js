@@ -14,7 +14,12 @@ const allHtml = pages.map(p => fs.readFileSync(p, 'utf8')).join('\n');
 const allJs = fs.readdirSync('js').map(f => fs.readFileSync('js/' + f, 'utf8')).join('\n');
 
 // --- 1. Хэвтээ гүйлтийн хамгаалалт ---
-t('html/body clamp the viewport width', /html, body \{[^}]*overflow-x: hidden/.test(css));
+t('html/body clamp the viewport width', /html, body \{[^}]*max-width: 100%/.test(css));
+// РЕГРЕСС: overflow-x: hidden нь scroll container үүсгэж, дотор нь байгаа
+// position: sticky БҮХ элементийг ажиллахаа болиулдаг — яг тийм болж толгой
+// хэсэг гүйлгэхэд алга болж байсан. `clip` нь мөн таслана, гэхдээ sticky-г эвдэхгүй.
+t('overflow uses clip, never hidden (clip keeps sticky working)',
+  /body \{ overflow-x: clip; \}/.test(css) && !/overflow-x: hidden;/.test(css));
 t('media elements cannot overflow', /img, video, iframe, table, pre \{[^}]*max-width: 100%/.test(css));
 
 // --- 2. Meta viewport бүх хуудсанд ---
@@ -37,8 +42,13 @@ t('carousel autoplay checks reduced motion', /prefers-reduced-motion/.test(fs.re
 // нэвтэрсэн хэрэглэгчийн "Гарах" товчийг ч нуудаг байсан (бодит эвдрэл).
 t('logout button is never hidden wholesale', !/\.nav-actions \.btn-ghost \{\s*display: none/.test(css));
 // Зөвхөн #navAuthButtons дотор, зөвхөн хамгийн нарийн дэлгэцэнд нуух нь зөв
-t('only the signed-out ghost button is hidden, at ≤600px',
-  /#navAuthButtons \.btn\.btn-ghost \{ display: none; \}/.test(css));
+// Нарийн дэлгэцэнд нэвтрэлтийн товч толгойноос алга болдог ч drawer дотор
+// ЗААВАЛ байх ёстой — эс бөгөөс утаснаас нэвтрэх арга огт үгүй болно.
+t('auth buttons are hidden from the mobile header', /#navAuthButtons \{ display: none; \}/.test(css));
+t('auth is still reachable in the mobile drawer',
+  fs.readdirSync('.').filter(f => f.endsWith('.html'))
+    .every(f => /id="mobileAuthButtons"[\s\S]{0,400}openAuth\('login'\)/.test(fs.readFileSync(f, 'utf8'))));
+t('signed-in controls are never hidden on mobile', !/#navUserInfo \{ display: none/.test(css));
 
 // --- 6. media дүрэмд үлдсэн "хий" selector байхгүй эсэх ---
 // Markup/JS-д огт байхгүй класс дээр дүрэм үлдвэл дараа нь уншигч төөрөгдөнө.
@@ -61,11 +71,31 @@ t('cards-grid has one source of truth', gridRules <= 4, gridRules + ' declaratio
 t('phones keep a 2-column card grid', /@media \(max-width: 560px\)[\s\S]{0,500}\.cards-grid \{ grid-template-columns: repeat\(2/.test(css));
 
 // --- 10. Sticky header нь sticky шүүлтүүртэй зөрчихгүй ---
-t('sticky filter bar offsets below the header', /\.filter-toolbar \{[\s\S]{0,200}top: \d+px/.test(css));
+// Шүүлтүүрийн мөр нь толгойн БОДИТ өндрөөр бэхлэгдэнэ (hardcode тоо биш) —
+// толгой нь breakpoint, фонт, нэвтрэлтийн төлвөөс хамаарч өндөр нь өөрчлөгддөг.
+t('sticky filter bar offsets below the header', /\.filter-toolbar \{[\s\S]{0,200}top: var\(--head-h\)/.test(css));
+t('head height is measured at runtime', /--head-h/.test(fs.readFileSync('js/main.js', 'utf8')));
 t('sticky filter is disabled on narrow screens', /@media \(max-width: 560px\)[\s\S]{0,700}\.filter-toolbar \{ position: static/.test(css));
 
 // --- 11. Header нь нарийн дэлгэцэнд хайлтыг бүтэн мөр болгодог эсэх ---
-t('header search wraps to its own row on mobile', /\.header-search \{ order: 3; flex-basis: 100%/.test(css));
+// Хайлт нь тусдаа мөр рүү БУУХГҮЙ: буувал толгой ~145px болж, 667px өндөртэй
+// утсан дээр дэлгэцийн тавны нэгийг sticky толгой эзэлнэ.
+t('header search stays on one row on mobile', /@media \(max-width: 860px\)[\s\S]{0,700}\.header-search \{ flex: 1 1 auto/.test(css));
+t('header does not wrap on mobile', /@media \(max-width: 860px\)[\s\S]{0,500}flex-wrap: nowrap/.test(css));
+
+// --- Sticky толгой ---
+t('the header is ONE sticky unit', /\.site-head \{[\s\S]{0,120}position: sticky; top: 0/.test(css));
+t('inner header is not separately sticky', !/\.site-header \{[\s\S]{0,80}position: sticky/.test(css));
+t('every page wraps header+catnav in .site-head',
+  fs.readdirSync('.').filter(f => f.endsWith('.html'))
+    .every(f => {
+      const h = fs.readFileSync(f, 'utf8');
+      const a = h.indexOf('<div class="site-head">');
+      return a > 0 && h.indexOf('<header class="site-header">') > a && h.indexOf('<nav class="cat-nav"') > a;
+    }));
+t('head height is declared at each breakpoint', (css.match(/--head-h: \d+px/g) || []).length >= 4,
+  (css.match(/--head-h: \d+px/g) || []).join(','));
+t('anchors clear the sticky header', /scroll-padding-top: calc\(var\(--head-h\)/.test(css));
 
 console.log('\nresponsive: ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

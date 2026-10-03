@@ -1,5 +1,9 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* Якорь эсвэл scrollIntoView-ээр үсрэхэд контент sticky толгойн ДООГУУР
+   нуугдахгүй байх зай. */
+html { scroll-padding-top: calc(var(--head-h) + 12px); }
+
 :root {
   --primary: #0077B6;
   --primary-dark: #023E8A;
@@ -79,8 +83,16 @@ body {
 .utility-slot .btn { font-size: 12.5px !important; padding: 5px 9px !important; }
 
 /* ---- 2. Үндсэн header ---- */
-.site-header {
+/* Толгой + ангиллын мөр нь НЭГ sticky нэгж — гүйлгэхэд хоёулаа дээрээ үлдэнэ.
+   --head-h нь доорх sticky элементүүд (шүүлтүүрийн мөр г.м) өөрийгөө хаана
+   бэхлэхээ мэдэхэд хэрэгтэй. Breakpoint бүрт дахин тодорхойлогдоно. */
+:root { --head-h: 118px; }
+.site-head {
   position: sticky; top: 0; z-index: 60;
+  background: var(--white);
+  box-shadow: 0 1px 0 var(--border), 0 2px 10px rgba(27, 38, 59, .05);
+}
+.site-header {
   background: var(--white);
   border-bottom: 1px solid var(--border);
 }
@@ -129,11 +141,7 @@ body {
 #navAuthButtons .btn { font-size: 13.5px; padding: 9px 15px; }
 
 /* ---- 3. Ангиллын цэс ---- */
-.cat-nav {
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 3px rgba(27, 38, 59, .04);
-}
+.cat-nav { background: var(--white); }
 .cat-nav-inner {
   max-width: 1280px; margin: 0 auto; padding: 0 20px;
   display: flex; align-items: stretch; gap: 2px;
@@ -150,35 +158,65 @@ body {
 .cat-link.active { color: var(--primary); border-bottom-color: var(--primary); }
 .cat-ico { display: flex; flex-shrink: 0; }
 
-/* ---- Responsive ---- */
-@media (max-width: 1024px) {
+/* ---- Responsive ----
+   Зорилго: дэлгэц багасах тусам толгой НАРИЙСНА, гэхдээ logo · хайлт ·
+   цэс гурав нь ямар ч өргөнд үлдэнэ. --head-h нь sticky өндрийг заана
+   (js/main.js нь бодит хэмжээгээр нь дахин тодорхойлно). ---- */
+
+@media (max-width: 1100px) {
   .header-saved-text { display: none; }
   .header-saved { padding: 9px; }
 }
+
+/* --- Таблет ба утас: толгой НЭГ мөр --- */
 @media (max-width: 860px) {
-  /* Утас/таблет: ангиллын цэс нь мобайл drawer-т бий тул хэвтээ цэсийг нуухгүй,
-     зөвхөн чирэгдэх болгоно — Zary шиг ангилал үргэлж харагдаж байх нь хэрэгтэй. */
+  :root { --head-h: 102px; }
+  /* Utility bar нь туслах мэдээлэл — нарийн дэлгэцэнд зай эзлэхгүй */
   .utility-bar { display: none; }
-  .header-inner { padding: 10px 16px; gap: 12px; flex-wrap: wrap; }
-  .header-search { order: 3; flex-basis: 100%; max-width: none; }
-  .nav-actions { margin-left: auto; }
+  .header-inner { padding: 9px 16px; gap: 10px; flex-wrap: nowrap; }
+  /* Хайлт нь тусдаа мөр рүү БУУХГҮЙ — нэг мөрөнд үлдэж, үлдсэн зайг эзэлнэ */
+  .header-search { flex: 1 1 auto; min-width: 0; max-width: none; }
+  .header-search-ico { padding-left: 11px; }
+  .header-search input { padding: 9px 8px; font-size: 14px; }
+  .header-search-btn { padding: 9px 15px; font-size: 13.5px; }
+  .nav-actions { gap: 6px; flex-shrink: 0; }
   .header-saved { display: none; }
-  #navAuthButtons .btn { font-size: 13px; padding: 8px 12px; }
+  /* Нэвтрэлт нь drawer дотор бий — толгойд давхардуулахгүй */
+  #navAuthButtons { display: none; }
   .cat-nav-inner { padding: 0 16px; }
-  .cat-link { padding: 11px 11px; font-size: 13px; }
+  .cat-link { padding: 10px 11px; font-size: 13px; gap: 6px; }
 }
+
+/* --- Утас --- */
 @media (max-width: 600px) {
-  /* Нарийн дэлгэц: "Бүртгүүлэх" л үлдэнэ, Нэвтрэх нь drawer-т байна */
-  #navAuthButtons .btn.btn-ghost { display: none; }
+  :root { --head-h: 94px; }
+  .header-inner { padding: 8px 14px; gap: 8px; }
   .site-header .logo-tagline { display: none; }
-  .site-header .logo-text { font-size: 18px; }
-  .header-search input { font-size: 14px; padding: 10px 8px; }
-  .header-search-btn { padding: 10px 14px; }
-  .cat-link span:not(.cat-ico) { font-size: 12.5px; }
+  .site-header .logo-text { font-size: 17px; }
+  .logo-icon { width: 34px; height: 34px; }
+  .header-search-btn { padding: 9px 13px; font-size: 13px; }
+  .cat-nav-inner { padding: 0 14px; }
+  .cat-link { padding: 10px 9px; font-size: 12.5px; }
 }
-@media (max-width: 380px) {
-  /* Хайлтын товчийг эможигүй icon болгож зай гаргана */
-  .header-search-btn { padding: 10px 12px; font-size: 13px; }
+
+/* --- Нарийн утас: лого нь зөвхөн тэмдэг --- */
+@media (max-width: 430px) {
+  :root { --head-h: 90px; }
+  .site-header .logo-text { display: none; }
+  .header-inner { gap: 7px; padding: 7px 12px; }
+  .header-search input::placeholder { font-size: 13.5px; }
+  /* Товчны оронд томруулсан хайлтын тэмдэг — зай хэмнэнэ */
+  .header-search-btn { padding: 9px 11px; font-size: 0; }
+  .header-search-btn::after { content: "\1F50D"; font-size: 15px; }
+  .cat-nav-inner { padding: 0 12px; }
+  .cat-link { padding: 9px 8px; font-size: 12px; gap: 5px; }
+}
+
+/* Хүрэлтээр ажилладаг төхөөрөмж дээр ангиллын мөрийг чирэхэд
+   инерц өгнө (iOS) */
+@media (hover: none) {
+  .cat-nav-inner { -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; }
+  .cat-link { scroll-snap-align: start; }
 }
 
 /* Хуучин .nav / .nav-menu дээр тулгуурласан загварууд энэ header-т
@@ -1616,7 +1654,13 @@ body {
 /* --- Хэвтээ гүйлт хэзээ ч гарахгүй ---
    Нэг элемент хэтэрсэн ч бүх хуудас хажуу тийш чирэгдэх нь утсан дээрх
    хамгийн эвгүй эвдрэл тул үндсэн хэмжээг хатуу хязгаарлав. */
-html, body { max-width: 100%; overflow-x: hidden; }
+/* overflow-x: hidden ашиглаж БОЛОХГҮЙ: тэр нь scroll container үүсгэж,
+   дотор нь байгаа position: sticky БҮХ элементийг ажиллахаа болиулдаг —
+   яг тийм болж толгой хэсэг гүйлгэхэд алга болж байсан.
+   `clip` нь илүүдлийг мөн таслана, гэхдээ scroll container үүсгэхгүй тул
+   sticky хэвээр ажиллана. */
+html, body { max-width: 100%; }
+body { overflow-x: clip; }
 img, video, iframe, table, pre { max-width: 100%; }
 
 /* ===== Notifications bell ===== */
@@ -2917,7 +2961,7 @@ select:focus-visible, [tabindex]:focus-visible {
    Урт жагсаалт гүйлгэхэд шүүлтүүр дээр бэхлэгдэнэ. top нь header-ийн
    өндрөөс хамаарна: desktop дээр sticky header 65px орчим. */
 .filter-toolbar {
-  position: sticky; top: 64px; z-index: 40;
+  position: sticky; top: var(--head-h); z-index: 40;
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 11px 0; margin-bottom: 14px;
   background: var(--bg);
@@ -2978,9 +3022,6 @@ select:focus-visible, [tabindex]:focus-visible {
 }
 .empty-state-chips a:hover, .empty-state-chips button:hover { border-color: var(--primary); }
 
-@media (max-width: 860px) {
-  .filter-toolbar { top: 56px; }
-}
 @media (max-width: 560px) {
   /* Утсан дээр header нь 2 мөр болдог тул sticky-г болиулж, зүгээр урсгана —
      эс бөгөөс дэлгэцийн хагасыг шүүлтүүр эзэлнэ. */

@@ -80,6 +80,10 @@ function header(activeKey) {
 <!-- 2-Р ДАВХАР: logo · хайлт · хэрэглэгч.
      .nav-actions класс хэвээр — js/core.js нь PWA товчийг, js/auth.js нь
      нэвтрэлтийн төлвийг түүнээс хайдаг. -->
+<!-- 2 ба 3-Р ДАВХАР нь НЭГ sticky нэгж. Тусад нь sticky болговол гүйлгэхэд
+     ангиллын мөр толгойн доороос гарч алга болдог. Дээд (utility) мөр нь
+     зориуд sticky БИШ — тэр нь туслах мэдээлэл тул гүйлгэхэд дээшээ гарна. -->
+<div class="site-head">
 <header class="site-header">
   <div class="header-inner">
     <a class="logo" data-page="home" onclick="navigate('home')" role="button" tabindex="0" aria-label="Нүүр хуудас"${activeKey === "home" ? ' aria-current="page"' : ""}>
@@ -127,6 +131,7 @@ ${CATEGORIES.map(cat).join("\n")}
         <a class="cat-link" id="navAdminLink" data-page="admin" onclick="navigate('admin')" style="display:none;"${activeKey === "admin" ? ' aria-current="page"' : ""}><span class="cat-ico" data-icon="settings" data-icon-size="19"></span><span>Админ</span></a>
   </div>
 </nav>
+</div><!-- /.site-head -->
 
 <!-- Мобайл drawer — ангиллын цэс нарийн дэлгэц дээр чирэгддэг тул энд бүх
      холбоос + нэвтрэлт байна. -->

@@ -12,6 +12,7 @@ function stubEl() {
     appendChild(){}, addEventListener(){}, removeAttribute(){}, setAttribute(){},
     querySelector(){ return stubEl(); }, querySelectorAll(){ return []; },
     getContext(){ return { drawImage(){} }; }, toBlob(){}, focus(){}, click(){},
+    getBoundingClientRect(){ return { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 }; },
   };
   el.parentElement = null;
   return el;

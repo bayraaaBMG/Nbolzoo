@@ -102,7 +102,6 @@ function renderPosts() {
       </div>
       <div class="post-content">${escapeHtml(p.content)}</div>
       ${p.imageUrl ? `<img src="${escapeHtml(p.imageUrl)}" loading="lazy" alt="" class="post-photo" onerror="this.remove()">` : (p.emoji ? `<div class="post-image">${p.emoji}</div>` : "")}
-      ${p.budget ? `<div class="post-budget-tag">💸 ${escapeHtml(p.budget)}</div>` : ""}
       <div class="post-actions">
         <div class="post-action ${userPostLikes.has(p.id)?'liked':''}" onclick="togglePostLike('${p.id}')" role="button" tabindex="0" aria-label="Таалагдсан">
           ${userPostLikes.has(p.id)?'❤️':'🤍'} <span>${p.likeCount||0}</span>
@@ -325,7 +324,6 @@ async function toggleFollow(targetUid) {
 let pendingPostImage = null;    // File
 let pendingPostLocation = null; // string
 let pendingPostFeeling = null;  // emoji string
-let pendingPostBudget = null;   // string
 
 function renderPostAttachments() {
   const el = document.getElementById("postAttachments");
@@ -334,7 +332,6 @@ function renderPostAttachments() {
   if (pendingPostImage) chips.push(`<div class="post-attach-chip">🖼 ${escapeHtml(pendingPostImage.name)} <span onclick="removePostImage()">✕</span></div>`);
   if (pendingPostLocation) chips.push(`<div class="post-attach-chip">📍 ${escapeHtml(pendingPostLocation)} <span onclick="removePostLocation()">✕</span></div>`);
   if (pendingPostFeeling) chips.push(`<div class="post-attach-chip">${pendingPostFeeling} <span onclick="removePostFeeling()">✕</span></div>`);
-  if (pendingPostBudget) chips.push(`<div class="post-attach-chip">💸 ${escapeHtml(pendingPostBudget)} <span onclick="removePostBudget()">✕</span></div>`);
   el.innerHTML = chips.join("");
 }
 
@@ -353,7 +350,6 @@ function removePostImage() {
 }
 function removePostLocation() { pendingPostLocation = null; renderPostAttachments(); }
 function removePostFeeling() { pendingPostFeeling = null; renderPostAttachments(); }
-function removePostBudget() { pendingPostBudget = null; renderPostAttachments(); }
 
 function togglePostRow(rowId) {
   const row = document.getElementById(rowId);
@@ -376,15 +372,6 @@ function commitPostLocation() {
   renderPostAttachments();
 }
 
-function commitPostBudget() {
-  const input = document.getElementById("postBudgetInput");
-  const val = input?.value.trim();
-  if (!val) return;
-  pendingPostBudget = val;
-  input.value = "";
-  document.getElementById("postBudgetRow").style.display = "none";
-  renderPostAttachments();
-}
 
 function togglePostFeelingPicker() {
   const row = document.getElementById("postFeelingRow");
@@ -407,7 +394,6 @@ function resetPostAttachments() {
   pendingPostImage = null;
   pendingPostLocation = null;
   pendingPostFeeling = null;
-  pendingPostBudget = null;
   const imgInput = document.getElementById("postImageInput");
   if (imgInput) imgInput.value = "";
   renderPostAttachments();
@@ -437,7 +423,6 @@ async function submitPost() {
     if (postingAsCouple) { postData.authorType = "couple"; postData.coupleId = currentCouple.id; }
     if (pendingPostLocation) postData.location = pendingPostLocation;
     if (pendingPostFeeling) postData.feeling = pendingPostFeeling;
-    if (pendingPostBudget) postData.budget = pendingPostBudget;
 
     if (pendingPostImage && typeof uploadImageWithThumbnail === "function") {
       const path = `posts/${currentUser.uid}/${Date.now()}`;

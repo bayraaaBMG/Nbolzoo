@@ -425,8 +425,6 @@ for(let i = 0; i < 365; i++) {
     location: loc.label,
     mapQuery: loc.mapQuery,
     items: getIdeaItems(tmpl.title, tmpl.desc, tmpl.feeling, !!loc.mapQuery),
-    price: tmpl.price,
-    priceText: tmpl.price === 0 ? "Үнэгүй" : (tmpl.price <= 50000 ? "Төсөв: Бага" : tmpl.price <= 150000 ? "Төсөв: Дунд" : "Төсөв: Өндөр"),
     feeling: tmpl.feeling,
     category: cat.name,
     mood: classifyMood(tmpl, cat),
@@ -442,13 +440,7 @@ const UB_SEASONS = [
   ["winter", "❄️ Өвөл"], ["spring", "🌸 Хавар"],
   ["summer", "☀️ Зун"], ["autumn", "🍂 Намар"],
 ];
-const UB_BUDGETS = [
-  ["free",      "Үнэгүй",           i => i.price === 0],
-  ["cheap",     "≤50,000₮",         i => i.price > 0 && i.price <= 50000],
-  ["medium",    "50–150,000₮",      i => i.price > 50000 && i.price <= 150000],
-  ["expensive", ">150,000₮",        i => i.price > 150000],
-];
-const ubFilter = { season: new Set(), budget: new Set(), category: new Set() };
+const ubFilter = { season: new Set(), category: new Set() };
 // Нүүр хуудасны хайлт мөн ЭНД ирнэ (ub.html?q=...). Шүүлтүүртэй нэг системд
 // байрлуулсан нь хайлт + шүүлтүүрийг зэрэг ашиглах боломж нээж, URL-ээр
 // хуваалцах / буцах товч / refresh бүгд ажиллана.
@@ -464,7 +456,7 @@ function ubCategories() {
 function ubActiveCount() {
   // Хайлтын үг ч "идэвхтэй шүүлт" — эс бөгөөс зөвхөн хайлт тавьсан үед
   // "Цэвэрлэх" товч гарахгүй бөгөөд хэрэглэгч гацна.
-  return ubFilter.season.size + ubFilter.budget.size + ubFilter.category.size + (ubQuery ? 1 : 0);
+  return ubFilter.season.size + ubFilter.category.size + (ubQuery ? 1 : 0);
 }
 
 function ubApplyFilters(list) {
@@ -480,17 +472,13 @@ function ubApplyFilters(list) {
   }
   if (ubFilter.season.size) out = out.filter(i => ubFilter.season.has(i.season));
   if (ubFilter.category.size) out = out.filter(i => ubFilter.category.has(i.category));
-  if (ubFilter.budget.size) {
-    const tests = UB_BUDGETS.filter(([id]) => ubFilter.budget.has(id)).map(([, , fn]) => fn);
-    out = out.filter(i => tests.some(fn => fn(i)));
-  }
   return out;
 }
 
 // Шүүлтүүрийн төлөвийг URL-д тусгана: хуваалцах, буцах товч, refresh бүгд ажиллана.
 function ubSyncUrl() {
   const p = new URLSearchParams();
-  ["season", "budget", "category"].forEach(k => {
+  ["season", "category"].forEach(k => {
     if (ubFilter[k].size) p.set(k, [...ubFilter[k]].join(","));
   });
   if (ubQuery) p.set("q", ubQuery);
@@ -501,15 +489,16 @@ function ubSyncUrl() {
 function ubReadUrl() {
   const p = new URLSearchParams(location.search);
   ubQuery = (p.get("q") || "").trim();
-  ["season", "budget", "category"].forEach(k => {
+  ["season", "category"].forEach(k => {
     const v = p.get(k);
     if (v) v.split(",").filter(Boolean).forEach(x => ubFilter[k].add(x));
   });
   // Хуучин холбоосын нийцтэй байдал: нүүр хуудаснаас ирдэг ub.html?filter=free гэх мэт.
   const legacy = p.get("filter");
   if (legacy && legacy !== "all") {
-    if (UB_BUDGETS.some(([id]) => id === legacy)) ubFilter.budget.add(legacy);
-    else if (UB_SEASONS.some(([id]) => id === legacy)) ubFilter.season.add(legacy);
+    // Төсвийн шүүлтүүр байхгүй болсон тул хуучин ?filter=free гэх мэт утгыг
+    // зүгээр үл тоомсорлоно — алдаа гаргахгүй, бүх санааг харуулна.
+    if (UB_SEASONS.some(([id]) => id === legacy)) ubFilter.season.add(legacy);
   }
 }
 
@@ -535,7 +524,7 @@ function ubClearFilters() {
   ubQuery = "";
   const box = document.getElementById("searchInput");
   if (box) box.value = "";
-  ubFilter.season.clear(); ubFilter.budget.clear(); ubFilter.category.clear();
+  ubFilter.season.clear(); ubFilter.category.clear();
   currentPage = 1;
   ubSyncUrl();
   renderUbIdeas();
@@ -570,13 +559,10 @@ function renderUbFilterBar() {
   };
   const seasons = UB_SEASONS.map(([id, label]) =>
     ubChip("season", id, label, countFor("season", i => i.season === id))).join("");
-  const budgets = UB_BUDGETS.map(([id, label, fn]) =>
-    ubChip("budget", id, label, countFor("budget", fn))).join("");
   const cats = ubCategories().map(c =>
     ubChip("category", c, c, countFor("category", i => i.category === c))).join("");
   box.innerHTML = `
     <div class="filter-group"><span class="filter-group-label">Улирал</span><div class="filter-chip-row">${seasons}</div></div>
-    <div class="filter-group"><span class="filter-group-label">Төсөв</span><div class="filter-chip-row">${budgets}</div></div>
     <div class="filter-group"><span class="filter-group-label">Ангилал</span><div class="filter-chip-row">${cats}</div></div>`;
 }
 
@@ -589,7 +575,6 @@ function renderUbIdeas() {
   if (summary) {
     const pills = [
       ...[...ubFilter.season].map(v => ["season", v, (UB_SEASONS.find(s => s[0] === v) || [, v])[1]]),
-      ...[...ubFilter.budget].map(v => ["budget", v, (UB_BUDGETS.find(b => b[0] === v) || [, v])[1]]),
       ...[...ubFilter.category].map(v => ["category", v, v]),
     ];
     const queryPill = ubQuery
@@ -618,7 +603,6 @@ function renderUbIdeas() {
         ubQuery ? "Өөр үгээр хайж, эсвэл доорхоос сонгож үзнэ үү." : "Шүүлтүүрээ цөөлж эсвэл доорхоос сонгож үзнэ үү.",
         [
           ...(ubActiveCount() ? [["Бүх шүүлтүүр цэвэрлэх", "ubClearFilters()"]] : []),
-          ["Үнэгүй санаа", "ub.html?budget=free"],
           ["21 аймаг", "aimags.html"],
           ["Санамсаргүй санаа", "openRandomIdea()"],
         ]);

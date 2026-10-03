@@ -78,7 +78,6 @@ function renderServiceGrid() {
         <div class="card-location">${escapeHtml(c.label)}${s.district ? " · " + escapeHtml(s.district) : ""}</div>
         <div class="card-title">${escapeHtml(s.name || "")}</div>
         <div class="card-desc">${escapeHtml(s.desc || "")}</div>
-        ${s.price ? `<div class="service-price">💸 ${escapeHtml(s.price)}</div>` : ""}
         ${s.hours ? `<div class="service-hours">🕒 ${escapeHtml(s.hours)}</div>` : ""}
         <div class="service-contact">
           ${s.website ? `<a href="${escapeHtml(s.website)}" target="_blank" rel="noopener nofollow">🔗 Вэбсайт</a>` : ""}
@@ -134,7 +133,6 @@ function openServiceForm() {
         <select id="svcCat" required>${SERVICE_CATS.map(c => `<option value="${c.id}">${escapeHtml(c.label)}</option>`).join("")}</select>
       </div>
       <div class="form-group"><label for="svcDesc">Товч тайлбар *</label><textarea id="svcDesc" rows="3" required maxlength="400"></textarea></div>
-      <div class="form-group"><label for="svcPrice">Үнэ / үнийн санал</label><input type="text" id="svcPrice" maxlength="60" placeholder="Жишээ: 30,000₮-ээс"></div>
       <div class="form-group"><label for="svcHours">Ажиллах цаг</label><input type="text" id="svcHours" maxlength="80" placeholder="Жишээ: Даваа–Бям 10:00–20:00"></div>
       <div class="form-group"><label for="svcDistrict">Дүүрэг / Аймаг</label><input type="text" id="svcDistrict" maxlength="60"></div>
       <div class="form-group"><label for="svcAddress">Хаяг</label><input type="text" id="svcAddress" maxlength="160"></div>
@@ -184,7 +182,6 @@ async function submitService(ev) {
       address: document.getElementById("svcAddress").value.trim(),
       phone: document.getElementById("svcPhone").value.trim(),
       website, social, imageUrl,
-      price: document.getElementById("svcPrice").value.trim(),
       hours: document.getElementById("svcHours").value.trim(),
       status: "pending",              // rules-д ч мөн албадсан — өөрөө зөвшөөрөх боломжгүй
       ownerUid: currentUser.uid,

@@ -31,8 +31,10 @@ t('each slide has a tag label',(slides.match(/hero-slide-tag/g)||[]).length>=3);
 t('each slide has a title',(slides.match(/<h3>/g)||[]).length>=3);
 t('slide media box is present',(slides.match(/hero-slide-media/g)||[]).length>=3);
 t('dots match slide count',(dots.match(/hero-dot/g)||[]).length===(slides.match(/class="hero-slide[ "]/g)||[]).length);
-t('quick chips rendered',(chips.match(/hero-chip/g)||[]).length===5,(chips.match(/hero-chip/g)||[]).length+' chips');
-t('chips link to real filters',/ub\.html\?budget=free/.test(chips)&&/aimags\.html/.test(chips));
+t('quick chips rendered',(chips.match(/hero-chip/g)||[]).length===4,(chips.match(/hero-chip/g)||[]).length+' chips');
+t('chips link to real filters',/ub\.html\?season=/.test(chips)&&/aimags\.html/.test(chips));
+t('no money chip remains',!/budget|Үнэгүй|₮/.test(chips));
+t('no price shown on carousel slides',!/card-price|₮/.test(slides));
 t('no NaN / undefined in output',!/undefined|NaN/.test(slides+chips),(slides+chips).match(/undefined|NaN/g)||'');
 // --- CSS тал: зохион байгуулалтын гол дүрмүүд бодитоор байгаа эсэх ---
 // Markup зөв ч CSS дутвал слайдууд бүтэн өргөнтэй өнгөт зурвас болж өрөгдөнө —

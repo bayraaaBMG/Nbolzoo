@@ -173,10 +173,6 @@
               <input type="text" id="postLocationInput" placeholder="📍 Байршил (жишээ: Зайсан толгой)" aria-label="Байршил" onkeypress="if(event.key==='Enter')commitPostLocation()">
               <button type="button" class="btn btn-primary" onclick="commitPostLocation()" aria-label="Байршил баталгаажуулах">✓</button>
             </div>
-            <div id="postBudgetRow" class="post-inline-row" style="display:none;">
-              <input type="text" id="postBudgetInput" placeholder="💸 Зардал (жишээ: 50,000₮)" aria-label="Зардал" onkeypress="if(event.key==='Enter')commitPostBudget()">
-              <button type="button" class="btn btn-primary" onclick="commitPostBudget()" aria-label="Зардал баталгаажуулах">✓</button>
-            </div>
             <div id="postFeelingRow" class="post-feeling-picker" style="display:none;"></div>
             <div id="postAsCoupleRow" style="display:none;margin-top:6px;">
               <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text-light);">
@@ -188,7 +184,6 @@
                 <span style="cursor: pointer;" onclick="document.getElementById('postImageInput').click()" title="Зураг нэмэх">📷</span>
                 <span style="cursor: pointer;" onclick="togglePostRow('postLocationRow')" title="Байршил тэмдэглэх">📍</span>
                 <span style="cursor: pointer;" onclick="togglePostFeelingPicker()" title="Сэтгэгдэл сонгох">😊</span>
-                <span style="cursor: pointer;" onclick="togglePostRow('postBudgetRow')" title="Зардал нэмэх">💸</span>
                 <select id="postVisibilitySelect" class="post-visibility-select" onchange="selectPostVisibility(this.value)" title="Хэн харах вэ" aria-label="Нийтлэлийн нууцлал">
                   <option value="public">🌍 Нийтэд</option>
                   <option value="private">🔒 Зөвхөн би</option>

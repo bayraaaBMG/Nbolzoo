@@ -25,13 +25,13 @@ const CMS_SOURCES = {
     list: () => (typeof allUbIdeas !== "undefined" ? allUbIdeas : null),
     title: x => x.title,
     img: x => x.img || "",
-    meta: x => `${x.day}-р өдөр · ${x.category || "-"} · ${x.priceText || ""}`,
+    meta: x => `${x.day}-р өдөр · ${x.category || "-"}`,
     // Ангиллын сонголтыг өгөгдлөөс гаргана — гараар бичсэн жагсаалт хоцрохоос сэргийлнэ.
     categories: () => (typeof allUbIdeas !== "undefined" ? [...new Set(allUbIdeas.map(i => i.category).filter(Boolean))].sort() : []),
     fields: [
       ["title", "Гарчиг", "text"], ["desc", "Тайлбар", "textarea"],
       ["category", "Ангилал", "select"], ["location", "Байршил", "text"],
-      ["price", "Үнэ (₮)", "number"], ["feeling", "Мэдрэмж", "textarea"],
+      ["feeling", "Мэдрэмж", "textarea"],
     ],
   },
   aimags: {
@@ -53,11 +53,11 @@ const CMS_SOURCES = {
     list: () => (typeof gifts !== "undefined" ? gifts : null),
     title: x => x.title,
     img: x => x.img || "",
-    meta: x => `${x.cat || "-"}${x.price ? " · " + x.price : ""}`,
+    meta: x => `${x.cat || "-"}`,
     categories: () => (typeof giftCategories !== "undefined" ? giftCategories.map(c => c.id) : []),
     fields: [
       ["title", "Нэр", "text"], ["desc", "Тайлбар", "textarea"],
-      ["cat", "Ангилал", "select"], ["price", "Үнийн санал", "text"],
+      ["cat", "Ангилал", "select"],
       ["why", "Яагаад", "textarea"], ["emoji", "Эможи", "text"],
     ],
   },

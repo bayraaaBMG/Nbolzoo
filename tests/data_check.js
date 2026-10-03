@@ -60,7 +60,9 @@ const U = u.allUbIdeas;
 t('allUbIdeas built', U.length === 365, 'len=' + U.length);
 t('no fabricated like counts', U.every(i => i.likes === undefined));
 t('every idea has a title', U.every(i => i.title && i.title.length > 2));
-t('every idea has a numeric price', U.every(i => typeof i.price === 'number'));
+// РЕГРЕСС: санаанд мөнгөний талбар ОГТ байхгүй байх ёстой.
+t('no idea carries a price', U.every(i => i.price === undefined));
+t('no idea carries a price label', U.every(i => i.priceText === undefined));
 t('every idea has a unique id', new Set(U.map(i => i.id)).size === U.length);
 t('every idea has a season', U.every(i => ['winter', 'spring', 'summer', 'autumn'].includes(i.season)));
 

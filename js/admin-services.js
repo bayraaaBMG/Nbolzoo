@@ -55,7 +55,6 @@ async function renderAdminServices() {
           <div class="admin-card-meta">${escapeHtml(adminServiceCatLabel(sv.category))}${sv.district ? " · " + escapeHtml(sv.district) : ""} · ${escapeHtml(sv.submittedByName || "?")} · ${timeAgo(sv.createdAt)}</div>
           <div class="admin-card-desc">${escapeHtml(sv.desc || "")}</div>
           <div class="admin-card-meta">
-            ${sv.price ? "💸 " + escapeHtml(sv.price) + " · " : ""}
             ${sv.hours ? "🕒 " + escapeHtml(sv.hours) + " · " : ""}
             ${sv.phone ? "☎ " + escapeHtml(sv.phone) + " · " : ""}
             ${sv.website ? "🔗 " + escapeHtml(sv.website) + " " : ""}

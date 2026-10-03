@@ -807,15 +807,11 @@ function renderCard(idea) {
        <span class="card-img-credit">${imgInfo.s === "Wikipedia CC" ? "© Wikipedia CC" : "Unsplash"}</span>`
     : `<span class="card-emoji-over card-emoji-solo">${idea.emoji}</span>`;
 
-  // Төсвийн badge нь зургийн дээр — жагсаалтыг гүйлгэж харахад хамгийн хэрэгтэй
-  // мэдээлэл тул картын доод талд биш, шууд харагдах газарт тавив.
-  const free = idea.price === 0;
   return `
     <article class="card" onclick="openIdeaModal(${idea.id})" role="button" tabindex="0"
       onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openIdeaModal(${idea.id})}">
       <div class="card-image${imgInfo ? "" : " media-fallback"}" style="background:${getColor(idea.id)}">
         ${imageContent}
-        <span class="card-badge-price${free ? " free" : ""}">${escapeHtml(idea.priceText || "")}</span>
         <button type="button" class="card-save${isLiked ? " on" : ""}"
           onclick="event.stopPropagation();toggleLike(${idea.id})"
           aria-label="${isLiked ? "Хадгалснаас хасах" : "Хадгалах"}" aria-pressed="${isLiked}">
@@ -858,7 +854,6 @@ function openIdeaModal(id) {
       <div class="modal-meta">
         <div class="modal-meta-item">📅 <strong>${idea.day}-р өдөр</strong></div>
         <div class="modal-meta-item">📍 <strong>${idea.location}</strong></div>
-        <div class="modal-meta-item">💸 <strong>${idea.priceText}</strong></div>
       </div>
       ${(idea.category || idea.season) ? `
       <div class="modal-tags">
@@ -901,7 +896,6 @@ function closeModal() { document.getElementById("modal").classList.remove("show"
 function openBookingModal(ideaId, customTitle) {
   const idea = ideaId ? allUbIdeas.find(i => i.id === ideaId) : null;
   const title = customTitle || (idea ? idea.title : "Болзооны захиалга");
-  const price = idea ? idea.priceText : "Тохиролцоогоор";
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-header">
       <h3>📅 Захиалга — ${title}</h3>

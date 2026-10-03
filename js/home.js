@@ -12,8 +12,6 @@ function updateHeroStats() {
     ub: allUbIdeas.length,
     aimags: aimagsClean.length,
     aimagIdeas: totalAimagIdeas,
-    // Үнэгүй санааны тоо — price === 0 гэсэн БОДИТ талбараас. Таамаглал биш.
-    free: allUbIdeas.filter(i => i.price === 0).length,
   };
   document.querySelectorAll("[data-stat]").forEach(el => {
     const v = stats[el.dataset.stat];
@@ -54,28 +52,6 @@ function openRandomIdea() {
   openIdeaModal(idea.id);
 }
 
-// "Төсвөөр хайх" - үнэгүй/бага/дунд/өндөр гэсэн 4 ангилал, тус бүрийн бодит тоогоор.
-// UB 365 датаг ub.html?filter=... руу дамжуулж, тэнд шууд шүүнэ.
-const BUDGET_TIERS = [
-  {id: "free", emoji: "🆓", label: "Үнэгүй", test: p => p === 0},
-  {id: "cheap", emoji: "💸", label: "Бага", sub: "≤50,000₮", test: p => p > 0 && p <= 50000},
-  {id: "medium", emoji: "💳", label: "Дунд", sub: "≤150,000₮", test: p => p > 50000 && p <= 150000},
-  {id: "expensive", emoji: "💎", label: "Өндөр", sub: ">150,000₮", test: p => p > 150000}
-];
-function renderBudgetSection() {
-  const el = document.getElementById("budgetChips");
-  if (!el) return;
-  el.innerHTML = BUDGET_TIERS.map(t => {
-    const count = allUbIdeas.filter(i => t.test(i.price)).length;
-    return `<div class="filter-chip" onclick="location.href='ub.html?filter=${t.id}'">
-      ${t.emoji} ${t.label}${t.sub ? ` <span style="opacity:.65">(${t.sub})</span>` : ""}
-      · ${count} санаа
-    </div>`;
-  }).join("");
-}
-
-// "Мэдрэмжээр хайх" - санаа бүрийн бодит title/desc/feeling текстээс гаргасан mood-оор шүүнэ (js/ub.js).
-let homeMoodFilter = MOODS[0].id;
 function renderMoodSection() {
   const chipsEl = document.getElementById("moodChips");
   const gridEl = document.getElementById("moodGrid");
@@ -173,9 +149,10 @@ function heroBuildSlides() {
     slides.push({ tag: (SEASON_LABEL[season] || season) + "-ийн сонголт", idea: seasonal[getDayOfYear() % seasonal.length] });
   }
 
-  // Үнэгүй санаа — хамгийн их хэрэгтэй шүүлт тул тусад нь онцолно.
-  const free = allUbIdeas.filter(i => i.price === 0 && !slides.some(s => s.idea.id === i.id));
-  if (free.length) slides.push({ tag: "Үнэгүй", idea: free[getDayOfYear() % free.length] });
+  // Гадаа/байгальд хийх санаа — улирлын дараа хамгийн хэрэгтэй ангилал.
+  const outdoor = allUbIdeas.filter(i => (i.category === "парк" || i.category === "идэвхтэй")
+    && !slides.some(s => s.idea.id === i.id));
+  if (outdoor.length) slides.push({ tag: "Гадаа", idea: outdoor[getDayOfYear() % outdoor.length] });
 
   const rest = allUbIdeas.filter(i => !slides.some(s => s.idea.id === i.id));
   if (rest.length) slides.push({ tag: "Редакцын сонголт", idea: rest[(getDayOfYear() * 7) % rest.length] });
@@ -207,7 +184,6 @@ function renderHeroCarousel() {
         <h3>${escapeHtml(s.idea.title)}</h3>
         <p>${escapeHtml((s.idea.desc || "").slice(0, 90))}</p>
         <div class="hero-slide-meta">
-          <span class="card-price">${escapeHtml(s.idea.priceText || "")}</span>
           <button class="btn btn-primary btn-sm" type="button" onclick="openIdeaModal(${s.idea.id})">Үзэх</button>
         </div>
       </div>
@@ -253,7 +229,6 @@ function renderHeroQuickChips() {
   if (!el || typeof allUbIdeas === "undefined") return;
   const season = currentSeason();
   const chips = [
-    ["Үнэгүй", "ub.html?budget=free"],
     [SEASON_LABEL[season] || season, "ub.html?season=" + season],
     ["Кафе", "ub.html?category=" + encodeURIComponent("кафе")],
     ["Гадаа", "ub.html?category=" + encodeURIComponent("парк")],

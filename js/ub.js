@@ -449,6 +449,10 @@ const UB_BUDGETS = [
   ["expensive", ">150,000₮",        i => i.price > 150000],
 ];
 const ubFilter = { season: new Set(), budget: new Set(), category: new Set() };
+// Нүүр хуудасны хайлт мөн ЭНД ирнэ (ub.html?q=...). Шүүлтүүртэй нэг системд
+// байрлуулсан нь хайлт + шүүлтүүрийг зэрэг ашиглах боломж нээж, URL-ээр
+// хуваалцах / буцах товч / refresh бүгд ажиллана.
+let ubQuery = "";
 
 // Ангиллын жагсаалтыг hardcode хийхгүй — бодит өгөгдлөөс гаргана.
 function ubCategories() {
@@ -458,11 +462,22 @@ function ubCategories() {
 }
 
 function ubActiveCount() {
-  return ubFilter.season.size + ubFilter.budget.size + ubFilter.category.size;
+  // Хайлтын үг ч "идэвхтэй шүүлт" — эс бөгөөс зөвхөн хайлт тавьсан үед
+  // "Цэвэрлэх" товч гарахгүй бөгөөд хэрэглэгч гацна.
+  return ubFilter.season.size + ubFilter.budget.size + ubFilter.category.size + (ubQuery ? 1 : 0);
 }
 
 function ubApplyFilters(list) {
   let out = list;
+  if (ubQuery) {
+    const q = ubQuery.toLowerCase();
+    out = out.filter(i =>
+      (i.title || "").toLowerCase().includes(q) ||
+      (i.desc || "").toLowerCase().includes(q) ||
+      (i.location || "").toLowerCase().includes(q) ||
+      (i.category || "").toLowerCase().includes(q) ||
+      (i.feeling || "").toLowerCase().includes(q));
+  }
   if (ubFilter.season.size) out = out.filter(i => ubFilter.season.has(i.season));
   if (ubFilter.category.size) out = out.filter(i => ubFilter.category.has(i.category));
   if (ubFilter.budget.size) {
@@ -478,12 +493,14 @@ function ubSyncUrl() {
   ["season", "budget", "category"].forEach(k => {
     if (ubFilter[k].size) p.set(k, [...ubFilter[k]].join(","));
   });
+  if (ubQuery) p.set("q", ubQuery);
   const qs = p.toString();
   history.replaceState(null, "", qs ? location.pathname + "?" + qs : location.pathname);
 }
 
 function ubReadUrl() {
   const p = new URLSearchParams(location.search);
+  ubQuery = (p.get("q") || "").trim();
   ["season", "budget", "category"].forEach(k => {
     const v = p.get(k);
     if (v) v.split(",").filter(Boolean).forEach(x => ubFilter[k].add(x));
@@ -504,7 +521,20 @@ function ubToggle(kind, value) {
   renderUbIdeas();
 }
 
+// Зөвхөн хайлтын үгийг хасна — сонгосон шүүлтүүр хэвээр үлдэнэ.
+function ubClearQuery() {
+  ubQuery = "";
+  const box = document.getElementById("ubSearchInput");
+  if (box) box.value = "";
+  currentPage = 1;
+  ubSyncUrl();
+  renderUbIdeas();
+}
+
 function ubClearFilters() {
+  ubQuery = "";
+  const box = document.getElementById("ubSearchInput");
+  if (box) box.value = "";
   ubFilter.season.clear(); ubFilter.budget.clear(); ubFilter.category.clear();
   currentPage = 1;
   ubSyncUrl();
@@ -562,8 +592,12 @@ function renderUbIdeas() {
       ...[...ubFilter.budget].map(v => ["budget", v, (UB_BUDGETS.find(b => b[0] === v) || [, v])[1]]),
       ...[...ubFilter.category].map(v => ["category", v, v]),
     ];
+    const queryPill = ubQuery
+      ? `<button type="button" class="filter-pill" onclick="ubClearQuery()">🔍 ${escapeHtml(ubQuery)} ✕</button>`
+      : "";
     summary.innerHTML = `
       <span class="filter-result-count"><strong>${filtered.length}</strong> санаа</span>
+      ${queryPill}
       ${pills.map(([k, v, l]) => `<button type="button" class="filter-pill" onclick="ubToggle('${k}','${String(v).replace(/'/g, "\\'")}')"
         aria-label="${l} шүүлтүүрийг хасах">${l}<span aria-hidden="true">×</span></button>`).join("")}
       ${active ? `<button type="button" class="filter-clear" onclick="ubClearFilters()">Цэвэрлэх</button>` : ""}`;
@@ -578,9 +612,9 @@ function renderUbIdeas() {
   document.getElementById("ubGrid").innerHTML = pageItems.length
     ? pageItems.map(renderCard).join("")
     : `<div class="empty-state">
-         <strong>Сонгосон шүүлтүүрт тохирох санаа олдсонгүй.</strong>
-         <p>Шүүлтүүрээ цөөлж эсвэл бүгдийг цэвэрлээд дахин үзнэ үү.</p>
-         ${ubActiveCount() ? `<button type="button" class="btn btn-primary" onclick="ubClearFilters()">Шүүлтүүр цэвэрлэх</button>` : ""}
+         <strong>${ubQuery ? `«${escapeHtml(ubQuery)}» гэсэн хайлтад тохирох санаа олдсонгүй.` : "Сонгосон шүүлтүүрт тохирох санаа олдсонгүй."}</strong>
+         <p>${ubQuery ? "Өөр үгээр хайж, эсвэл шүүлтүүрээ цөөлж үзнэ үү." : "Шүүлтүүрээ цөөлж эсвэл бүгдийг цэвэрлээд дахин үзнэ үү."}</p>
+         ${ubActiveCount() ? `<button type="button" class="btn btn-primary" onclick="ubClearFilters()">Хайлт/шүүлтүүр цэвэрлэх</button>` : ""}
        </div>`;
 
   // Үр дүн нэг хуудсанд багтвал хуудаслалт харуулахгүй.

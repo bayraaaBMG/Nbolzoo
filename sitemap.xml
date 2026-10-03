@@ -11,4 +11,6 @@
   <url><loc>https://nbolzoo.vercel.app/urilga.html</loc><priority>0.6</priority></url>
   <url><loc>https://nbolzoo.vercel.app/saved.html</loc><priority>0.5</priority></url>
   <url><loc>https://nbolzoo.vercel.app/services.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://nbolzoo.vercel.app/privacy.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://nbolzoo.vercel.app/terms.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>

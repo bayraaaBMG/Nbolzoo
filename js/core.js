@@ -998,19 +998,34 @@ async function toggleLike(id) {
   }
 }
 
-function performSearch() {
-  const q = document.getElementById("searchInput").value.toLowerCase();
-  if(!q) return showToast("Хайх үг оруулна уу");
-  const ubResults = allUbIdeas.filter(i => i.title.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q) || i.location.toLowerCase().includes(q));
-  const aimagResults = aimagsClean.filter(a => a.name.toLowerCase().includes(q));
-  showToast(`🔍 "${q}" - ${ubResults.length + aimagResults.length} үр дүн олдлоо`);
-  if(ubResults.length > 0) {
-    navigate('ub');
-    setTimeout(() => {
-      document.getElementById("ubGrid").innerHTML = ubResults.slice(0,12).map(renderCard).join("");
-      document.getElementById("ubPagination").innerHTML = `<span style="padding: 8px 14px; color: var(--text-light);">"${q}" гэсэн хайлтаар ${ubResults.length} санаа олдлоо</span>`;
-    }, 300);
+// Хайлт нь ub.html?q=... руу чиглүүлнэ.
+//
+// ӨМНӨ ЭНЭ ЭВДЭРСЭН БАЙСАН: navigate('ub') нь location.href тавьдаг тул хуудас шууд
+// ачаалж, дараа нь тавьсан setTimeout callback ХЭЗЭЭ Ч ажиллахгүй байв — хэрэглэгч
+// toast хараад ub.html дээр шүүгдээгүй жагсаалт нээгдэнэ. Одоо хайлтыг URL-ээр
+// дамжуулж, ub.js нь ubReadUrl()-ээр уншиж шүүдэг (шүүлтүүртэй ижил зам) тул
+// дахин ачаалах, хуваалцах, буцах товч бүгд зөв ажиллана.
+function performSearch(inputId) {
+  const box = document.getElementById(inputId || "searchInput");
+  const q = box ? box.value.trim() : "";
+  if (!q) return showToast("Хайх үг оруулна уу");
+
+  // Аймгийн нэр яг таарвал тухайн аймгийн хуудас руу шууд оруулах нь илүү хэрэгтэй.
+  if (typeof aimagsClean !== "undefined") {
+    const exact = aimagsClean.find(a => (a.name || "").toLowerCase() === q.toLowerCase());
+    if (exact) return navigate("aimag-detail", exact.id);
   }
+
+  // ub.html дээр аль хэдийн байгаа бол дахин ачаалахгүй, шууд шүүнэ.
+  if (typeof ubQuery !== "undefined" && typeof renderUbIdeas === "function") {
+    ubQuery = q;
+    currentPage = 1;
+    ubSyncUrl();
+    renderUbIdeas();
+    document.getElementById("ubGrid").scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  location.href = "ub.html?q=" + encodeURIComponent(q);
 }
 
 document.querySelectorAll('[data-ub-filter]').forEach(c => {

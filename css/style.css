@@ -2565,3 +2565,52 @@ select:focus-visible, [tabindex]:focus-visible {
   .nav-cfg-order { flex-direction: row; }
   .user-detail-time { margin-left: 0; flex-basis: 100%; }
 }
+
+/* ---- УБ хуудасны хайлтын хайрцаг ---- */
+.ub-search { display: flex; gap: 9px; margin-bottom: 14px; }
+.ub-search input {
+  flex: 1; min-width: 0; padding: 13px 16px; font: inherit; font-size: 15px;
+  border: 1px solid var(--border); border-radius: 11px; background: var(--white); color: var(--text);
+}
+.ub-search input:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; border-color: var(--primary); }
+.ub-search .btn { flex-shrink: 0; }
+@media (max-width: 520px) {
+  .ub-search .btn { padding-left: 16px; padding-right: 16px; }
+}
+
+/* ---- Эрх зүйн хуудас (нууцлал / нөхцөл) ---- */
+.legal-page { max-width: 760px; }
+.legal-page h1 { margin-bottom: 6px; }
+.legal-page h2 {
+  font-size: 19px; margin: 32px 0 10px; padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.legal-page h3 { font-size: 15px; margin: 20px 0 8px; }
+.legal-page p, .legal-page li { line-height: 1.75; color: var(--text); }
+.legal-page ul { margin: 10px 0 10px 22px; }
+.legal-page li { margin-bottom: 7px; }
+.legal-updated { font-size: 13px; color: var(--text-light); margin-bottom: 22px; }
+.legal-note {
+  padding: 15px 17px; border-radius: 10px; font-size: 14px; line-height: 1.7;
+  background: var(--primary-extra-soft); border-left: 3px solid var(--primary);
+}
+.legal-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+.legal-table th, .legal-table td {
+  text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;
+}
+.legal-table th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-light); }
+.legal-footer-link { margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--border); }
+.legal-footer-link a { color: var(--primary); cursor: pointer; font-weight: 600; }
+
+.footer-legal {
+  display: flex; align-items: center; justify-content: center; gap: 9px; flex-wrap: wrap;
+  padding: 16px 20px 0; font-size: 13px;
+}
+.footer-legal a { color: inherit; opacity: .85; cursor: pointer; text-decoration: none; }
+.footer-legal a:hover { opacity: 1; text-decoration: underline; }
+
+@media (max-width: 600px) {
+  /* Хүснэгтийг нарийн дэлгэц дээр хэвтээ чирж харна — багана нурж уншигдахгүй болохоос сэргийлнэ */
+  .legal-table { display: block; overflow-x: auto; }
+  .legal-page h2 { font-size: 17px; }
+}

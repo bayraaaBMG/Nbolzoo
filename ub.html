@@ -121,6 +121,13 @@
       <h1 style="margin-bottom: 6px;">🏙 Улаанбаатарын 365 болзооны санаа</h1>
       <p style="color: var(--text-light); margin-bottom: 24px;">Жилийн өдөр бүрд нэг өвөрмөц санаа. Хосоо аз жаргалтай байлгах 365 арга.</p>
       <!-- Шүүлтүүрийг JS бүтээнэ: ангиллын жагсаалт болон тоонууд бодит dataset-ээс гарна. -->
+      <!-- Хайлтын хайрцаг нь шүүлтүүрийн хажууд — хоёулаа зэрэг ажиллана
+           (хайлт + улирал + төсөв хамтдаа). Төлөв нь URL-д хадгалагдана. -->
+      <div class="ub-search">
+        <input type="search" id="ubSearchInput" placeholder="Жишээ: Зайсан, кафе, музей, алхах"
+               aria-label="Санаа хайх" onkeypress="if(event.key==='Enter')performSearch('ubSearchInput')">
+        <button class="btn btn-accent" type="button" onclick="performSearch('ubSearchInput')">Хайх</button>
+      </div>
       <div class="filter-toolbar">
         <button type="button" class="filter-toggle-btn" onclick="ubToggleSheet(true)" aria-controls="ubFilterSheet">
           <span class="nav-ico" data-icon="search" data-icon-size="17"></span>Шүүлтүүр
@@ -181,6 +188,11 @@
       <span class="footer-static" data-footer="facebook">💬 Facebook: NBolzoo</span>
     </div>
   </div>
+  <div class="footer-legal">
+    <a onclick="navigate('privacy')">Нууцлалын бодлого</a>
+    <span aria-hidden="true">·</span>
+    <a onclick="navigate('terms')">Үйлчилгээний нөхцөл</a>
+  </div>
   <div class="footer-bottom">
     <span id="footerYear" data-footer="bottom">© 2026 NBolzoo.mn · Монголын хайрын платформ 💕</span>
   </div>
@@ -208,6 +220,9 @@
 <script src="js/main.js"></script>
 <script>
 ubReadUrl();
+// Нүүр хуудаснаас ?q=... -аар ирсэн хайлтыг хайрцагт эгүүлж харуулна, эс бөгөөс
+// хэрэглэгч шүүгдсэн жагсаалт хараад яагаад гэдгийг нь мэдэхгүй байна.
+if (ubQuery) document.getElementById("ubSearchInput").value = ubQuery;
 renderUbIdeas();
 nbHydrateIcons();
 // Admin-аас нуусан/өөрчилсөн зүйл байвал ирэхэд нь дахин зурна (эхний render хүлээхгүй).

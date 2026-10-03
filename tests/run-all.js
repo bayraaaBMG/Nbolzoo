@@ -10,9 +10,11 @@ const SUITES = [
   ["cms overlay logic", "tests/cms_test.js", []],
   ["cms integration", "tests/cms_integration.js", []],
   ["xss regression", "tests/xss_test.js", []],
+  ["search", "tests/search_test.js", []],
   ["links & wiring", "tests/link_check.js", []],
   ["services catalogue", "tests/services_test.js", []],
   ["settings consistency", "tests/settings_test.js", []],
+  ["pwa / offline", "tests/pwa_test.js", []],
   ["dataset integrity", "tests/data_check.js", []],
 ];
 

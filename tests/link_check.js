@@ -58,13 +58,25 @@ t('site-settings.js on every page', noSettings.length === 0, noSettings.join(', 
 const noSvc = pages.filter(p => !fs.readFileSync(p, 'utf8').includes('data-page="services"'));
 t('services nav link on every page', noSvc.length === 0, noSvc.join(', '));
 
-// 7. aria-current нэг хуудсанд яг нэг л удаа nav-д байх ёстой (идэвхтэй хуудас)
+// 7. Дээд цэсэнд ЯГ нэг active холбоос байх ёстой — хоёр бол хэрэглэгч хаана
+// байгаагаа мэдэхгүй. Тэгийг зөвхөн цэсэнд байдаггүй хуудсанд (нууцлал/нөхцөл)
+// зөвшөөрнө, тэдгээр нь зөвхөн footer-ээс холбогддог.
+const NOT_IN_NAV = ['privacy.html', 'terms.html'];
 for (const p of pages) {
   const h = fs.readFileSync(p, 'utf8');
   const navBlock = h.slice(h.indexOf('<ul class="nav-menu">'), h.indexOf('</ul>', h.indexOf('<ul class="nav-menu">')));
   const n = (navBlock.match(/aria-current="page"/g) || []).length;
-  t(p + ' has exactly one active nav link', n === 1, 'found ' + n);
+  const want = NOT_IN_NAV.includes(p) ? 0 : 1;
+  t(p + ' has ' + want + ' active nav link', n === want, 'found ' + n);
 }
+
+// 8. Эрх зүйн хуудас бүх хуудсын footer-ээс холбогдсон эсэх
+for (const key of ['privacy', 'terms']) {
+  const missing = pages.filter(p => !fs.readFileSync(p, 'utf8').includes("navigate('" + key + "')"));
+  t('footer links to ' + key + ' on every page', missing.length === 0, missing.join(', '));
+}
+t('privacy.html exists', fs.existsSync('privacy.html'));
+t('terms.html exists', fs.existsSync('terms.html'));
 
 console.log('\nlinks: ' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

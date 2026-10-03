@@ -884,10 +884,14 @@ function openIdeaModal(id) {
       <button class="btn btn-ghost" style="width:100%;margin-top:8px;justify-content:center;" type="button" onclick="navigate('urilga')">
         <span class="nav-ico" data-icon="mail" data-icon-size="16"></span>Энэ санаагаар урилга үүсгэх
       </button>
+      <!-- Үнэлгээг Firestore-оос async-аар бөглөнө: модал нээхэд хүлээлт үүсгэхгүй.
+           Үнэлгээ байхгүй бол "хараахан алга" гэж ил хэлнэ (зохиомол тоо хэрэглэхгүй). -->
+      <div id="ideaReviewSlot"></div>
     </div>`;
   document.getElementById("modal").classList.add("show");
   // Модал доторх [data-icon]-уудыг SVG болгоно (ui.js ачаалагдсан үед).
   if (typeof nbHydrateIcons === "function") nbHydrateIcons(document.getElementById("modalContent"));
+  if (typeof renderIdeaReviews === "function") renderIdeaReviews(idea.id);
 }
 
 function closeModal() { document.getElementById("modal").classList.remove("show"); }

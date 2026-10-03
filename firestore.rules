@@ -352,6 +352,38 @@ service cloud.firestore {
         || (isSignedIn() && resource.data.ownerUid == request.auth.uid);
     }
 
+    // ---- ideaReviews/{uid_ideaId} : хэрэглэгчийн үнэлгээ + туршлага.
+    // Baримтын id нь uid + "_" + ideaId — likes/saved-тай ижил хэв маяг. Үүний ач
+    // холбогдол нь нэг хүн нэг санааг ЗӨВХӨН нэг удаа үнэлж чадна гэдгийг ДҮРМЭЭР
+    // хангадаг: давхардсан баримт үүсгэх боломж байхгүй тул дундаж үнэлгээ хэзээ ч
+    // гажихгүй (UI-д итгэх шаардлагагүй).
+    match /ideaReviews/{reviewId} {
+      // Нийтэд уншигдана — дундаж үнэлгээг нэвтрээгүй зочин ч харна.
+      // Нуусан (модерацлагдсан) үнэлгээг client нь дундажаас хасдаг; агуулга нь
+      // нийтийн сэтгэгдэлтэй ижил тул уншилтыг хязгаарлах шаардлагагүй.
+      allow read: if true;
+      allow create: if isSignedIn() && !isBanned()
+        && request.resource.data.uid == request.auth.uid
+        && reviewId == request.auth.uid + '_' + string(request.resource.data.ideaId)
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 500
+        && !('hidden' in request.resource.data);
+      // Эзэн нь үнэлгээгээ шинэчилж болно (мөн адил хязгаартай), гэхдээ `hidden`
+      // модерацийн тугийг хүрч ЧАДАХГҮЙ. Ажилтан зөвхөн тэр тугийг л өөрчилнө.
+      allow update: if isSignedIn() && (
+        (resource.data.uid == request.auth.uid
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.rating is int
+          && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+          && request.resource.data.text.size() <= 500
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['hidden', 'uid', 'ideaId']))
+        || (isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hidden']))
+      );
+      allow delete: if isSignedIn() && (resource.data.uid == request.auth.uid || isStaffAtLeastAdmin());
+    }
+
     // ---- siteSettings/{key} : сайтын дэлхийн тохиргоо. key = 'theme' | 'navigation' | 'homepage'.
     // Нийтэд уншигдана (хуудас бүр өнгө/цэсээ эндээс авна), зөвхөн admin+ бичнэ.
     match /siteSettings/{key} {

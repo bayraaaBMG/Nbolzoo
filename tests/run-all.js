@@ -14,6 +14,7 @@ const SUITES = [
   ["links & wiring", "tests/link_check.js", []],
   ["services catalogue", "tests/services_test.js", []],
   ["settings consistency", "tests/settings_test.js", []],
+  ["reviews", "tests/reviews_test.js", []],
   ["pwa / offline", "tests/pwa_test.js", []],
   ["dataset integrity", "tests/data_check.js", []],
 ];

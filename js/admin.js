@@ -58,6 +58,7 @@ const ADMIN_TABS = [
     { id: "reports",    label: "Гомдол",            icon: "🚩", perm: "moderation.reports", render: () => renderAdminReports() },
     { id: "posts",      label: "Нийтлэлүүд",        icon: "📝", perm: "moderation.hide",    render: () => renderAdminPosts() },
     { id: "comments",   label: "Сэтгэгдэл",         icon: "💬", perm: "moderation.hide",    render: () => renderAdminComments() },
+    { id: "reviews",    label: "Үнэлгээ",           icon: "⭐", perm: "moderation.hide",    render: () => renderAdminReviews() },
   ]},
   { group: "Маркетинг", items: [
     { id: "services",   label: "Үйлчилгээ",         icon: "🏪", perm: "services.read",  render: () => renderAdminServices() },
@@ -153,6 +154,7 @@ const ADMIN_ACTION_LABELS = {
   suggestion_approve: "Кино санал зөвшөөрсөн", suggestion_reject: "Кино санал татгалзсан",
   movie_add: "Кино нэмсэн", movie_delete: "Кино устгасан",
   post_hide: "Пост нуусан", post_unhide: "Пост дахин харуулсан", post_delete: "Пост устгасан",
+  review_hide: "Үнэлгээ нуусан", review_show: "Үнэлгээ дахин харуулсан", review_delete: "Үнэлгээ устгасан",
   comment_hide: "Сэтгэгдэл нуусан", comment_unhide: "Сэтгэгдэл дахин харуулсан", comment_delete: "Сэтгэгдэл устгасан",
   user_ban: "Хэрэглэгч хориглосон", user_unban: "Хэрэглэгчийн хориг арилгасан",
   admin_grant: "Admin эрх олгосон", admin_revoke: "Admin эрх хассан",
@@ -985,4 +987,73 @@ function renderAdminActivityList() {
     </div>
     <div class="admin-list-count">${list.length} / ${adminLogCache.length} бүртгэл</div>
     ${rows || `<div class="admin-empty">Тохирох бүртгэл олдсонгүй</div>`}`;
+}
+
+// ---------- Хэрэглэгчийн үнэлгээний модерац ----------
+// Үнэлгээг УСТГАХГҮЙ, зөвхөн НУУНА (admin+ бол устгаж ч болно) — нуусан үнэлгээ
+// дундажид орохгүй болдог. Ингэснээр шийдвэрийг буцаах боломжтой хэвээр үлдэнэ.
+let adminReviewFilter = "all";
+
+async function renderAdminReviews() {
+  const el = document.getElementById("admin-reviews");
+  el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>`;
+  const tabs = [["all", "Бүгд"], ["visible", "Харагдаж байгаа"], ["hidden", "Нуусан"]].map(([v, l]) =>
+    `<button type="button" class="cms-type${v === adminReviewFilter ? " active" : ""}" onclick="adminSetReviewFilter('${v}')">${l}</button>`).join("");
+  try {
+    const snap = await db.collection("ideaReviews").limit(200).get();
+    let list = snap.docs.map(d => Object.assign({ _id: d.id }, d.data()))
+      .sort((a, b) => (b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0) -
+                      (a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0));
+    if (adminReviewFilter === "visible") list = list.filter(r => !r.hidden);
+    if (adminReviewFilter === "hidden") list = list.filter(r => r.hidden);
+
+    // Санааны гарчгийг харуулна — зөвхөн ID-аар хянах нь ашиггүй.
+    const titleFor = id => {
+      if (typeof allUbIdeas === "undefined") return "#" + id;
+      const i = allUbIdeas.find(x => x.id === Number(id));
+      return i ? i.title : "#" + id;
+    };
+
+    const rows = list.map(r => `<div class="admin-card${r.hidden ? " admin-card-dim" : ""}">
+      <div class="admin-card-main">
+        <strong>${escapeHtml(r.name || "?")}</strong>
+        <span class="review-stars">${"★".repeat(Math.max(0, Math.min(5, r.rating || 0)))}</span>
+        ${r.hidden ? `<span class="cms-flag cms-flag-hidden">Нуусан</span>` : ""}
+        <div class="admin-card-meta">${escapeHtml(titleFor(r.ideaId))} · ${timeAgo(r.createdAt)}</div>
+        ${r.text ? `<div class="admin-card-desc">${escapeHtml(r.text)}</div>` : ""}
+      </div>
+      <div class="admin-card-actions">
+        <button class="btn btn-outline btn-sm" type="button" onclick="adminToggleReviewHidden('${r._id}', ${!r.hidden})">${r.hidden ? "Харуулах" : "Нуух"}</button>
+        ${nbCan("moderation.delete") ? `<button class="btn btn-outline btn-sm" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeleteReview('${r._id}')">🗑 Устгах</button>` : ""}
+      </div>
+    </div>`).join("");
+
+    el.innerHTML = `<div class="cms-types">${tabs}</div>
+      <div class="admin-note">Нуусан үнэлгээ нь дундаж онооны тооцоололд ОРОХГҮЙ. Нуух нь буцаах боломжтой тул устгахаас эрхэм.</div>
+      <div class="admin-list-count">${list.length} үнэлгээ</div>
+      ${rows || `<div class="admin-empty">Үнэлгээ алга</div>`}`;
+  } catch (e) {
+    el.innerHTML = `<div class="cms-types">${tabs}</div><div class="admin-empty">Алдаа: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function adminSetReviewFilter(v) { adminReviewFilter = v; renderAdminReviews(); }
+
+async function adminToggleReviewHidden(id, hidden) {
+  try {
+    await db.collection("ideaReviews").doc(id).update({ hidden });
+    logAdminAction(hidden ? "review_hide" : "review_show", id, "", hidden ? "харагдаж байсан" : "нуугдсан байсан", hidden ? "нуусан" : "харуулсан");
+    renderAdminReviews();
+  } catch (e) { showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || "")); }
+}
+
+async function adminDeleteReview(id) {
+  if (!nbCan("moderation.delete")) return showToast("⚠️ Танд энэ эрх алга");
+  if (!confirm("Энэ үнэлгээг бүрмөсөн устгах уу?")) return;
+  try {
+    await db.collection("ideaReviews").doc(id).delete();
+    logAdminAction("review_delete", id, "", "байсан", "устгасан");
+    showToast("🗑 Устгагдлаа");
+    renderAdminReviews();
+  } catch (e) { showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || "")); }
 }

@@ -8,8 +8,8 @@
 //
 // Ашиглалт:  nbRail("featuredGrid")   — render хийсний ДАРАА дуудна.
 //
-// Хэрэв бүх карт дэлгэцэнд багтаж байвал товч, тоолуур ОГТ гарахгүй — юу ч
-// хийдэггүй товч харуулах нь хэрэглэгчийг төөрөгдүүлнэ.
+// Хэрэв бүх карт дэлгэцэнд багтаж байвал товч ОГТ гарахгүй — юу ч хийдэггүй
+// товч харуулах нь хэрэглэгчийг төөрөгдүүлнэ.
 
 function nbRailReduceMotion() {
   try {
@@ -30,12 +30,6 @@ function nbRailIndex(track) {
   return step > 0 ? Math.round(track.scrollLeft / step) : 0;
 }
 
-// Хэдэн карт зэрэг харагдаж байна — тоолуурыг "3 / 8" гэж зөв харуулахад хэрэгтэй.
-function nbRailPerView(track) {
-  const step = nbRailStep(track);
-  return step > 0 ? Math.max(1, Math.round(track.clientWidth / step)) : 1;
-}
-
 function nbRail(gridId) {
   const track = document.getElementById(gridId);
   if (!track) return;
@@ -49,6 +43,11 @@ function nbRail(gridId) {
     if (old) old.remove();
     prevWrap.replaceWith(track);
   }
+  // Гарчгийн мөрөнд үлдсэн хуучин удирдлагыг мөн арилгана — rail дахин
+  // баригдахад тэнд хоёр хос товч үлдэх боломжтой байв.
+  const sec = track.closest("section") || track.parentElement;
+  if (sec) sec.querySelectorAll(".rail-controls").forEach(c => c.remove());
+
   track.classList.add("rail-track");
 
   // Бүгд багтаж байвал rail хэрэггүй — энгийн сүлжээ хэвээр үлдэнэ.
@@ -58,11 +57,11 @@ function nbRail(gridId) {
       track.classList.remove("rail-track");
       return;
     }
-    nbRailBuild(track, gridId);
+    nbRailBuild(track);
   });
 }
 
-function nbRailBuild(track, gridId) {
+function nbRailBuild(track) {
   const wrap = document.createElement("div");
   wrap.className = "rail-wrap";
   track.parentNode.insertBefore(wrap, track);
@@ -70,9 +69,10 @@ function nbRailBuild(track, gridId) {
 
   const controls = document.createElement("div");
   controls.className = "rail-controls";
+  // Тоолуургүй — зөвхөн хоёр товч. Байрлалын тоо нь нүүр хуудсанд
+  // шаардлагагүй мэдээлэл болж, гарчгийн мөрийг бөглөрүүлж байсан.
   controls.innerHTML =
     `<button type="button" class="rail-btn rail-prev" aria-label="Өмнөх"><span aria-hidden="true">‹</span></button>` +
-    `<span class="rail-count" aria-live="polite" aria-atomic="true"></span>` +
     `<button type="button" class="rail-btn rail-next" aria-label="Дараах"><span aria-hidden="true">›</span></button>`;
 
   // Удирдлагыг хэсгийн ГАРЧГИЙН мөрөнд тавина (байвал) — тэнд байх нь
@@ -82,35 +82,38 @@ function nbRailBuild(track, gridId) {
   if (titleRow) { controls.classList.add("in-title"); titleRow.appendChild(controls); }
   else wrap.insertBefore(controls, track);
 
-  const count = controls.querySelector(".rail-count");
   const prev = controls.querySelector(".rail-prev");
   const next = controls.querySelector(".rail-next");
 
-  function update() {
-    const total = track.children.length;
-    const perView = nbRailPerView(track);
-    const i = nbRailIndex(track);
-    // Эхнийх нь 1-ээс эхлэх нь хүнд ойлгомжтой. Сүүлийн "хуудас" дээр
-    // тоолуур нийт тооноосоо хэтрэхгүй.
-    count.textContent = Math.min(i + perView, total) + " / " + total;
-  }
-
+  // Жинхэнэ давталт (loop): сүүлээс → эхлэл, эхлэлээс → сүүл.
+  //
+  // ӨМНӨ ЭВДЭРСЭН БАЙСАН: хил таних хүлцэл 4px байсан бөгөөд CSS дээр
+  // scroll-snap-type: x mandatory байв. Mandatory snap нь хамгийн сүүлийн
+  // байрлал (max) snap цэг биш бол хөтчийг ХОЙШ нь татаж буцаадаг. Тиймээс
+  // scrollLeft нь max-д хэзээ ч хүрдэггүй → "сүүлд хүрээд өмнөх рүүгээ
+  // үсэрнэ" гэсэн эвдрэл гарч, давталт хэзээ ч ажиллахгүй байв.
+  // Одоо: snap нь proximity (CSS), хүлцэл нь хагас карт.
   function go(dir) {
     const step = nbRailStep(track);
-    const max = track.scrollWidth - track.clientWidth;
-    let target = track.scrollLeft + dir * step;
-    // Төгсгөлд давтана (loop) — "өнөөдрийн" мэдрэмжийг тасалдуулахгүй.
-    if (dir > 0 && track.scrollLeft >= max - 4) target = 0;
-    else if (dir < 0 && track.scrollLeft <= 4) target = max;
+    const max = Math.max(0, track.scrollWidth - track.clientWidth);
+    // Хөтөч бутархай scrollLeft мэдээлдэг тул жижиг хүлцэл.
+    const EPS = 2;
+    let target;
+    if (dir > 0) {
+      // Жинхэнэ төгсгөлд байвал л эхлэл рүү. Үгүй бол нэг алхам, гэхдээ
+      // max-аас хэтрэхгүй — ингэснээр СҮҮЛИЙН карт бүтнээрээ харагдсаны
+      // ДАРАА давталт болно (өмнө нь сүүлийн карт тасарч үлдээд давтдаг байв).
+      target = track.scrollLeft >= max - EPS ? 0 : Math.min(max, track.scrollLeft + step);
+    } else {
+      target = track.scrollLeft <= EPS ? max : Math.max(0, track.scrollLeft - step);
+    }
     track.scrollTo({ left: target, behavior: nbRailReduceMotion() ? "auto" : "smooth" });
   }
 
   prev.addEventListener("click", () => go(-1));
   next.addEventListener("click", () => go(1));
-  track.addEventListener("scroll", update, { passive: true });
-  window.addEventListener("resize", update);
 
-  // Гар утасны унших дараалал: хэсэг дотор фокустай үед ← → ажиллана.
+  // Гарын товчлуур: хэсэг дотор фокустай үед ← → ажиллана.
   // Хэрэглэгч бичиж байх үед (input/textarea) хөндөхгүй.
   (section || wrap).addEventListener("keydown", e => {
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
@@ -119,8 +122,6 @@ function nbRailBuild(track, gridId) {
     e.preventDefault();
     go(e.key === "ArrowRight" ? 1 : -1);
   });
-
-  update();
 }
 
 // Нэг хуудсан дээрх бүх rail-ийг нэг дор үүсгэнэ.

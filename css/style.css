@@ -3027,7 +3027,10 @@ select:focus-visible, [tabindex]:focus-visible {
   display: flex !important;
   gap: 18px;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
+  /* mandatory БИШ: төгсгөлийн байрлал нь snap цэг биш тул хөтөч хойш нь
+     татаж, "сүүлд хүрээд өмнөх рүүгээ үсэрнэ" гэсэн эвдрэл үүсгэдэг байв.
+     proximity нь гар хурууны гүйлтэд snap хийх боловч scrollTo-г эвдэхгүй. */
+  scroll-snap-type: x proximity;
   scroll-padding-left: 2px;
   /* Гүйлтийн зураас нуух — товч, swipe хоёроор удирдана */
   scrollbar-width: none;
@@ -3058,10 +3061,6 @@ select:focus-visible, [tabindex]:focus-visible {
 .rail-btn:hover { border-color: var(--primary); color: var(--primary); }
 .rail-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .rail-btn span { position: relative; top: -1px; }
-.rail-count {
-  font-size: 12.5px; font-weight: 700; color: var(--text-light);
-  min-width: 48px; text-align: center; font-variant-numeric: tabular-nums;
-}
 
 /* Гарчгийн мөрөнд "Бүгдийг үзэх"-ийн хажууд багтаана */
 .section-title .rail-controls.in-title + .section-more,
@@ -3078,7 +3077,6 @@ select:focus-visible, [tabindex]:focus-visible {
   .rail-track > * { flex-basis: 78%; width: 78%; }
   /* Хүрэх талбай 44px */
   .rail-btn { width: 44px; height: 44px; font-size: 22px; }
-  .rail-count { min-width: 44px; font-size: 12px; }
   /* Гарчиг доош хураагдах үед удирдлага баруун хаяанд үлдэнэ */
   .section-title .rail-controls.in-title { margin-left: 0; }
 }

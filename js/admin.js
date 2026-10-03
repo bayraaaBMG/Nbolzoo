@@ -72,6 +72,7 @@ const ADMIN_TABS = [
     { id: "theme",      label: "Өнгө / Загвар",     icon: "🎨", perm: "settings.theme",      render: () => renderAdminTheme() },
     { id: "navigation", label: "Цэс",               icon: "🧭", perm: "settings.navigation", render: () => renderAdminNavigation() },
     { id: "homepage",   label: "Нүүр хуудас",       icon: "🏠", perm: "settings.homepage",   render: () => renderAdminHomepage() },
+    { id: "texts",      label: "Хуудасны текст",    icon: "✍️", perm: "settings.homepage",   render: () => renderAdminTexts() },
     { id: "footer",     label: "Footer",            icon: "📄", perm: "settings.homepage",   render: () => renderAdminFooter() },
   ]},
 ];
@@ -166,7 +167,8 @@ const ADMIN_ACTION_LABELS = {
   cms_delete: "Нэмсэн контентыг устгасан", cms_reset: "Контентын өөрчлөлтийг буцаасан",
   service_approve: "Үйлчилгээ зөвшөөрсөн", service_reject: "Үйлчилгээ татгалзсан", service_delete: "Үйлчилгээ устгасан",
   settings_theme: "Өнгөний тохиргоо хадгалсан", settings_navigation: "Цэсний тохиргоо хадгалсан",
-  settings_homepage: "Нүүр хуудсын тохиргоо хадгалсан", settings_footer: "Footer тохиргоо хадгалсан", settings_reset: "Тохиргоог анхны байдалд буцаасан",
+  settings_homepage: "Нүүр хуудсын тохиргоо хадгалсан", settings_footer: "Footer тохиргоо хадгалсан",
+  settings_texts: "Хуудасны текст зассан", settings_reset: "Тохиргоог анхны байдалд буцаасан",
 };
 
 // ---------- Кино саналууд (movieSuggestions) ----------

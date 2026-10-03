@@ -145,8 +145,8 @@
     <!-- Cinema Header -->
     <div class="cinema-header">
       <div class="container">
-        <h1 class="cinema-title">🎬 Кино каталог</h1>
-        <p class="cinema-subtitle">Хосуудад зориулсан монгол хадмал болон монгол кинонуудын цуглуулга</p>
+        <h1 class="cinema-title" data-text="movies.80960e69">🎬 Кино каталог</h1>
+        <p class="cinema-subtitle" data-text="movies.c1d03cb4">Хосуудад зориулсан монгол хадмал болон монгол кинонуудын цуглуулга</p>
         <div class="cinema-search-bar">
           <span class="cinema-search-icon">🔍</span>
           <input type="text" id="movieSearchInput" class="cinema-search-input" placeholder="Кино нэрээр хайх..." aria-label="Кино хайх" oninput="filterAndRenderMovies()">
@@ -198,7 +198,7 @@
       <!-- Add Movie Button -->
       <div style="text-align:center; padding: 24px 0 40px;">
         <button type="button" class="cinema-add-btn" onclick="openAddMovieModal()">＋ Кино нэмэх</button>
-        <p style="color:rgba(255,255,255,0.3); font-size:12px; margin-top:8px;">Таны санал админ хянасны дараа каталогт нэмэгдэнэ</p>
+        <p style="color:rgba(255,255,255,0.3); font-size:12px; margin-top:8px;" data-text="movies.819f0f64">Таны санал админ хянасны дараа каталогт нэмэгдэнэ</p>
       </div>
     </div>
 
@@ -212,14 +212,14 @@
       <div class="cinema-add-form">
         <div class="cinema-detail-topbar">
           <button type="button" class="cinema-back-btn" onclick="closeAddMovieModal()">← Буцах</button>
-          <h3 style="color:#fff; margin:0; font-size:18px;">＋ Шинэ кино нэмэх</h3>
+          <h3 style="color:#fff; margin:0; font-size:18px;" data-text="movies.90adb7a0">＋ Шинэ кино нэмэх</h3>
           <div></div>
         </div>
         <div style="padding:24px; max-width:600px; margin:0 auto;">
           <!-- TMDB Auto-search -->
           <div style="background:rgba(226,183,20,0.08);border:1px solid rgba(226,183,20,0.25);border-radius:12px;padding:16px;margin-bottom:20px;">
-            <label class="cinema-label" style="color:#e2b714;font-size:13px;font-weight:700;">🔍 TMDB-аас автоматаар мэдээлэл татах</label>
-            <p style="color:rgba(255,255,255,0.45);font-size:12px;margin:4px 0 10px;">Кино нэрийг англиар бичээд "Хайх" дарна уу — poster, rating, тайлбар автоматаар орно</p>
+            <label class="cinema-label" style="color:#e2b714;font-size:13px;font-weight:700;" data-text="movies.88a32bd2">🔍 TMDB-аас автоматаар мэдээлэл татах</label>
+            <p style="color:rgba(255,255,255,0.45);font-size:12px;margin:4px 0 10px;" data-text="movies.f9fae06b">Кино нэрийг англиар бичээд "Хайх" дарна уу — poster, rating, тайлбар автоматаар орно</p>
             <div style="display:flex;gap:8px;">
               <input type="text" id="tmdbSearchInput" class="cinema-input" placeholder="жишээ: Interstellar, Parasite..." style="flex:1" onkeypress="if(event.key==='Enter')doTMDBSearch()">
               <button type="button" id="tmdbSearchBtn" onclick="doTMDBSearch()" style="background:#e2b714;color:#000;border:none;padding:0 18px;border-radius:8px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Хайх</button>
@@ -229,27 +229,27 @@
 
           <div class="add-movie-grid">
             <div class="form-group">
-              <label class="cinema-label">Киноны нэр *</label>
+              <label class="cinema-label" data-text="movies.7dfb842c">Киноны нэр *</label>
               <input type="text" id="amTitle" class="cinema-input" placeholder="жишээ: Interstellar">
             </div>
             <div class="form-group">
-              <label class="cinema-label">Гарсан он</label>
+              <label class="cinema-label" data-text="movies.84c7c404">Гарсан он</label>
               <input type="text" id="amYear" class="cinema-input" placeholder="жишээ: 2014">
             </div>
             <div class="form-group" style="grid-column:1/-1">
-              <label class="cinema-label">Poster зургийн URL <span style="color:rgba(255,255,255,0.3)">(TMDB хайлтаар автоматаар орно)</span></label>
+              <label class="cinema-label" data-text="movies.c242d3c4">Poster зургийн URL <span style="color:rgba(255,255,255,0.3)">(TMDB хайлтаар автоматаар орно)</span></label>
               <input type="text" id="amPoster" class="cinema-input" placeholder="https://image.tmdb.org/t/p/w500/...">
             </div>
             <div class="form-group">
-              <label class="cinema-label">Рейтинг (0-10)</label>
+              <label class="cinema-label" data-text="movies.2fe75b3b">Рейтинг (0-10)</label>
               <input type="text" id="amRating" class="cinema-input" placeholder="жишээ: 8.5">
             </div>
             <div class="form-group">
-              <label class="cinema-label">Хугацаа</label>
+              <label class="cinema-label" data-text="movies.d8ca114a">Хугацаа</label>
               <input type="text" id="amDuration" class="cinema-input" placeholder="жишээ: 120 мин">
             </div>
             <div class="form-group">
-              <label class="cinema-label">Хэл</label>
+              <label class="cinema-label" data-text="movies.bdf5a2c0">Хэл</label>
               <select id="amLang" class="cinema-input">
                 <option value="dubbed">🎙 Монгол хадмал</option>
                 <option value="mongolian">🎙 Монгол хэлээр</option>
@@ -257,19 +257,19 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="cinema-label">Төрөл <span style="color:rgba(255,255,255,0.3)">(автоматаар орно)</span></label>
+              <label class="cinema-label" data-text="movies.c96f88f1">Төрөл <span style="color:rgba(255,255,255,0.3)">(автоматаар орно)</span></label>
               <input type="text" id="amGenres" class="cinema-input" placeholder="romantic, drama, action...">
             </div>
             <div class="form-group" style="grid-column:1/-1">
-              <label class="cinema-label">🔗 Lolokino / үзэх холбоос</label>
+              <label class="cinema-label" data-text="movies.21c6b7eb">🔗 Lolokino / үзэх холбоос</label>
               <input type="text" id="amWatchUrl" class="cinema-input" placeholder="https://lolokino.buzz/... (хоосон бол автоматаар хайна)">
             </div>
             <div class="form-group" style="grid-column:1/-1">
-              <label class="cinema-label">Тайлбар <span style="color:rgba(255,255,255,0.3)">(TMDB-аас автоматаар орно)</span></label>
+              <label class="cinema-label" data-text="movies.8229c79c">Тайлбар <span style="color:rgba(255,255,255,0.3)">(TMDB-аас автоматаар орно)</span></label>
               <textarea id="amDesc" class="cinema-input" rows="3" placeholder="Киноны товч тайлбар..."></textarea>
             </div>
             <div class="form-group" style="grid-column:1/-1">
-              <label class="cinema-label">💑 Яагаад хосуудад тохиромжтой вэ?</label>
+              <label class="cinema-label" data-text="movies.87636e09">💑 Яагаад хосуудад тохиромжтой вэ?</label>
               <input type="text" id="amWhy" class="cinema-input" placeholder="жишээ: Хамтдаа уйлахад тохиромжтой">
             </div>
           </div>

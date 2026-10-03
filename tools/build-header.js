@@ -154,7 +154,11 @@ ${END}`;
 }
 
 // ---- Бичих ----
-let written = 0, skipped = 0;
+// --check : файлыг БИЧИХГҮЙ, зөвхөн зөрүүтэй эсэхийг шалгаад exit code-оор хэлнэ.
+// Тест үүнийг ашиглана — эс бөгөөс тест өөрөө файл бичиж, "нэг удаа унаад
+// дараа нь дамждаг" тогтворгүй зан үйл үүсгэнэ.
+const CHECK = process.argv.includes("--check");
+let written = 0, skipped = 0, stale = [];
 for (const [file, activeKey] of Object.entries(ACTIVE)) {
   const p = path.join(ROOT, file);
   if (!fs.existsSync(p)) { console.log("  SKIP (missing) " + file); skipped++; continue; }
@@ -179,7 +183,20 @@ for (const [file, activeKey] of Object.entries(ACTIVE)) {
     if (b < 0 || b < a) { console.log("  SKIP (no <main> after nav) " + file); skipped++; continue; }
     html = html.slice(0, a) + block + "\n\n" + html.slice(b);
   }
-  fs.writeFileSync(p, html);
-  written++;
+  if (CHECK) {
+    if (html !== fs.readFileSync(p, "utf8")) stale.push(file);
+  } else {
+    fs.writeFileSync(p, html);
+    written++;
+  }
 }
-console.log("header written to " + written + " file(s)" + (skipped ? ", " + skipped + " skipped" : ""));
+if (CHECK) {
+  if (stale.length) {
+    console.log("STALE header in: " + stale.join(", "));
+    console.log('Шийдэх: node tools/build-header.js');
+    process.exit(1);
+  }
+  console.log("all headers up to date");
+} else {
+  console.log("header written to " + written + " file(s)" + (skipped ? ", " + skipped + " skipped" : ""));
+}

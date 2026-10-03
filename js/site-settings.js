@@ -9,16 +9,18 @@
 async function applySiteSettings() {
   if (typeof db === "undefined" || !db) return;
   // Гурвуулаа зэрэг, бие биенээсээ хамааралгүй — нэг нь унасан ч нөгөөдөө нөлөөлөхгүй.
-  const [theme, nav, home, footer] = await Promise.allSettled([
+  const [theme, nav, home, footer, texts] = await Promise.allSettled([
     db.collection("siteSettings").doc("theme").get(),
     db.collection("siteSettings").doc("navigation").get(),
     db.collection("siteSettings").doc("homepage").get(),
     db.collection("siteSettings").doc("footer").get(),
+    db.collection("siteSettings").doc("pageTexts").get(),
   ]);
   if (theme.status === "fulfilled") applyThemeSetting(theme.value);
   if (nav.status === "fulfilled") applyNavigationSetting(nav.value);
   if (home.status === "fulfilled") applyHomepageSetting(home.value);
   if (footer.status === "fulfilled") { applyFooterSetting(footer.value); applyContactSetting(footer.value); }
+  if (texts.status === "fulfilled") applyPageTexts(texts.value);
 }
 
 // ---------- Өнгө ----------
@@ -181,4 +183,29 @@ function applyContactSetting(snap) {
     if (t.facebookUrl) set("utilFacebook", "Facebook", t.facebookUrl);
     if (t.instagramUrl) set("utilInstagram", "Instagram", t.instagramUrl);
   } catch (e) { console.warn("applyContactSetting failed:", e); }
+}
+
+// ---------- Хуудасны текст (admin-аас засдаг) ----------
+// tools/tag-texts.js нь статик текст бүрд data-text="<хуудас>.<хэш>" тавьдаг.
+// Admin тэдгээрийг дарж бичвэл siteSettings/pageTexts дээр хадгалагдана.
+//
+// textContent ашиглаж байгаа нь САНААТАЙ: admin-ийн бичвэрээр HTML/script
+// тарих боломжийг бүрэн хаана. Тиймээс холбоос, тод бичилт зэрэг оруулж
+// болохгүй — зөвхөн ил бичвэр.
+//
+// Тэмдэглэгдсэн зангилаа дотор холбоос байж болох тул (жишээ нь "... унших →"),
+// зөвхөн ЦЭВЭР текст агуулсан зангилааг л дарж бичнэ — эс бөгөөс холбоос
+// устах байсан.
+function applyPageTexts(snap) {
+  try {
+    if (!snap.exists) return;
+    const texts = snap.data().texts || {};
+    if (!Object.keys(texts).length) return;
+    document.querySelectorAll("[data-text]").forEach(el => {
+      const v = texts[el.dataset.text];
+      if (typeof v !== "string" || !v) return;
+      if (el.children.length) return;        // дотор элемент бий — хөндөхгүй
+      el.textContent = v;
+    });
+  } catch (e) { console.warn("applyPageTexts failed:", e); }
 }

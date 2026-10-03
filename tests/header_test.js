@@ -31,13 +31,17 @@ for (const p of pages) {
 }
 t('all headers are identical (ignoring active state)', diffs.length === 0, diffs.join(','));
 
-// --- 3. Генератор дахин ажиллахад юу ч өөрчлөгдөхгүй эсэх ---
-// Гараар header засвал энэ унана — яг тэр нь хэрэгтэй.
-const before = pages.map(p => fs.readFileSync(p, 'utf8'));
-cp.execFileSync(process.execPath, ['tools/build-header.js'], { stdio: 'pipe' });
-const changed = pages.filter((p, i) => fs.readFileSync(p, 'utf8') !== before[i]);
-t('generator output is stable (no manual edits)', changed.length === 0,
-  changed.join(',') + ' — "node tools/build-header.js" ажиллуулаад commit хийнэ үү');
+// --- 3. Committed header нь template-тэй тохирч байгаа эсэх ---
+// --check нь файлыг БИЧИХГҮЙ (зөвхөн харьцуулна) — тест өөрөө файл бичвэл
+// "нэг удаа унаад дараа нь дамждаг" тогтворгүй зан үйл үүсдэг байсан.
+let genOk = true, genMsg = "";
+try {
+  cp.execFileSync(process.execPath, ['tools/build-header.js', '--check'], { stdio: 'pipe' });
+} catch (e) {
+  genOk = false;
+  genMsg = (e.stdout || '').toString().trim().split('\n')[0];
+}
+t('committed header matches the template', genOk, genMsg + ' — "node tools/build-header.js" ажиллуулаад commit хийнэ үү');
 
 // --- 4. JS-ийн хамаарал бүрэн эсэх ---
 // Эдгээр id/class-ийг auth.js / core.js / notifications.js / site-settings.js хайдаг.

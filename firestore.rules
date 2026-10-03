@@ -384,7 +384,8 @@ service cloud.firestore {
       allow delete: if isSignedIn() && (resource.data.uid == request.auth.uid || isStaffAtLeastAdmin());
     }
 
-    // ---- siteSettings/{key} : сайтын дэлхийн тохиргоо. key = 'theme' | 'navigation' | 'homepage'.
+    // ---- siteSettings/{key} : сайтын дэлхийн тохиргоо.
+    // key = 'theme' | 'navigation' | 'homepage' | 'footer' | 'pageTexts'.
     // Нийтэд уншигдана (хуудас бүр өнгө/цэсээ эндээс авна), зөвхөн admin+ бичнэ.
     match /siteSettings/{key} {
       allow read: if true;

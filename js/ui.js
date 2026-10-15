@@ -82,3 +82,33 @@ document.addEventListener("keydown", e => {
 });
 
 nbHydrateIcons();
+
+// ===== АНГИЛЛЫН МӨРИЙН ГҮЙЛТ =====
+// Идэвхтэй ангиллыг харагдах байрлалд авчирна (нарийн дэлгэц дээр тэр нь
+// мөрийн баруун хэсэгт байвал хэрэглэгч хаана байгаагаа мэдэхгүй байна).
+// Мөн баруун хаяаны бүдгэрэлтийг төгсгөлд хүрэхэд арилгана.
+(function catNavInit() {
+  const nav = document.querySelector(".cat-nav");
+  const rail = document.querySelector(".cat-nav-inner");
+  if (!nav || !rail) return;
+
+  const syncEdge = () => {
+    const atEnd = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 2;
+    nav.classList.toggle("at-end", atEnd);
+  };
+
+  // Идэвхтэйг нь төвд нь авчирна. scroll-behavior: smooth тул анхны
+  // ачаалалтад үсэрч харагдахгүйн тулд "auto"-гоор нэг удаа байрлуулна.
+  const active = rail.querySelector(".cat-link.active");
+  if (active) {
+    const prev = rail.style.scrollBehavior;
+    rail.style.scrollBehavior = "auto";
+    const target = active.offsetLeft - (rail.clientWidth - active.offsetWidth) / 2;
+    rail.scrollLeft = Math.max(0, target);
+    rail.style.scrollBehavior = prev;
+  }
+
+  rail.addEventListener("scroll", syncEdge, { passive: true });
+  window.addEventListener("resize", syncEdge);
+  syncEdge();
+})();

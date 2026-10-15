@@ -44,6 +44,26 @@ try {
 }
 t('committed header matches the template', genOk, genMsg + ' — "node tools/build-header.js" ажиллуулаад commit хийнэ үү');
 
+// --- 3b. Ассетын хувилбар тамга шинэ эсэх ---
+// Тамга хуучирвал хэрэглэгчийн хөтөч ХУУЧИН CSS/JS-ийг кэшнээс үзүүлсээр
+// байна — засвар хийгдсэн ч утсан дээр хүрэхгүй. Яг тийм зүйл болсон.
+let stampOk = true, stampMsg = '';
+try {
+  cp.execFileSync(process.execPath, ['tools/stamp-assets.js', '--check'], { stdio: 'pipe' });
+} catch (e) {
+  stampOk = false;
+  stampMsg = (e.stdout || '').toString().trim().split('\n')[0];
+}
+t('asset version stamps are current', stampOk, stampMsg + ' — "node tools/stamp-assets.js" ажиллуулаад commit хийнэ үү');
+
+// Бүх дотоод css/js тамгатай байх ёстой
+const unstamped = [];
+for (const p of pages) {
+  const h = fs.readFileSync(p, 'utf8');
+  for (const m of h.matchAll(/(?:href|src)="((?:css|js)\/[^"]+\.(?:css|js))"/g)) unstamped.push(p + ':' + m[1]);
+}
+t('every internal asset carries a version stamp', unstamped.length === 0, unstamped.slice(0, 3).join(', '));
+
 // --- 4. JS-ийн хамаарал бүрэн эсэх ---
 // Эдгээр id/class-ийг auth.js / core.js / notifications.js / site-settings.js хайдаг.
 const REQUIRED = [

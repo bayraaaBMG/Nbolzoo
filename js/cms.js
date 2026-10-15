@@ -21,8 +21,8 @@
 // Зөвхөн ХАВТГАЙ жагсаалт хэлбэртэй, id-тай контентыг энд удирдана.
 // "Зөвлөгөө" (js/expert.js) нь жагсаалт биш, үе шат/тест зэрэг өөр өөр бүтэцтэй тул
 // энэ загварт таарахгүй. "Кино" нь аль хэдийн Firestore дээр тусдаа CRUD таб-тай.
-const CMS_TYPES = ["ub", "aimags", "gifts"];
-const CMS_TYPE_LABELS = { ub: "УБ 365 санаа", aimags: "Аймгууд", gifts: "Бэлэг" };
+const CMS_TYPES = ["ub", "aimags", "gifts", "invites"];
+const CMS_TYPE_LABELS = { ub: "УБ 365 санаа", aimags: "Аймгууд", gifts: "Бэлэг", invites: "Урилгын төрөл" };
 
 // Нэг хуудсанд нэг төрөл л хэрэгтэй тул process бүрт cache хийнэ.
 const _cmsCache = {};

@@ -16,7 +16,7 @@ const ctx={console:{log(){},warn(){}},document:doc,Math,Date,JSON,Set,Map,URLSea
   firebase:{firestore:Object.assign(()=>({}),{FieldValue:{}})},db:null};
 ctx.window=ctx;ctx.addEventListener=()=>{};
 vm.createContext(ctx);
-const files=[...fs.readFileSync('index.html','utf8').matchAll(/<script src="(js\/[^"]+)"><\/script>/g)].map(m=>m[1]);
+const files=[...fs.readFileSync('index.html','utf8').matchAll(/<script src="(js\/[^"?]+)(?:\?[^"]*)?"><\/script>/g)].map(m=>m[1]);
 vm.runInContext(files.map(f=>fs.readFileSync(f,'utf8')).join('\n;\n'),ctx,{filename:'index'});
 vm.runInContext('renderHeroCarousel(); renderHeroQuickChips(); updateHeroStats();',ctx);
 

@@ -37,7 +37,8 @@ const pages = fs.readdirSync(root).filter(f => f.endsWith('.html'));
 let fail = 0;
 for (const page of pages) {
   const html = fs.readFileSync(path.join(root, page), 'utf8');
-  const srcs = [...html.matchAll(/<script src="(js\/[^"]+)"><\/script>/g)].map(m => m[1]);
+  // ?v=<hash> тамгыг хасна — файлын зам нь query-гүй.
+  const srcs = [...html.matchAll(/<script src="(js\/[^"?]+)(?:\?[^"]*)?"><\/script>/g)].map(m => m[1]);
   const ctx = {
     console: { log(){}, warn(){}, error(){} },
     document: doc, window: {}, location: { search: '', href: '', pathname: '/' + page },

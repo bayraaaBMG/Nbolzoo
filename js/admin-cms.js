@@ -47,6 +47,19 @@ const CMS_SOURCES = {
       ["region", "Бүс (ангилал)", "select"], ["history", "Түүх", "textarea"],
     ],
   },
+  invites: {
+    idKey: "id",
+    label: () => CMS_TYPE_LABELS.invites,
+    list: () => (typeof INVITE_TYPE_LIST !== "undefined" ? INVITE_TYPE_LIST : null),
+    title: x => x.label,
+    img: x => x.img || "",
+    meta: x => `${x.id} · ${x.group === "event" ? "Үйл ажиллагаа" : "Бусад төрөл"}`,
+    categories: () => ["event", ""],
+    fields: [
+      ["label", "Нэр", "text"], ["emoji", "Эможи", "text"],
+      ["desc", "Тайлбар", "textarea"], ["group", "Бүлэг (event = Үйл ажиллагаа)", "select"],
+    ],
+  },
   gifts: {
     idKey: "id",
     label: () => CMS_TYPE_LABELS.gifts,

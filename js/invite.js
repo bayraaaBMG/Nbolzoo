@@ -24,6 +24,15 @@ const INVITE_TYPES = {
   holiday:   { label: "Баярын урилга",          emoji: "🎊", family: "holiday" },
 };
 
+// CMS (contentOverrides/invites) нь МАССИВ дээр ажилладаг тул объектоос
+// жагсаалт гаргана. INVITE_TYPES объект ХЭВЭЭР үлдэнэ — invite-builder,
+// invite-engine, invite-music гурав түүнийг түлхүүрээр хайдаг.
+//
+// Admin энд нуусан/зассан/нэмсэн зүйл нь зөвхөн СОНГОХ ДЭЛГЭЦЭД үйлчилнэ.
+// Аль хэдийн илгээгдсэн урилга огт хөндөгдөхгүй — тэдгээр нь Firestore-д
+// өөрийн гэсэн хуулбартай байдаг.
+let INVITE_TYPE_LIST = Object.entries(INVITE_TYPES).map(([id, t]) => Object.assign({ id }, t));
+
 function encodeInviteData(obj) {
   return btoa(encodeURIComponent(JSON.stringify(obj))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
@@ -92,9 +101,25 @@ async function submitInviteResponse(response) {
   } catch (e) { console.warn("submitInviteResponse error:", e); }
 }
 
+// Overlay хэрэгжсэний дараа INVITE_TYPES-ийг жагсаалттай тэнцүүлнэ — эс бөгөөс
+// admin-аас нэмсэн төрөл дээр дарахад builder "тийм төрөл алга" гэж унана.
+function syncInviteTypes() {
+  INVITE_TYPE_LIST.forEach(t => {
+    if (!INVITE_TYPES[t.id]) INVITE_TYPES[t.id] = {};
+    Object.assign(INVITE_TYPES[t.id], t);
+  });
+}
+
 function renderTypePicker() {
-  const eventTypes = Object.entries(INVITE_TYPES).filter(([, t]) => t.group === "event");
-  const otherTypes = Object.entries(INVITE_TYPES).filter(([, t]) => !t.group);
+  syncInviteTypes();
+  // Admin-ийн нуулт/засвар/дараалал/нэмэлтийг хэрэгжүүлнэ. Эхлээд эх
+  // жагсаалтаар шууд зурагдаж, overlay ирэхэд дахин зурагдана (fail-open).
+  if (!renderTypePicker._hydrated && typeof cmsHydrate === "function") {
+    renderTypePicker._hydrated = true;
+    cmsHydrate("invites", INVITE_TYPE_LIST, "id", renderTypePicker);
+  }
+  const eventTypes = INVITE_TYPE_LIST.filter(t => t.group === "event");
+  const otherTypes = INVITE_TYPE_LIST.filter(t => !t.group);
   document.getElementById("inviteRoot").innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
       <div>
@@ -105,19 +130,19 @@ function renderTypePicker() {
     </div>
     <div class="section-title"><h2 style="font-size:16px;">🎉 Үйл ажиллагаа</h2></div>
     <div class="inv-type-grid inv-type-grid-sub">
-      ${eventTypes.map(([id, t]) => `
-        <div class="inv-type-card inv-type-card-sub" onclick="invStartBuilder('${id}')">
-          <div class="icon">${t.emoji}</div>
-          <h3>${t.label}</h3>
+      ${eventTypes.map(t => `
+        <div class="inv-type-card inv-type-card-sub" onclick="invStartBuilder('${escapeHtml(t.id)}')">
+          <div class="icon">${t.emoji || "💌"}</div>
+          <h3>${escapeHtml(t.label || t.id)}</h3>
         </div>`).join("")}
     </div>
     <div class="section-title" style="margin-top:22px;"><h2 style="font-size:16px;">Бусад төрөл</h2></div>
     <div class="inv-type-grid">
-      ${otherTypes.map(([id, t]) => `
-        <div class="inv-type-card" onclick="invStartBuilder('${id}')">
-          <div class="icon">${t.emoji}</div>
-          <h3>${t.label}</h3>
-          <p>${t.desc || ""}</p>
+      ${otherTypes.map(t => `
+        <div class="inv-type-card" onclick="invStartBuilder('${escapeHtml(t.id)}')">
+          <div class="icon">${t.emoji || "💌"}</div>
+          <h3>${escapeHtml(t.label || t.id)}</h3>
+          <p>${escapeHtml(t.desc || "")}</p>
         </div>`).join("")}
     </div>`;
 }

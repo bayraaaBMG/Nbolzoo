@@ -46,7 +46,8 @@ const required = {
 };
 for (const [p, reqs] of Object.entries(required)) {
   const h = fs.readFileSync(p, 'utf8');
-  const miss = reqs.filter(r => !h.includes('"' + r + '"'));
+  // ?v=<hash> тамгыг тооцно: 'js/x.js"' эсвэл 'js/x.js?v=...'
+  const miss = reqs.filter(r => !h.includes('"' + r + '"') && !h.includes('"' + r + '?v='));
   t(p + ' includes required scripts', miss.length === 0, miss.join(', '));
 }
 

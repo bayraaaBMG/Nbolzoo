@@ -147,16 +147,31 @@ body {
 #navAuthButtons .btn { font-size: 13.5px; padding: 9px 15px; }
 
 /* ---- 3. Ангиллын цэс ---- */
-.cat-nav { background: var(--white); }
+/* Ангиллын мөр нь нэг эгнээ ХЭВТЭЭ гүйдэг. Доошоо эвдэрч буухгүй, жижгэрэхгүй —
+   нарийн дэлгэц дээр ч нэг цэвэрхэн мөр хэвээр үлдэнэ.
+   Баруун/зүүн хаяанд бүдгэрэлт нь "цааш гүйнэ" гэдгийг зөн совингоор хэлнэ. */
+.cat-nav { background: var(--white); position: relative; }
+.cat-nav::after {
+  content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 28px;
+  background: linear-gradient(90deg, transparent, var(--white));
+  pointer-events: none; z-index: 1;
+}
+.cat-nav.at-end::after { opacity: 0; transition: opacity .18s; }
 .cat-nav-inner {
   max-width: 1280px; margin: 0 auto; padding: 0 20px;
   display: flex; align-items: stretch; gap: 2px;
-  overflow-x: auto; scrollbar-width: none;
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  /* Нэг мөрөөс доошоо хэзээ ч буухгүй */
+  flex-wrap: nowrap;
 }
 .cat-nav-inner::-webkit-scrollbar { display: none; }
 .cat-link {
   display: flex; align-items: center; gap: 7px;
   padding: 12px 13px; white-space: nowrap; cursor: pointer; text-decoration: none;
+  scroll-snap-align: start; flex-shrink: 0;
   font-size: 13.5px; font-weight: 600; color: var(--text-light);
   border-bottom: 2.5px solid transparent;
 }
@@ -231,10 +246,7 @@ body {
 
 /* Хүрэлтээр ажилладаг төхөөрөмж дээр ангиллын мөрийг чирэхэд
    инерц өгнө (iOS) */
-@media (hover: none) {
-  .cat-nav-inner { -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; }
-  .cat-link { scroll-snap-align: start; }
-}
+
 
 /* Хуучин .nav / .nav-menu дээр тулгуурласан загварууд энэ header-т
    хамаарахгүй — тэднийг дарж бичнэ. */

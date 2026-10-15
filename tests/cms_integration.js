@@ -34,7 +34,14 @@ const c = load(['js/core.js', 'js/ub.js', 'js/aimags.js', 'js/gifts.js', 'js/cms
   t(type + ': ids are unique', new Set(arr.map(x => String(x.id))).size === arr.length,
     arr.length + ' items, ' + new Set(arr.map(x => String(x.id))).size + ' unique');
 });
-t('CMS_TYPES matches what is wired', JSON.stringify(c.CMS_TYPES) === JSON.stringify(['ub', 'aimags', 'gifts']), JSON.stringify(c.CMS_TYPES));
+t('CMS_TYPES matches what is wired',
+  JSON.stringify(c.CMS_TYPES) === JSON.stringify(['ub', 'aimags', 'gifts', 'invites']), JSON.stringify(c.CMS_TYPES));
+// Урилгын төрөл нь ОБЪЕКТ-оос гаргасан жагсаалт тул id нь заавал байх ёстой —
+// эс бөгөөс overlay зүйлийг олж чадахгүй.
+const inv = require('fs').readFileSync('js/invite.js', 'utf8');
+t('invite types expose an id for the overlay', /INVITE_TYPE_LIST = Object\.entries\(INVITE_TYPES\)\.map\(\(\[id, t\]\)/.test(inv));
+t('invite picker reads the overlay list', /INVITE_TYPE_LIST\.filter/.test(inv));
+t('admin-added invite types reach the builder', /function syncInviteTypes/.test(inv));
 
 // ---- 2. Бодит өгөгдөл дээр нуулт/засвар ажиллаж байгаа эсэх ----
 const firstUb = c.allUbIdeas[0], secondUb = c.allUbIdeas[1];

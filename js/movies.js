@@ -288,7 +288,7 @@ function openMovieDetail(id) {
       </div>
       <div class="cinema-detail-section">
         <h4>💑 Яагаад хосуудад тохиромжтой вэ?</h4>
-        <p class="cinema-detail-desc" style="color:#e2b714">${m.why||'Хамтдаа үзэхэд тохиромжтой кино'}</p>
+        <p class="cinema-detail-desc" style="color:var(--primary)">${m.why||'Хамтдаа үзэхэд тохиромжтой кино'}</p>
       </div>
       <div class="cinema-detail-section">
         <h4>🎬 Trailer</h4>

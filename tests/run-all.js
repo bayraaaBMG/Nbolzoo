@@ -21,6 +21,7 @@ const SUITES = [
   ["card rail (prev/next)", "tests/rail_test.js", []],
   ["responsive", "tests/responsive_test.js", []],
   ["pwa / offline", "tests/pwa_test.js", []],
+  ["safety + consistency", "tests/safety_test.js", []],
   ["no money anywhere", "tests/nomoney_test.js", []],
   ["dataset integrity", "tests/data_check.js", []],
 ];

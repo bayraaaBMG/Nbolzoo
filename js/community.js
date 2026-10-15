@@ -52,7 +52,10 @@ function visiblePostsForFeed() {
   // Private posts only ever show to their own author — everyone else's Firestore read is
   // already blocked at the rules layer, but the local realtime cache can still briefly hold
   // a stale copy right after the author flips visibility, so this stays defense-in-depth.
-  let list = posts.filter(p => !p.hidden && (p.visibility !== "private" || (currentUser && p.authorId === currentUser.uid)));
+  // Хаасан хүний нийтлэл тухайн хэрэглэгчид ОГТ харагдахгүй.
+  let list = posts.filter(p => !p.hidden
+    && !isBlocked(p.authorId)
+    && (p.visibility !== "private" || (currentUser && p.authorId === currentUser.uid)));
   if (currentFeedTab === "following") {
     list = list.filter(p => currentUser && (followingSet.has(p.authorId) || p.authorId === currentUser.uid));
   } else if (currentFeedTab === "trending") {
@@ -76,12 +79,21 @@ function renderPosts() {
   renderFeedTabs();
   const visible = visiblePostsForFeed();
   if (!visible.length) {
-    const emptyMsg = currentFeedTab === "following"
-      ? `Одоогоор дагасан хүмүүсийн нийтлэл алга. Сонирхолтой хүмүүсийг дагаад эхлээрэй! 👥`
+    // Хоосон төлөвт ЗААВАЛ дараагийн алхам санал болгоно — зөвхөн "алга" гэж
+    // бичих нь шинэ хэрэглэгчийг хоосон хуудсанд гацаана.
+    const empty = currentFeedTab === "following"
+      ? emptyState("Дагасан хүмүүсийн нийтлэл алга",
+          "Хүмүүсийг дагавал тэдний санаа энд гарч ирнэ.",
+          [["Бүх нийтлэл үзэх", "selectFeedTab('all')"], ["Санаа хайх", "ub.html"]])
       : currentFeedTab === "trending"
-      ? `Одоогоор "Хэрэгтэй" гэж тэмдэглэгдсэн нийтлэл алга.`
-      : `Одоохондоо нийтлэл алга. Эхний санаагаа хуваалцаарай! 💬`;
-    el.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text-light);">${emptyMsg}</div>`;
+      ? emptyState("Хэрэгтэй гэж тэмдэглэсэн нийтлэл алга",
+          "Хэрэгтэй санаанууд цугларах тусам энд эрэмбэлэгдэнэ.",
+          [["Бүх нийтлэл үзэх", "selectFeedTab('all')"]])
+      : emptyState("Одоохондоо нийтлэл алга",
+          "Эхний санаагаа хуваалцаад нийгэмлэгийг эхлүүлээрэй.",
+          [["Санаа хайх", "ub.html"], ["21 аймаг", "aimags.html"]]);
+    el.innerHTML = empty;
+    if (typeof nbHydrateIcons === "function") nbHydrateIcons(el);
     return;
   }
   el.innerHTML = visible.map(p => {
@@ -150,7 +162,8 @@ function renderComments(postId) {
   const section = document.getElementById(`comments-${postId}`);
   if (!section) return;
   // Admin-hidden comments (moderation) never show in the public thread.
-  const cmts = (commentsCache[postId] || []).filter(c => !c.hidden);
+  // Хаасан хэрэглэгчийн сэтгэгдэл мөн адил — эс бөгөөс хаалт хагас дутуу болно.
+  const cmts = (commentsCache[postId] || []).filter(c => !c.hidden && !isBlocked(c.authorId));
   section.innerHTML = `
     ${cmts.map(c => `
       <div class="comment-item">
@@ -477,6 +490,13 @@ function openReportModal(targetType, targetId, targetAuthorId) {
       <div class="form-group"><label>Шалтгаан (сонголтоор)</label><textarea id="reportReasonInput" rows="3" placeholder="Юу болсныг тайлбарлана уу..."></textarea></div>
       <div id="reportModalStatus" style="min-height:18px;font-size:13px;margin-bottom:8px;"></div>
       <button class="btn btn-primary" type="button" id="reportSubmitBtn" style="width:100%" onclick="submitReport('${targetType}','${targetId}','${targetAuthorId}')">Мэдэгдэл илгээх</button>
+      <div class="report-divider"><span>эсвэл</span></div>
+      <p style="color:var(--text-light);font-size:13px;margin-bottom:10px;">
+        Админы хариуг хүлээлгүй шууд арга хэмжээ авах бол энэ хэрэглэгчийг хаана уу.
+        Түүний нийтлэл, сэтгэгдэл танд харагдахаа болино.
+      </p>
+      <button class="btn btn-outline" type="button" style="width:100%;border-color:#ef4444;color:#ef4444"
+        onclick="blockUser('${targetAuthorId}')">🚫 Энэ хэрэглэгчийг хаах</button>
     </div>`;
   document.getElementById("modal").classList.add("show");
 }
@@ -607,3 +627,89 @@ async function initCommunityExtras() {
 }
 
 subscribeToPosts();
+
+// ===== ХЭРЭГЛЭГЧ ХААХ (block) =====
+//
+// Мэдэгдэх (report) нь АДМИНД хандана — шийдвэр гартал хугацаа шаардана.
+// Хаах нь ХЭРЭГЛЭГЧ ӨӨРӨӨ шууд авах арга хэмжээ: хаасан хүний нийтлэл,
+// сэтгэгдэл тухайн хэрэглэгчид дахин харагдахгүй.
+//
+// Хаалт нь ЗӨВХӨН хаасан хүнд үйлчилнэ (нэг талын). Хаагдсан хүн энэ тухай
+// мэдэхгүй — энэ нь зориуд: мэдэгдэх нь хариу дайралт үүсгэх эрсдэлтэй.
+//
+// blocks/{uid_targetUid} — likes/saved-тай ижил хэв маяг: нэг хүн нэг хүнийг
+// давхар хааж чадахгүй, "хаасан эсэх" нь нэг уншилт.
+
+let blockedSet = new Set();
+
+async function loadBlockedUsers() {
+  blockedSet = new Set();
+  if (!currentUser || !db) return;
+  try {
+    const snap = await db.collection("blocks").where("uid", "==", currentUser.uid).get();
+    snap.docs.forEach(d => blockedSet.add(d.data().targetUid));
+  } catch (e) { console.warn("loadBlockedUsers failed:", e); }
+}
+
+function isBlocked(uid) { return blockedSet.has(uid); }
+
+async function blockUser(targetUid, targetName) {
+  if (!currentUser) return openAuth("login");
+  if (targetUid === currentUser.uid) return;
+  if (!confirm(`${targetName || "Энэ хэрэглэгч"}-г хаах уу?\n\nТүүний нийтлэл, сэтгэгдэл танд харагдахаа болино. Хэзээ ч буцааж болно.`)) return;
+  try {
+    await db.collection("blocks").doc(currentUser.uid + "_" + targetUid).set({
+      uid: currentUser.uid, targetUid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    blockedSet.add(targetUid);
+    closeModal();
+    showToast("🚫 Хаалаа — энэ хүний контент танд харагдахгүй");
+    loadPosts();
+  } catch (e) { showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || "")); }
+}
+
+async function unblockUser(targetUid) {
+  if (!currentUser) return;
+  try {
+    await db.collection("blocks").doc(currentUser.uid + "_" + targetUid).delete();
+    blockedSet.delete(targetUid);
+    showToast("✅ Хаалт цуцлагдлаа");
+    renderBlockedList();
+    loadPosts();
+  } catch (e) { showToast("⚠️ Алдаа гарлаа: " + (e.message || e.code || "")); }
+}
+
+// Хаасан хүмүүсийн жагсаалт — хаалтыг буцаах цорын ганц газар тул
+// заавал хүртээмжтэй байх ёстой (профайл цэснээс нээгдэнэ).
+async function renderBlockedList() {
+  const el = document.getElementById("modalContent");
+  if (!el) return;
+  let rows = "";
+  try {
+    const snap = await db.collection("blocks").where("uid", "==", currentUser.uid).get();
+    const list = snap.docs.map(d => d.data());
+    if (!list.length) {
+      rows = `<p style="color:var(--text-light);font-size:14px;">Та хэнийг ч хаагаагүй байна.</p>`;
+    } else {
+      const names = await Promise.allSettled(list.map(b => db.collection("users").doc(b.targetUid).get()));
+      rows = list.map((b, i) => {
+        const r = names[i];
+        const nm = r.status === "fulfilled" && r.value.exists ? (r.value.data().name || "Хэрэглэгч") : "Хэрэглэгч";
+        return `<div class="blocked-row">
+          <strong>${escapeHtml(nm)}</strong>
+          <button class="btn btn-outline btn-sm" type="button" onclick="unblockUser('${escapeHtml(b.targetUid)}')">Хаалт цуцлах</button>
+        </div>`;
+      }).join("");
+    }
+  } catch (e) {
+    rows = `<p style="color:var(--text-light);font-size:14px;">Жагсаалтыг ачаалж чадсангүй.</p>`;
+  }
+  el.innerHTML = `
+    <div class="modal-header">
+      <h3>🚫 Хаасан хэрэглэгчид</h3>
+      <button class="modal-close" onclick="closeModal()" type="button" aria-label="Хаах">×</button>
+    </div>
+    <div class="modal-body">${rows}</div>`;
+  document.getElementById("modal").classList.add("show");
+}

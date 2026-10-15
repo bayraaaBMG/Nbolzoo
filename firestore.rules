@@ -352,6 +352,21 @@ service cloud.firestore {
         || (isSignedIn() && resource.data.ownerUid == request.auth.uid);
     }
 
+    // ---- blocks/{uid_targetUid} : хэрэглэгч өөрөө авах арга хэмжээ.
+    // Хаалт нь НЭГ ТАЛЫН бөгөөд ЗӨВХӨН хаасан хүнд үйлчилнэ — тиймээс зөвхөн
+    // эзэн нь уншиж, бичиж, устгана. Хаагдсан хүн энэ тухай мэдэх ёсгүй
+    // (мэдэгдэл нь хариу дайралт үүсгэх эрсдэлтэй), тиймээс read нь эзэнд хаалттай.
+    // Doc id = uid + "_" + targetUid — нэг хүнийг давхар хаах боломжгүй.
+    match /blocks/{blockId} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.targetUid != request.auth.uid
+        && blockId == request.auth.uid + '_' + request.resource.data.targetUid;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
     // ---- ideaReviews/{uid_ideaId} : хэрэглэгчийн үнэлгээ + туршлага.
     // Baримтын id нь uid + "_" + ideaId — likes/saved-тай ижил хэв маяг. Үүний ач
     // холбогдол нь нэг хүн нэг санааг ЗӨВХӨН нэг удаа үнэлж чадна гэдгийг ДҮРМЭЭР

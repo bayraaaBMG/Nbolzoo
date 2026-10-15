@@ -62,8 +62,13 @@ function renderServiceGrid() {
   const list = serviceFilter ? servicesCache.filter(s => s.category === serviceFilter) : servicesCache;
   if (!list.length) {
     grid.innerHTML = servicesCache.length
-      ? `<div class="admin-empty">Энэ ангилалд бүртгэл алга</div>`
-      : `<div class="admin-empty">Одоогоор зөвшөөрөгдсөн үйлчилгээ алга. Та эхний нь болж бүртгүүлээрэй.</div>`;
+      ? emptyState("Энэ ангилалд бүртгэл алга",
+          "Өөр ангилал сонгож үзнэ үү.",
+          [["Бүх ангилал", "setServiceFilter('')"]])
+      : emptyState("Одоогоор зөвшөөрөгдсөн үйлчилгээ алга",
+          "Та эхний нь болж бизнесээ бүртгүүлээрэй — админ шалгасны дараа нийтэд харагдана.",
+          [["Үйлчилгээ бүртгүүлэх", "openServiceForm()"]]);
+    if (typeof nbHydrateIcons === "function") nbHydrateIcons(grid);
     return;
   }
   grid.innerHTML = list.map(s => {

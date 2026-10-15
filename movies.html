@@ -223,11 +223,11 @@
         <div style="padding:24px; max-width:600px; margin:0 auto;">
           <!-- TMDB Auto-search -->
           <div style="background:rgba(226,183,20,0.08);border:1px solid rgba(226,183,20,0.25);border-radius:12px;padding:16px;margin-bottom:20px;">
-            <label class="cinema-label" style="color:#e2b714;font-size:13px;font-weight:700;" data-text="movies.88a32bd2">🔍 TMDB-аас автоматаар мэдээлэл татах</label>
+            <label class="cinema-label" style="color:var(--primary);font-size:13px;font-weight:700;" data-text="movies.88a32bd2">🔍 TMDB-аас автоматаар мэдээлэл татах</label>
             <p style="color:rgba(255,255,255,0.45);font-size:12px;margin:4px 0 10px;" data-text="movies.f9fae06b">Кино нэрийг англиар бичээд "Хайх" дарна уу — poster, rating, тайлбар автоматаар орно</p>
             <div style="display:flex;gap:8px;">
               <input type="text" id="tmdbSearchInput" class="cinema-input" placeholder="жишээ: Interstellar, Parasite..." style="flex:1" onkeypress="if(event.key==='Enter')doTMDBSearch()">
-              <button type="button" id="tmdbSearchBtn" onclick="doTMDBSearch()" style="background:#e2b714;color:#000;border:none;padding:0 18px;border-radius:8px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Хайх</button>
+              <button type="button" id="tmdbSearchBtn" onclick="doTMDBSearch()" style="background:var(--primary);color:#fff;border:none;padding:0 18px;border-radius:8px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Хайх</button>
             </div>
             <div id="tmdbResults" class="tmdb-results" style="display:none;margin-top:8px;"></div>
           </div>

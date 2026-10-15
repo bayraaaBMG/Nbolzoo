@@ -206,6 +206,11 @@ async function loadUserLikesAndSaved(uid) {
     followingSet = new Set(followSnap.docs.map(d => d.data().targetUid));
   } catch (e) { console.warn("loadUserLikesAndSaved(follows) error:", e); }
 
+  // Хаалтын жагсаалтыг постуудыг зурахаас ӨМНӨ ачаална.
+  if (typeof loadBlockedUsers === "function") {
+    try { await loadBlockedUsers(); } catch (e) { console.warn("loadBlockedUsers error:", e); }
+  }
+
   if (document.getElementById("featuredGrid")) renderFeatured();
   if (document.getElementById("ubGrid")) renderUbIdeas();
   if (document.getElementById("savedGrid")) renderSaved();
@@ -232,6 +237,7 @@ function openProfileModal() {
       <div id="profileStatus" style="min-height:18px;font-size:13px;margin-bottom:8px;"></div>
       <button class="btn btn-primary" type="button" id="profileSaveBtn" style="width:100%" onclick="saveProfile()">Хадгалах</button>
       <button class="btn btn-ghost" type="button" style="width:100%;margin-top:10px;" onclick="openCoupleModal()">💑 Хосын дурсамж</button>
+      ${typeof renderBlockedList === "function" ? `<button class="btn btn-ghost" type="button" style="width:100%;margin-top:8px;" onclick="renderBlockedList()">🚫 Хаасан хэрэглэгчид</button>` : ""}
     </div>`;
   document.getElementById("modal").classList.add("show");
 }

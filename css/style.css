@@ -209,9 +209,9 @@ body {
   /* "Хайх" товч нуугдана: талбар доторх томруулагч нь дарж болох товч,
      мөн Enter ажиллана. Энэ нь ~70px чөлөөлж, хайлтын талбар уншигдахуйц
      өргөнтэй болно. */
-  .header-search-btn { display: none; }
+  .header-search .header-search-btn { display: none; }
   /* "Гарах" нь мобайл цэс болон профайл цонхонд бий — толгойд давхардуулахгүй */
-  .header-logout { display: none; }
+  .nav-actions .header-logout { display: none; }
   /* Хонх, зураг хоёрыг нягтруулна */
   #navUserInfo { gap: 4px !important; }
   .notif-bell { width: 36px; height: 36px; }
@@ -977,7 +977,7 @@ body {
 .cinema-tab {
   padding: 8px 18px; border-radius: 20px;
   border: 1.5px solid var(--border);
-  background: transparent; color: var(--border);
+  background: var(--white); color: var(--text-light);
   cursor: pointer; font-size: 14px; font-weight: 500;
   white-space: nowrap; transition: all 0.2s;
 }
@@ -989,9 +989,9 @@ body {
 .filter-label { color: var(--text-light); font-size: 12px; white-space: nowrap; }
 .cinema-genre-chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .cchip {
-  padding: 5px 12px; border-radius: 14px;
+  padding: 6px 13px; border-radius: 14px;
   border: 1.5px solid var(--border);
-  background: transparent; color: var(--border);
+  background: var(--white); color: var(--text-light);
   cursor: pointer; font-size: 12px; transition: all 0.18s;
 }
 .cchip:hover { border-color: var(--primary); color: var(--primary); }
@@ -3196,4 +3196,93 @@ select:focus-visible, [tabindex]:focus-visible {
 @media (max-width: 560px) {
   .hero-eyebrow { font-size: 11px; }
   .hero-actions .btn { flex: 1 1 100%; justify-content: center; }
+}
+
+/* ===================================================================
+   CHIP RAIL — ангиллын мөр бүр НЭГ МӨР, хажуу тийш гүйнэ.
+   Өмнө нь flex-wrap: wrap байсан тул утсан дээр 3-4 мөр болж задарч,
+   эмх замбараагүй харагддаг байв. Стриминг аппуудын хэв маяг:
+   нэг эгнээ, хуруугаар чирнэ, хаяанд бүдгэрэлт нь "цааш бий" гэж хэлнэ.
+   =================================================================== */
+.chip-rail {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding-bottom: 2px;
+}
+.chip-rail::-webkit-scrollbar { display: none; }
+.chip-rail > * { flex: 0 0 auto; scroll-snap-align: start; white-space: nowrap; }
+
+/* Хаяаны бүдгэрэлт — "цааш гүйнэ" гэдгийг зөн совингоор хэлнэ */
+.chip-rail-wrap { position: relative; }
+.chip-rail-wrap::after {
+  content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 26px;
+  background: linear-gradient(90deg, transparent, var(--bg));
+  pointer-events: none; transition: opacity .18s;
+}
+.chip-rail-wrap.at-end::after { opacity: 0; }
+
+/* Байгаа мөрүүдийг rail болгоно */
+.gift-cat-tabs, .cinema-tabs, .cinema-genre-chips, .cinema-filter-group, .filters {
+  display: flex; flex-wrap: nowrap; gap: 8px;
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+.gift-cat-tabs::-webkit-scrollbar,
+.cinema-tabs::-webkit-scrollbar,
+.cinema-genre-chips::-webkit-scrollbar,
+.cinema-filter-group::-webkit-scrollbar,
+.filters::-webkit-scrollbar { display: none; }
+.gift-cat-tabs > *, .cinema-tabs > *, .cinema-genre-chips > *,
+.cinema-filter-group > *, .filters > * {
+  flex: 0 0 auto; scroll-snap-align: start; white-space: nowrap;
+}
+
+/* Шүүлтүүрийн мөр нь доошоо биш, хажуу тийш — шошго нь мөрийн эхэнд үлдэнэ */
+.cinema-filter-row { flex-wrap: nowrap; align-items: center; gap: 10px; }
+.cinema-filter-group { flex: 1; min-width: 0; }
+.cinema-sort-row { flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  /* Эрэмбэлэх сонголт нь доогуур бие даасан мөр болно — нэг мөрөнд
+     шүүлтүүр + эрэмбэ хоёулаа багтахгүй. */
+  .cinema-filter-row { flex-wrap: wrap; }
+  .cinema-sort-row { width: 100%; justify-content: flex-end; }
+  .gift-cat-tabs, .cinema-tabs, .cinema-genre-chips { gap: 7px; }
+}
+
+/* ===== КИНО: төрөл тус бүрээр ХЭВТЭЭ эгнээ (стриминг аппын хэв маяг) =====
+   Өмнө нь бүх кино нэг том тор болж, доошоо урт гүйлт үүсгэдэг байв. */
+#movieGrid { display: block; }
+.cine-row { margin-bottom: 26px; }
+.cine-row-head {
+  display: flex; align-items: baseline; gap: 9px; margin-bottom: 11px;
+}
+.cine-row-head h3 { font-size: 16px; font-weight: 800; margin: 0; color: var(--text); }
+.cine-row-count {
+  font-size: 12px; font-weight: 700; color: var(--text-lighter);
+  background: var(--primary-extra-soft); padding: 2px 8px; border-radius: 999px;
+}
+.cine-row-rail {
+  display: flex; flex-wrap: nowrap; gap: 14px;
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding-bottom: 4px;
+}
+.cine-row-rail::-webkit-scrollbar { display: none; }
+.cine-row-rail > .cine-card {
+  flex: 0 0 168px; width: 168px; scroll-snap-align: start;
+}
+@media (max-width: 640px) {
+  .cine-row { margin-bottom: 20px; }
+  .cine-row-head h3 { font-size: 15px; }
+  .cine-row-rail { gap: 10px; }
+  .cine-row-rail > .cine-card { flex-basis: 132px; width: 132px; }
 }

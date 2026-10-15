@@ -193,6 +193,51 @@ function cinePosterHtml(m, cls) {
   return noImgFallback;
 }
 
+// Нэг киноны карт. Эгнээ болон торын аль алинд ашиглана.
+function movieCardHtml(m) {
+  const langCls = `lang-${m.lang || "dubbed"}`;
+  const langLabel = (m.lang === "mongolian") ? "MN" : (m.lang === "original") ? "ORG" : "HАД";
+  const genreFirst = GL[m.genres[0]] || m.genres[0];
+  return `<div class="cine-card" onclick="openMovieDetail(${m.id})">
+    <div class="cine-poster-wrap">
+      ${cinePosterHtml(m)}
+      <div class="cine-rating-badge">⭐ ${m.rating}</div>
+      <div class="cine-lang-badge ${langCls}">${langLabel}</div>
+      <div class="cine-play-btn">▶</div>
+    </div>
+    <div class="cine-info">
+      <div class="cine-movie-title">${escapeHtml(m.title)}</div>
+      <div class="cine-meta"><span>${m.year}</span><span>·</span><span>${m.duration || ""}</span></div>
+      <span class="cine-genre-pill">${escapeHtml(genreFirst)}</span>
+    </div>
+  </div>`;
+}
+
+// Жагсаалтыг эгнээ болгон хуваана.
+// Төрлөөр нь ялгахдаа кино бүрийн ЭХНИЙ төрлийг л авна — эс бөгөөс нэг кино
+// олон эгнээнд давхардан гарч, "аль эгнээнд юу байгаа" нь ойлгомжгүй болно.
+function movieRows(list) {
+  // Хэрэглэгч төрөл сонгосон бол аль хэдийн шүүгдсэн — нэг эгнээ хангалттай.
+  if (typeof currentMovieGenre !== "undefined" && currentMovieGenre && currentMovieGenre !== "all") {
+    return [{ label: GL[currentMovieGenre] || currentMovieGenre, items: list }];
+  }
+  // Хайлт хийсэн бол үр дүн нь аль хэдийн нэг утга учиртай жагсаалт —
+  // төрлөөр задлах нь хэрэглэгчийн хайсан зүйлийг тараана.
+  if (typeof currentMovieSearch !== "undefined" && currentMovieSearch.trim()) {
+    return [{ label: "Хайлтын үр дүн", items: list }];
+  }
+  const groups = new Map();
+  list.forEach(m => {
+    const key = (m.genres && m.genres[0]) || "other";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(m);
+  });
+  // Олон кинотой төрөл эхэнд — хоосон мэт санагдах 1-2 кинотой эгнээ дээр гарахгүй.
+  return [...groups.entries()]
+    .map(([k, items]) => ({ label: GL[k] || k, items }))
+    .sort((a, b) => b.items.length - a.items.length);
+}
+
 function renderMovies() {
   try {
   const list = getFilteredMovies();
@@ -208,24 +253,20 @@ function renderMovies() {
     </div>`;
     return;
   }
-  grid.innerHTML = list.map(m => {
-    const langCls = `lang-${m.lang||"dubbed"}`;
-    const langLabel = (m.lang === "mongolian") ? "MN" : (m.lang === "original") ? "ORG" : "HАД";
-    const genreFirst = GL[m.genres[0]] || m.genres[0];
-    return `<div class="cine-card" onclick="openMovieDetail(${m.id})">
-      <div class="cine-poster-wrap">
-        ${cinePosterHtml(m)}
-        <div class="cine-rating-badge">⭐ ${m.rating}</div>
-        <div class="cine-lang-badge ${langCls}">${langLabel}</div>
-        <div class="cine-play-btn">▶</div>
+  // Ангилал СОНГОООГҮЙ үед стриминг аппын хэв маягаар: төрөл тус бүрээр
+  // хэвтээ эгнээ. Ангилал сонгосон үед нэг эгнээ (тэр нь аль хэдийн шүүгдсэн).
+  // Эгнээ бүр нь ЗӨВХӨН хажуу тийш гүйнэ — доошоо урт тор үүсгэхгүй.
+  const byRow = movieRows(list);
+  grid.innerHTML = byRow.map(row => `
+    <section class="cine-row">
+      <div class="cine-row-head">
+        <h3>${escapeHtml(row.label)}</h3>
+        <span class="cine-row-count">${row.items.length}</span>
       </div>
-      <div class="cine-info">
-        <div class="cine-movie-title">${m.title}</div>
-        <div class="cine-meta"><span>${m.year}</span><span>·</span><span>${m.duration||''}</span></div>
-        <span class="cine-genre-pill">${genreFirst}</span>
+      <div class="cine-row-rail">
+        ${row.items.map(movieCardHtml).join("")}
       </div>
-    </div>`;
-  }).join("");
+    </section>`).join("");
   } catch(err) {
     console.error("renderMovies error:", err);
     const grid = document.getElementById("movieGrid");

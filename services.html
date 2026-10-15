@@ -70,7 +70,7 @@
     </a>
 
     <div class="header-search">
-      <span class="header-search-ico" data-icon="search" data-icon-size="18" aria-hidden="true"></span>
+      <button type="button" class="header-search-ico" onclick="performSearch()" aria-label="Хайх"><span data-icon="search" data-icon-size="18" aria-hidden="true"></span></button>
       <input type="search" id="searchInput" placeholder="Санаа, газар, аймаг хайх..."
              aria-label="Болзооны санаа хайх" onkeypress="if(event.key==='Enter')performSearch()">
       <button class="btn btn-accent header-search-btn" type="button" onclick="performSearch()">Хайх</button>
@@ -90,7 +90,7 @@
           <div class="notif-dropdown" id="notifDropdown" style="display:none;"></div>
         </div>
         <div class="avatar" id="navAvatar" style="width:34px;height:34px;font-size:13px;cursor:pointer;" onclick="openProfileModal()" role="button" tabindex="0" aria-label="Профайл нээх"></div>
-        <button type="button" class="btn btn-ghost" style="font-size:13px;padding:8px 12px;" onclick="logoutUser()">Гарах</button>
+        <button type="button" class="btn btn-ghost header-logout" style="font-size:13px;padding:8px 12px;" onclick="logoutUser()">Гарах</button>
       </div>
       <button type="button" class="mobile-menu-btn" onclick="openMobileMenu()" title="Цэс нээх" aria-label="Цэс нээх"><span class="nav-ico" data-icon="menu" data-icon-size="20"></span></button>
     </div>

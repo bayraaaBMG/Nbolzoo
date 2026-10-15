@@ -19,6 +19,7 @@ const SUITES = [
   ["reviews", "tests/reviews_test.js", []],
   ["hero / carousel", "tests/hero_test.js", []],
   ["card rail (prev/next)", "tests/rail_test.js", []],
+  ["mobile header density", "tests/mobile_header_test.js", []],
   ["responsive", "tests/responsive_test.js", []],
   ["pwa / offline", "tests/pwa_test.js", []],
   ["safety + consistency", "tests/safety_test.js", []],

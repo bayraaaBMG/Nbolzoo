@@ -120,7 +120,13 @@ body {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 14%, transparent);
   background: var(--white);
 }
-.header-search-ico { display: flex; padding: 0 2px 0 13px; color: var(--text-lighter); flex-shrink: 0; }
+.header-search-ico {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px 0 12px; color: var(--text-lighter); flex-shrink: 0;
+  background: none; border: 0; cursor: pointer; font: inherit;
+}
+.header-search-ico:hover { color: var(--primary); }
+.header-search-ico:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; border-radius: 8px; }
 .header-search input {
   flex: 1; min-width: 0; border: 0; background: none; outline: none;
   padding: 11px 10px; font: inherit; font-size: 14.5px; color: var(--text);
@@ -177,12 +183,23 @@ body {
   /* Хайлт нь тусдаа мөр рүү БУУХГҮЙ — нэг мөрөнд үлдэж, үлдсэн зайг эзэлнэ */
   .header-search { flex: 1 1 auto; min-width: 0; max-width: none; }
   .header-search-ico { padding-left: 11px; }
-  .header-search input { padding: 9px 8px; font-size: 14px; }
-  .header-search-btn { padding: 9px 15px; font-size: 13.5px; }
-  .nav-actions { gap: 6px; flex-shrink: 0; }
+  .header-search input { padding: 10px 10px 10px 2px; font-size: 16px; }
+  /* ЯГ 16px: iOS нь түүнээс БАГА фонттой input дээр фокуслахад хуудсыг
+     автоматаар томруулдаг. user-scalable=no -гоор засвал хүртээмж алдагдана
+     тул фонтын хэмжээгээр шийдэв. */
+  .nav-actions { gap: 4px; flex-shrink: 0; }
   .header-saved { display: none; }
   /* Нэвтрэлт нь drawer дотор бий — толгойд давхардуулахгүй */
   #navAuthButtons { display: none; }
+  /* "Хайх" товч нуугдана: талбар доторх томруулагч нь дарж болох товч,
+     мөн Enter ажиллана. Энэ нь ~70px чөлөөлж, хайлтын талбар уншигдахуйц
+     өргөнтэй болно. */
+  .header-search-btn { display: none; }
+  /* "Гарах" нь мобайл цэс болон профайл цонхонд бий — толгойд давхардуулахгүй */
+  .header-logout { display: none; }
+  /* Хонх, зураг хоёрыг нягтруулна */
+  #navUserInfo { gap: 4px !important; }
+  .notif-bell { width: 36px; height: 36px; }
   .cat-nav-inner { padding: 0 16px; }
   .cat-link { padding: 10px 11px; font-size: 13px; gap: 6px; }
 }
@@ -194,7 +211,6 @@ body {
   .site-header .logo-tagline { display: none; }
   .site-header .logo-text { font-size: 17px; }
   .logo-icon { width: 34px; height: 34px; }
-  .header-search-btn { padding: 9px 13px; font-size: 13px; }
   .cat-nav-inner { padding: 0 14px; }
   .cat-link { padding: 10px 9px; font-size: 12.5px; }
 }
@@ -203,11 +219,12 @@ body {
 @media (max-width: 430px) {
   :root { --head-h: 90px; }
   .site-header .logo-text { display: none; }
-  .header-inner { gap: 7px; padding: 7px 12px; }
-  .header-search input::placeholder { font-size: 13.5px; }
-  /* Товчны оронд томруулсан хайлтын тэмдэг — зай хэмнэнэ */
-  .header-search-btn { padding: 9px 11px; font-size: 0; }
-  .header-search-btn::after { content: "\1F50D"; font-size: 15px; }
+  .header-inner { gap: 5px; padding: 7px 10px; }
+  .nav-actions { gap: 3px; }
+  .notif-bell { width: 34px; height: 34px; }
+  /* Placeholder-ийг жижигрүүлж нарийн дэлгэцэнд багтаана — input-ийн
+     өөрийнх нь фонт 16px хэвээр (iOS томруулалтаас сэргийлнэ). */
+  .header-search input::placeholder { font-size: 13px; }
   .cat-nav-inner { padding: 0 12px; }
   .cat-link { padding: 9px 8px; font-size: 12px; gap: 5px; }
 }

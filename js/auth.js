@@ -241,6 +241,9 @@ function openProfileModal() {
       <button class="btn btn-primary" type="button" id="profileSaveBtn" style="width:100%" onclick="saveProfile()">Хадгалах</button>
       <button class="btn btn-ghost" type="button" style="width:100%;margin-top:10px;" onclick="openCoupleModal()">💑 Хосын дурсамж</button>
       ${typeof renderBlockedList === "function" ? `<button class="btn btn-ghost" type="button" style="width:100%;margin-top:8px;" onclick="renderBlockedList()">🚫 Хаасан хэрэглэгчид</button>` : ""}
+      <!-- Мобайл дээр толгойн "Гарах" товчийг зайн хэмнэлтийн улмаас нуусан тул
+           гарах арга энд ЗААВАЛ байх ёстой (мобайл цэсэнд ч бий). -->
+      <button class="btn btn-ghost" type="button" style="width:100%;margin-top:8px;color:#ef4444;" onclick="logoutUser()">Гарах</button>
     </div>`;
   document.getElementById("modal").classList.add("show");
 }

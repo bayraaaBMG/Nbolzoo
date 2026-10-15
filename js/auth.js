@@ -211,6 +211,9 @@ async function loadUserLikesAndSaved(uid) {
     try { await loadBlockedUsers(); } catch (e) { console.warn("loadBlockedUsers error:", e); }
   }
 
+  // Hero дээрх хосын холболтын төлөв нэвтрэлт шийдэгдсэний дараа л зөв болно.
+  if (typeof renderHeroCouple === "function") renderHeroCouple();
+
   if (document.getElementById("featuredGrid")) renderFeatured();
   if (document.getElementById("ubGrid")) renderUbIdeas();
   if (document.getElementById("savedGrid")) renderSaved();

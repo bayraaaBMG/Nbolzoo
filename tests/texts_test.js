@@ -45,6 +45,21 @@ const mismatched = Object.entries(D).filter(([k, v]) =>
 t('every key is the hash of its own default text', mismatched.length === 0,
   mismatched.slice(0, 3).map(x => x[0]).join(','));
 
+// --- 3b. Эх бичвэр өөрчлөгдвөл түлхүүр ДАХИН тооцогдох ёстой ---
+// Энэ бол хэш ашигласны үндсэн шалтгаан: хөгжүүлэгч бичвэрээ зассан үед
+// түлхүүр өөрчлөгдөж, admin-ийн ХУУЧИН засвар автоматаар хүчингүй болно.
+// Түлхүүр хуучнаараа үлдвэл хуучин засвар шинэ бичвэр дээр дарагдана.
+//
+// Нэгэнт чимээгүй эвдэрч байсан: tagger нь тэмдэглэгдсэн зангилааг алгасдаг
+// байсан тул түлхүүр хэзээ ч шинэчлэгддэггүй; дараа нь шинэчилдэг болсон ч
+// файлыг БИЧДЭГГҮЙ байсан (зөвхөн `added` шалгадаг байв).
+const tagger = fs.readFileSync('tools/tag-texts.js', 'utf8');
+t('tagger re-keys text whose content changed', /rekeyed\+\+/.test(tagger));
+t('tagger compares the existing key against the current hash',
+  /existing\[1\] === want/.test(tagger));
+t('tagger writes the file when only re-keying happened',
+  /if \(added \|\| rekeyed\) fs\.writeFileSync/.test(tagger));
+
 // --- 4. Header/footer давхар тэмдэглэгдээгүй ---
 for (const p of pages) {
   const h = fs.readFileSync(p, 'utf8');

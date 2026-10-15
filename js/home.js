@@ -237,3 +237,43 @@ function renderHeroQuickChips() {
   el.innerHTML = chips.map(([label, url]) =>
     `<a class="hero-chip" href="${url}">${escapeHtml(label)}</a>`).join("");
 }
+
+// ===== ХОСЫН ХОЛБОЛТЫН CTA (hero) =====
+//
+// Сайтын гол ялгарал нь "аль хэдийн хос болсон хоёр хүн хамтдаа ашиглана"
+// гэдэг. Энэ нь өмнө нь зөвхөн профайл цэсний дотор, "Хосын дурсамж" гэсэн
+// нэрээр нуугдсан байсан тул шинэ хэрэглэгч ойлгодоггүй байв.
+//
+// Гурван төлөв:
+//   нэвтрээгүй     → бүртгүүлэх урилга
+//   нэвтэрсэн, холбогдоогүй → "Хосоороо холбогдох" (гол үйлдэл)
+//   холбогдсон     → хосын нэр + дурсамж руу орох
+//
+// Firestore унтарсан ч hero эвдрэхгүй: алдаа гарвал холболтын мөрийг
+// ОГТ харуулахгүй, бусад контент хэвийн ажиллана.
+async function renderHeroCouple() {
+  const slot = document.getElementById("heroCoupleSlot");
+  if (!slot) return;
+  try {
+    if (!currentUser) {
+      slot.innerHTML = `<button type="button" class="btn btn-ghost hero-couple-btn" onclick="openAuth('signup')">
+        <span class="nav-ico" data-icon="heart" data-icon-size="16"></span>Хосоороо эхлэх</button>`;
+    } else {
+      // loadCoupleData нь currentCouple-ийг бөглөнө (js/couple.js).
+      if (typeof loadCoupleData === "function") await loadCoupleData();
+      const linked = typeof currentCouple !== "undefined" && currentCouple;
+      if (linked) {
+        const partner = (currentCouple.memberNames && currentCouple.memberNames[partnerUidOf(currentCouple)]) || "хос";
+        slot.innerHTML = `<button type="button" class="btn btn-ghost hero-couple-btn is-linked" onclick="openCoupleModal()">
+          <span class="nav-ico" data-icon="heart" data-icon-size="16"></span>${escapeHtml(partner)}-тэй холбогдсон</button>`;
+      } else {
+        slot.innerHTML = `<button type="button" class="btn btn-ghost hero-couple-btn" onclick="openCoupleModal()">
+          <span class="nav-ico" data-icon="heart" data-icon-size="16"></span>Хосоороо холбогдох</button>`;
+      }
+    }
+    if (typeof nbHydrateIcons === "function") nbHydrateIcons(slot);
+  } catch (e) {
+    console.warn("renderHeroCouple failed:", e);
+    slot.innerHTML = "";
+  }
+}

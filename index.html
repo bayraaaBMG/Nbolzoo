@@ -157,8 +157,9 @@
     <section class="hero" data-home-section="hero">
       <div class="hero-grid">
         <div class="hero-promo">
+          <span class="hero-eyebrow">Хосуудад зориулсан</span>
           <h1 id="heroTitle" data-text="index.d741572c">Өнөөдөр хамт хаашаа явах вэ?</h1>
-          <p id="heroSubtitle" data-text="index.2211ef6b">Монголын болзооны санааны платформ — Улаанбаатар болон 21 аймаг</p>
+          <p id="heroSubtitle" data-text="index.8840b452">Хосоороо холбогдоод болзооны санаа, урилга, тоглоом, дурсамжаа нэг дор хөтлөөрэй.</p>
           <div class="hero-quick">
             <span class="hero-quick-label">Хурдан сонголт</span>
             <div class="hero-quick-chips" id="heroQuickChips"></div>
@@ -169,6 +170,9 @@
             </button>
             <!-- Admin нүүр хуудсын тохиргоонд CTA нэр + холбоос өгвөл энд товч нэмэгдэнэ. -->
             <span id="heroCtaSlot"></span>
+            <!-- Хосын холболтын төлвийг js/home.js бөглөнө: нэвтрээгүй / холбогдоогүй /
+                 холбогдсон гэсэн гурван төлөв. Энэ бол сайтын гол ялгарал тул hero-д байрлав. -->
+            <span id="heroCoupleSlot"></span>
           </div>
         </div>
 
@@ -203,24 +207,30 @@
         <div class="how-steps">
           <div class="how-step">
             <span class="how-step-num">1</span>
-            <div class="how-step-ico"><span class="nav-ico" data-icon="compass" data-icon-size="21"></span></div>
-            <h3 data-text="index.b3907360">Санаагаа ол</h3>
-            <p data-text="index.cab84056">Улаанбаатарын өдөр бүрийн санаа, 21 аймгийн газруудаас төсөв, улирал, ангиллаар шүүж сонго.</p>
+            <div class="how-step-ico"><span class="nav-ico" data-icon="heart" data-icon-size="21"></span></div>
+            <h3 data-text="index.1c8a7714">Хосоороо холбогдоно</h3>
+            <p data-text="index.40601f8d">6 оронтой код үүсгээд хостоо илгээнэ. Хоёулаа холбогдсоны дараа дурсамж, тоглоом, урилга хамтдаа хөтлөгдөнө.</p>
           </div>
           <div class="how-step">
             <span class="how-step-num">2</span>
+            <div class="how-step-ico"><span class="nav-ico" data-icon="compass" data-icon-size="21"></span></div>
+            <h3 data-text="index.b3907360">Санаагаа ол</h3>
+            <p data-text="index.d1f1df3a">Улаанбаатарын өдөр бүрийн санаа, 21 аймгийн газруудаас улирал, ангиллаар шүүж сонго.</p>
+          </div>
+          <div class="how-step">
+            <span class="how-step-num">3</span>
             <div class="how-step-ico"><span class="nav-ico" data-icon="heart" data-icon-size="21"></span></div>
             <h3 data-text="index.dfff53da">Хостойгоо сонго</h3>
             <p data-text="index.62a17672">Таалагдсанаа хадгалж, <a onclick="navigate('saved')">Хадгалсан</a> хэсэгт цуглуулаад хамтдаа шийд.</p>
           </div>
           <div class="how-step">
-            <span class="how-step-num">3</span>
+            <span class="how-step-num">4</span>
             <div class="how-step-ico"><span class="nav-ico" data-icon="mail" data-icon-size="21"></span></div>
             <h3 data-text="index.870629d6">Болзоогоо хэрэгжүүл</h3>
             <p data-text="index.d8e6ecc8"><a onclick="navigate('urilga')">Урилга</a> үүсгэж QR/холбоосоор илгээ, газрын зураг, авч явах зүйлсийн жагсаалтыг ашигла.</p>
           </div>
           <div class="how-step">
-            <span class="how-step-num">4</span>
+            <span class="how-step-num">5</span>
             <div class="how-step-ico"><span class="nav-ico" data-icon="users" data-icon-size="21"></span></div>
             <h3 data-text="index.56580260">Дурсамжаа хуваалц</h3>
             <p data-text="index.d0ce137a"><a onclick="navigate('community')">Нийгэмлэг</a>-т туршлагаа бичиж, бусад хосын санаанаас шинийг ол.</p>
@@ -370,6 +380,7 @@
 <script>
 renderHeroCarousel();
 renderHeroQuickChips();
+renderHeroCouple();
 renderFeatured();
 renderMoodSection();
 renderEditorialPicks();

@@ -53,6 +53,7 @@ for (const file of fs.readdirSync(ROOT).filter(f => f.endsWith(".html"))) {
   let html = fs.readFileSync(p, "utf8");
   const page = file.replace(/\.html$/, "");
   let added = 0;
+  let rekeyed = 0;
 
   // Хасагдах хүрээг ДАМЖЛАГА БҮРТ дахин тооцно.
   //
@@ -72,6 +73,7 @@ for (const file of fs.readdirSync(ROOT).filter(f => f.endsWith(".html"))) {
   // идемпотент болж, тест түүнийг шалгаж чадна.
   for (let pass = 0; ; pass++) {
     let addedThisPass = 0;
+    const rekeyedBefore = rekeyed;
     const b = bounds(html);
     const skip = i =>
       (b.hdrA >= 0 && i > b.hdrA && i < b.hdrB) ||
@@ -80,8 +82,24 @@ for (const file of fs.readdirSync(ROOT).filter(f => f.endsWith(".html"))) {
       const re = new RegExp(`<${tag}(\\s[^>]*)?>([\\s\\S]*?)</${tag}>`, "g");
       html = html.replace(re, (m, attrs, inner, offset) => {
         if (skip(offset)) return m;
-        if ((attrs || "").includes("data-text")) return m;
         if (!isEditable(inner)) return m;
+
+        // Аль хэдийн тэмдэглэгдсэн бол: түлхүүр нь ОДООГИЙН бичвэрийн хэштэй
+        // таарч байна уу гэдгийг шалгана.
+        //
+        // Яагаад чухал вэ: хөгжүүлэгч эх бичвэрийг зассан ч түлхүүр хуучнаараа
+        // үлдвэл admin-ийн ХУУЧИН засвар ШИНЭ бичвэр дээр дарагдана — энэ нь
+        // хэш ашигласны үндсэн зорилгыг (хуучин override автоматаар хүчингүй
+        // болох) бүрмөсөн үгүй хийнэ. Тиймээс бичвэр өөрчлөгдсөн бол түлхүүрийг
+        // ДАХИН тооцож, хуучин override-ийг таслана.
+        const existing = (attrs || "").match(/data-text="([^"]+)"/);
+        const want = page + "." + keyFor(inner);
+        if (existing) {
+          if (existing[1] === want) return m;
+          rekeyed++;
+          const fixed = attrs.replace(/data-text="[^"]+"/, 'data-text="' + want + '"');
+          return `<${tag}${fixed}>${inner}</${tag}>`;
+        }
         // Ижил бичвэр → ижил түлхүүр. Давхардсаныг ч тэмдэглэнэ: нэг override
         // бүгдэд зэрэг үйлчилнэ, мөн гаралт идемпотент болно.
         const k = keyFor(inner);
@@ -90,11 +108,15 @@ for (const file of fs.readdirSync(ROOT).filter(f => f.endsWith(".html"))) {
       });
     }
     added += addedThisPass;
-    if (!addedThisPass) break;
+    if (!addedThisPass && rekeyed === rekeyedBefore) break;
     if (pass > 10) { console.log("  WARN " + file + ": did not converge in 10 passes"); break; }
   }
 
-  if (added) fs.writeFileSync(p, html);
+  // ЗААВАЛ rekeyed-ийг ч шалгана: зөвхөн `added` шалгавал, бичвэр нь өөрчлөгдөж
+  // түлхүүр нь дахин тооцогдсон (гэхдээ шинээр юу ч нэмэгдээгүй) тохиолдолд файл
+  // бичигдэхгүй өнгөрч, лавлах нь шинэ түлхүүртэй атал markup хуучин түлхүүртэй
+  // үлддэг — хоёулаа чимээгүй зөрнө.
+  if (added || rekeyed) fs.writeFileSync(p, html);
   totalNew += added;
 
   // Лавлахыг тэмдэглэгдсэн БҮХ зангилаанаас бүтээнэ (зөвхөн шинээс бус) — эс
@@ -106,7 +128,7 @@ for (const file of fs.readdirSync(ROOT).filter(f => f.endsWith(".html"))) {
     let m;
     while ((m = re.exec(html))) { registry[m[1]] = m[2].trim(); found++; }
   }
-  console.log("  " + file.padEnd(16) + added + " new, " + found + " total");
+  console.log("  " + file.padEnd(16) + added + " new, " + rekeyed + " re-keyed, " + found + " total");
 }
 
 const out = "// ҮҮНИЙГ ГАРААР ЗАСАХГҮЙ — tools/tag-texts.js үүсгэдэг.\n" +

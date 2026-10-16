@@ -35,7 +35,7 @@ const c = load(['js/core.js', 'js/ub.js', 'js/aimags.js', 'js/gifts.js', 'js/cms
     arr.length + ' items, ' + new Set(arr.map(x => String(x.id))).size + ' unique');
 });
 t('CMS_TYPES matches what is wired',
-  JSON.stringify(c.CMS_TYPES) === JSON.stringify(['ub', 'aimags', 'gifts', 'invites']), JSON.stringify(c.CMS_TYPES));
+  JSON.stringify(c.CMS_TYPES) === JSON.stringify(['ub', 'aimags', 'gifts', 'invites', 'movies']), JSON.stringify(c.CMS_TYPES));
 // Урилгын төрөл нь ОБЪЕКТ-оос гаргасан жагсаалт тул id нь заавал байх ёстой —
 // эс бөгөөс overlay зүйлийг олж чадахгүй.
 const inv = require('fs').readFileSync('js/invite.js', 'utf8');

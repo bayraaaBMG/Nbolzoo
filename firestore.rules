@@ -323,7 +323,7 @@ service cloud.firestore {
     // энэ collection нь зөвхөн ДАВХАРЛАСАН өөрчлөлтийг хадгална: нуух, дараалал солих,
     // талбар засах, шинэ зүйл нэмэх. Ингэснээр баталгаажсан dataset (source/verifiedAt)
     // хэвээр үлдэж, хуудас бүр нэмэлт 1 л уншилтаар удирдагдана.
-    // Doc id = контентын төрөл: 'ub' | 'aimags' | 'gifts' | 'expert' | 'movies'.
+    // Doc id = контентын төрөл: 'ub' | 'aimags' | 'gifts' | 'invites' | 'movies'.
     // Doc shape: { hidden: [id...], order: [id...], edits: {id: {...}}, added: [{...}], updatedBy, updatedAt }
     match /contentOverrides/{contentType} {
       allow read: if true;                       // нийтийн хуудас render хийхэд хэрэгтэй

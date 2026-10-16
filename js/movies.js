@@ -157,6 +157,16 @@ const LANG_LABEL = {dubbed:"🎙 Монгол хадмал", mongolian:"🎙 М�
 
 function allMovies() { return [...movies, ...firebaseMovies]; }
 
+// Admin-ийн давхарлалтыг (нуух / засах) суурь каталогт тавина.
+// Эхлээд кодын өгөгдлөөр ШУУД зурагдаж, давхарлалт ирэхэд дахин зурагдана —
+// Firestore удаан эсвэл унтарсан ч каталог хэвийн харагдана (fail-open).
+function hydrateMovieOverrides() {
+  if (typeof cmsHydrate !== "function") return;
+  cmsHydrate("movies", movies, "id", () => {
+    if (document.getElementById("movieGrid")) renderMovies();
+  });
+}
+
 function getFilteredMovies() {
   let list = allMovies();
   const tab = currentMovieCinemaTab;

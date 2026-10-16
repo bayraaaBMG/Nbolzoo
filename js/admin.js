@@ -153,7 +153,8 @@ function adminLogValue(v) {
 
 const ADMIN_ACTION_LABELS = {
   suggestion_approve: "Кино санал зөвшөөрсөн", suggestion_reject: "Кино санал татгалзсан",
-  movie_add: "Кино нэмсэн", movie_delete: "Кино устгасан",
+  movie_add: "Кино нэмсэн", movie_edit: "Кино засварласан", movie_delete: "Кино устгасан",
+  movie_hide: "Кино нуусан", movie_show: "Кино дахин харуулсан",
   post_hide: "Пост нуусан", post_unhide: "Пост дахин харуулсан", post_delete: "Пост устгасан",
   review_hide: "Үнэлгээ нуусан", review_show: "Үнэлгээ дахин харуулсан", review_delete: "Үнэлгээ устгасан",
   comment_hide: "Сэтгэгдэл нуусан", comment_unhide: "Сэтгэгдэл дахин харуулсан", comment_delete: "Сэтгэгдэл устгасан",
@@ -225,73 +226,6 @@ async function rejectSuggestion(id) {
   } catch (e) {
     showToast("⚠️ Алдаа гарлаа: " + e.message);
   }
-}
-
-// ---------- Кино каталог (movies) шууд CRUD ----------
-async function renderAdminMovies() {
-  const el = document.getElementById("admin-movies");
-  el.innerHTML = `<div class="admin-loading">Ачаалж байна...</div>` + adminAddMovieFormHtml();
-  try {
-    const snap = await db.collection("movies").orderBy("dateAdded", "desc").get();
-    const list = snap.docs.map(d => ({ _dbId: d.id, ...d.data() }));
-    const listHtml = list.length
-      ? list.map(m => `<div class="admin-card">
-          <div class="admin-card-main"><strong>${escapeHtml(m.title)}</strong> (${escapeHtml(m.year)}) — ⭐ ${escapeHtml(m.rating)}</div>
-          <div class="admin-card-actions">
-            <button class="btn btn-outline" style="border-color:#ef4444;color:#ef4444" type="button" onclick="adminDeleteMovieRow('${m._dbId}')">🗑 Устгах</button>
-          </div>
-        </div>`).join("")
-      : `<div class="admin-empty">Firestore-д admin-аар нэмсэн кино алга (суурь каталог тусдаа код дотор байгаа)</div>`;
-    document.getElementById("adminMoviesList").innerHTML = listHtml;
-  } catch (e) {
-    document.getElementById("adminMoviesList").innerHTML = `<div class="admin-empty">Алдаа: ${escapeHtml(e.message)}</div>`;
-  }
-}
-
-function adminAddMovieFormHtml() {
-  return `
-    <div class="admin-add-form">
-      <h4>+ Кино шууд нэмэх (шууд каталогт орно)</h4>
-      <div class="add-movie-grid">
-        <input class="cinema-input" id="admTitle" placeholder="Нэр">
-        <input class="cinema-input" id="admYear" placeholder="Он">
-        <input class="cinema-input" id="admRating" placeholder="Рейтинг">
-        <input class="cinema-input" id="admPoster" placeholder="Poster URL" style="grid-column:1/-1">
-        <input class="cinema-input" id="admGenres" placeholder="Genres (romantic, drama...)">
-        <input class="cinema-input" id="admWatchUrl" placeholder="Watch URL">
-        <textarea class="cinema-input" id="admDesc" placeholder="Тайлбар" style="grid-column:1/-1"></textarea>
-      </div>
-      <button class="btn btn-primary" type="button" onclick="adminAddMovieDirect()">✓ Каталогт нэмэх</button>
-      <div id="adminMoviesList" style="margin-top:16px;"></div>
-    </div>`;
-}
-
-async function adminAddMovieDirect() {
-  const title = document.getElementById("admTitle").value.trim();
-  if (!title) return showToast("⚠️ Нэр оруулна уу");
-  const genres = document.getElementById("admGenres").value.split(",").map(g=>g.trim()).filter(Boolean);
-  const movie = {
-    emoji: "🎬", title,
-    year: document.getElementById("admYear").value || "2024",
-    rating: document.getElementById("admRating").value || "7.0",
-    poster: document.getElementById("admPoster").value.trim(),
-    watchUrl: document.getElementById("admWatchUrl").value.trim(),
-    genres: genres.length ? genres : ["drama"],
-    desc: document.getElementById("admDesc").value.trim(),
-    lang: "dubbed", trending: false,
-    dateAdded: new Date().toISOString().slice(0, 10),
-  };
-  const dbId = await saveMovieToFirebase(movie);
-  if (dbId) { logAdminAction("movie_add", dbId, title); showToast("✅ Нэмэгдлээ"); renderAdminMovies(); }
-  else showToast("⚠️ Алдаа гарлаа");
-}
-
-async function adminDeleteMovieRow(dbId) {
-  if (!confirm("Устгах уу?")) return;
-  await deleteMovieFromFirebase(dbId);
-  logAdminAction("movie_delete", dbId);
-  showToast("🗑 Устгагдлаа");
-  renderAdminMovies();
 }
 
 // ---------- Community post moderation ----------
